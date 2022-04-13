@@ -10,6 +10,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CS401Collaboration">
         <activity
+            android:name=".ItemViewActivity"
+            android:exported="false" />
+        <activity
             android:name=".CollectionViewActivity"
             android:exported="true">
             <intent-filter>
@@ -20,9 +23,7 @@
         </activity>
         <activity
             android:name=".HomeScreenActivity"
-            android:exported="true">
-
-        </activity>
+            android:exported="true"></activity>
     </application>
 
 </manifest>
