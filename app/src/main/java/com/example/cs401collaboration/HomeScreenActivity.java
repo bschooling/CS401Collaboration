@@ -18,7 +18,6 @@ public class HomeScreenActivity extends AppCompatActivity
     /* Firebase Auth */
     private FirebaseAuth mAuth;
 
-    private String LOG_TAG_MAIN = "HomeScreenActivity";
     private final String LOG_TAG_MAIN = "HomeScreenActivity";
 
     @Override
@@ -60,7 +59,7 @@ public class HomeScreenActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu (Menu menu)
     {
-        getMenuInflater().inflate(R.menu.homescreenMenu, menu);
+        getMenuInflater().inflate(R.menu.homescreen_menu, menu);
         return true;
     }
 
