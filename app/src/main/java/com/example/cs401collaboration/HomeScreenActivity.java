@@ -5,6 +5,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -16,6 +19,7 @@ public class HomeScreenActivity extends AppCompatActivity
     private FirebaseAuth mAuth;
 
     private String LOG_TAG_MAIN = "HomeScreenActivity";
+    private final String LOG_TAG_MAIN = "HomeScreenActivity";
 
     @Override
     protected void onCreate (Bundle savedInstanceState)
@@ -50,6 +54,34 @@ public class HomeScreenActivity extends AppCompatActivity
             Log.d(LOG_TAG_MAIN, "onStart: User logged in");
         else
             Log.d(LOG_TAG_MAIN, "onStart: User not logged in");
+    }
+
+    /* Setup Menu */
+    @Override
+    public boolean onCreateOptionsMenu (Menu menu)
+    {
+        getMenuInflater().inflate(R.menu.homescreenMenu, menu);
+        return true;
+    }
+
+    /* Handle Menu Item Clicks */
+    @Override
+    public boolean onOptionsItemSelected (MenuItem item)
+    {
+        if (item.getItemId() == R.id.miLogout)
+        {
+            Log.d(LOG_TAG_MAIN, "onOptionsItemSelected: logout option selected");
+            this.mAuth.signOut();
+            startActivity(new Intent(this, LoginActivity.class));
+            Log.d (
+                    LOG_TAG_MAIN,
+                    "onOptionsItemSelected: logging out, sending to login screen"
+            );
+            return true;
+        }
+
+        Log.d(LOG_TAG_MAIN, "onOptionsItemSelected: default triggered");
+        return super.onOptionsItemSelected(item);
     }
 
 }
