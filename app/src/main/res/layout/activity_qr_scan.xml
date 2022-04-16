@@ -39,7 +39,7 @@
         android:id="@+id/scanQRButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="chooseImage"
+        android:onClick="takeImage"
         android:text="@string/scan_qr_text"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
