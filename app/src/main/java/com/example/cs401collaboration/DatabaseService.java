@@ -4,13 +4,25 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.example.cs401collaboration.model.User;
+import com.example.cs401collaboration.model.Collection;
+import com.example.cs401collaboration.interfaces.OnCollectionsRetrievedCallback;
 
 /**
  * DatabaseService incorporates functionality for accessing backend database
@@ -29,7 +41,7 @@ public class DatabaseService
 
     }
 
-    public static DatabaseService getInstance()
+    public static DatabaseService getInstance ()
     {
         if(INSTANCE == null)
             INSTANCE = new DatabaseService();
@@ -49,11 +61,13 @@ public class DatabaseService
      * @param uid uid of authenticated user
      * @param name name of user
      */
-    public void createUser(String uid, String name)
+    public void createUser (String uid, String name)
     {
         Map<String, Object> user = new HashMap<>();
         user.put("uid", uid);
         user.put("name", name);
+        user.put("collabs", Arrays.asList());
+        user.put("collections", Arrays.asList());
 
         db.collection("users")
             .document(uid)
@@ -70,6 +84,92 @@ public class DatabaseService
                     Log.w(TAG, "createUser: failure", e);
                 }
             });
+    }
+
+    /**
+     * Get all collections that a user can access.
+     *
+     * This includes the authenticated user's collections, as well as any collections of current
+     * user's collaborators.
+     *
+     * @param cb Callback of interface OnCollectionsRetrievedCallback to be called with returned
+     *           collections once database successfully returns collections.
+     */
+    public void getAllCollections (OnCollectionsRetrievedCallback cb)
+    {
+        if (auth.getUid() == null) return;
+
+        DocumentReference userDocRef = db.collection("users")
+                .document(auth.getUid());
+
+        // Retrieve User
+        userDocRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful())
+                {
+                    DocumentSnapshot userDocSnap = task.getResult();
+                    if (userDocSnap.exists())
+                    {
+                        /* Proceed with accessing all collections for authorized user. */
+                        User user = userDocSnap.toObject(User.class);
+
+                        ArrayList<Collection> collections = new ArrayList<Collection>();
+                        ArrayList<DocumentReference> userGrp = new ArrayList<DocumentReference>();
+                        ArrayList<DocumentReference> collabs = user.getCollabs();
+
+                        // Populate userGrp
+                        userGrp.add(userDocSnap.getReference());
+                        for (DocumentReference collab : collabs)
+                            userGrp.add(collab);
+
+                        db.collection("collections").whereIn("owner", userGrp)
+                            .get()
+                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                @Override
+                                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                    if (task.isSuccessful())
+                                    { // Have collections
+                                        Log.d(
+                                                TAG,
+                                                "getAllCollections: collection return count = "
+                                                        + task.getResult().size()
+                                        );
+                                        for (QueryDocumentSnapshot document : task.getResult())
+                                        {
+                                            Log.d(
+                                                    TAG,
+                                                    "getAllCollections" +
+                                                            document.getId() +
+                                                            " => " + document.getData()
+                                            );
+                                            collections.add(document.toObject(Collection.class));
+                                        }
+                                        // Call callback, should update UI here
+                                        cb.OnCollectionsRetrieved(collections);
+                                    } // Failure to get collections
+                                    else
+                                    {
+                                        Log.d(
+                                                TAG,
+                                                "getAllCollections: Error getting collections ",
+                                                task.getException()
+                                        );
+                                    }
+                                }
+                            });
+                    }
+                    else
+                    {
+                        Log.d(TAG, "getAllCollections: No such document of collection users.");
+                    }
+                } // User Retrieve Task Unsuccessful
+                else
+                {
+                    Log.d(TAG, "getAllCollections: Unable to retrieve user", task.getException());
+                }
+            }
+        });
     }
 
 }
