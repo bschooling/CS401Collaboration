@@ -57,11 +57,17 @@ public class DatabaseService
     private final String TAG = "DatabaseService";
 
     /**
-     * Create User
+     * Create User.
+     *
+     * onCreationFailureCB may handle db query failure by deleting created user in fire-auth
+     * and alerting user, or trying again.
+     *
      * @param uid uid of authenticated user
      * @param name name of user
+     * @param onCreationFailureCB Of OnFailureListener, this callback is called if user creation
+     *                            query fails with database.
      */
-    public void createUser (String uid, String name)
+    public void createUser (String uid, String name, OnFailureListener onCreationFailureCB)
     {
         Map<String, Object> user = new HashMap<>();
         user.put("uid", uid);
@@ -82,6 +88,7 @@ public class DatabaseService
                 @Override
                 public void onFailure(@NonNull Exception e) {
                     Log.w(TAG, "createUser: failure", e);
+                    onCreationFailureCB.onFailure(e);
                 }
             });
     }
