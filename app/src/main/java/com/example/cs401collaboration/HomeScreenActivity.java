@@ -1,6 +1,8 @@
 package com.example.cs401collaboration;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
@@ -15,6 +17,7 @@ import com.example.cs401collaboration.DatabaseService;
 import com.example.cs401collaboration.model.Collection;
 import com.example.cs401collaboration.interfaces.OnCollectionsRetrievedCallback;
 
+import com.example.cs401collaboration.rvAdapters.CollectionRvAdapter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -26,6 +29,9 @@ public class HomeScreenActivity extends AppCompatActivity
 
     /* Database */
     private DatabaseService mDB;
+
+    /* recycler view for displaying collections*/
+    private RecyclerView collectionRView;
 
     private final String LOG_TAG_MAIN = "HomeScreenActivity";
 
@@ -48,6 +54,7 @@ public class HomeScreenActivity extends AppCompatActivity
         else Log.d(LOG_TAG_MAIN, "onCreate: User logged in");
 
         mDB = DatabaseService.getInstance();
+
     }
 
     @Override
@@ -76,6 +83,14 @@ public class HomeScreenActivity extends AppCompatActivity
                             collection.getLocation()
                     );
                 }
+
+                // rView handler
+                collectionRView = findViewById(R.id.collection_view_rv);
+                CollectionRvAdapter collectionRvAdapter = new CollectionRvAdapter(HomeScreenActivity.this, collections);
+                GridLayoutManager gridLayoutManager = new GridLayoutManager(HomeScreenActivity.this, 2);
+                collectionRView.setLayoutManager(gridLayoutManager);
+                collectionRView.setAdapter(collectionRvAdapter);
+
             }
         });
 
