@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1012567155595",
+    "project_id": "invii-2b287",
+    "storage_bucket": "invii-2b287.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1012567155595:android:715c6f03c9687abed4458e",
+        "android_client_info": {
+          "package_name": "com.example.cs401collaboration"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1012567155595-jivgesoik8pperqn51feibliqqlf5fei.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAExmoEdGr59rJBcKDedZXJALxqk7aP91E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1012567155595-jivgesoik8pperqn51feibliqqlf5fei.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
