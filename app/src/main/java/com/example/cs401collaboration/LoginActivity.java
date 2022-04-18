@@ -12,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.AuthResult;
@@ -175,7 +176,50 @@ public class LoginActivity extends AppCompatActivity
                             {
                                 // Success: return to calling activity with user logged in
                                 Log.d(LOG_TAG_MAIN, "createUserWithEmail:success");
-                                mDB.createUser(mAuth.getUid(), name);
+                                mDB.createUser(mAuth.getUid(), name, new OnFailureListener() {
+                                    // This OnFailure is called when db.createUser encounters an issue.
+                                    // It attempts to revert the user creation handled via fire-auth.
+                                    @Override
+                                    public void onFailure(@NonNull Exception e)
+                                    {
+                                        // Attempt deletion of firebase user.
+                                        FirebaseAuth.getInstance().getCurrentUser().delete()
+                                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<Void> task) {
+                                                    // User created, db creation failed, removed from firebase-auth.
+                                                    if (task.isSuccessful())
+                                                    {
+                                                        Log.d (
+                                                                LOG_TAG_MAIN,
+                                                                "createUserWithEmailAndPassword: " +
+                                                                        "User account deleted. " +
+                                                                        "Situation: EC=5100"
+                                                        );
+                                                        Toast.makeText (
+                                                                LoginActivity.this,
+                                                                "Unable to create your account at this time. EC=5100",
+                                                                Toast.LENGTH_LONG
+                                                        ).show();
+                                                    }
+                                                    // User created, db creation failure, firebase-auth deletion failure.
+                                                    else {
+                                                        Log.d (
+                                                                LOG_TAG_MAIN,
+                                                                "createUserWithEmailAndPassword: " +
+                                                                        "User account not deleted. " +
+                                                                        "Situation: EC=5101"
+                                                        );
+                                                        Toast.makeText (
+                                                                LoginActivity.this,
+                                                                "Unable to create your account at this time. EC=5101",
+                                                                Toast.LENGTH_LONG
+                                                        ).show();
+                                                    }
+                                                }
+                                            });
+                                    }
+                                });
                                 finish();
                             }
                             else
