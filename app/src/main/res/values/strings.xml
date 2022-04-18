@@ -106,4 +106,6 @@
     <string name="password_hint">Password</string>
     <string name="signup_string">Sign Up</string>
     <string name="login_string">Log In</string>
+    <string name="default_collection_name">DEFAULT_NAME</string>
+    <string name="default_collection_location">DEFAULT_LOCATION</string>
 </resources>
