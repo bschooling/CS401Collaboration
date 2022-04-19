@@ -90,16 +90,6 @@
         "when a user tries to pick up one of cards.\n\n"
     </string>
     <string name="logout">Logout</string>
-    <!-- QRTest strings -->
-    <string name="resultString">Result</string>
-    <string name="defaultResult">TextView</string>
-    <string name="changedResult">Yes!</string>
-    <string name="scan_qr_text">Scan QR Code</string>
-    <string name="qr_code_image">QR Code Image</string>
-    <string name="IOException_string">Image not found or IOException occurred</string>
-    <string name="invalid_coding_string">Image coding not recognized</string>
-    <string name="taken_photo_text">Here is the taken photo</string>
-    <string name="no_qr_text">No QR code found in the image</string>
     <string name="welcome_string">Welcome</string>
     <string name="instructions_string">Please Log In or Sign Up</string>
     <string name="email_hint">Email</string>
@@ -108,4 +98,13 @@
     <string name="login_string">Log In</string>
     <string name="default_collection_name">DEFAULT_NAME</string>
     <string name="default_collection_location">DEFAULT_LOCATION</string>
+    <!-- QRTest strings -->
+    <string name="resultString">Result</string>
+    <string name="defaultResult">Empty QR Code</string>
+    <string name="scan_qr_text">Take an Image</string>
+    <string name="qr_code_image">QR Code Image</string>
+    <string name="invalid_coding_string">Image coding not recognized</string>
+    <string name="no_qr_text">No QR code found in the image</string>
+    <string name="camera_permission_denied">Denied permission to use Camera</string>
+
 </resources>

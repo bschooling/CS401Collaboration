@@ -1,15 +1,19 @@
 package com.example.cs401collaboration;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -71,7 +75,21 @@ public class QRScanActivity extends AppCompatActivity {
     public void takeImage(View view) {
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-        startActivityForResult(cameraIntent, 200); // Deprecated!
+        if (checkPermission(Manifest.permission.CAMERA))
+            startActivityForResult(cameraIntent, 200); // Deprecated!
+
+        else {
+            resultText.setText(R.string.camera_permission_denied);
+        }
+    }
+
+    /**
+     * checkPermission checks the permission to use a restricted activity
+     * @param permission is the permission String typically in Manifest.permission
+     * @return a boolean whether the checked permission is granted
+     */
+    public boolean checkPermission(String permission) {
+        return ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED;
     }
 
     /**
@@ -129,9 +147,10 @@ public class QRScanActivity extends AppCompatActivity {
                      */
                     @Override
                     public void onFailure(@NonNull Exception except) {
-                        //resultText.setText(R.string.no_qr_text);
+                        Log.e("Invii_QRScan", "QR Scan Error occurred: " + except.getMessage());
                     }
                 });
+
             }
         }
     }
