@@ -27,11 +27,20 @@ public class Collection
     /** Location */
     private String location;
 
-    /** List of contained items as DocumentReferences. */
-    ArrayList<DocumentReference> items;
-
     /** User owner of collection, as DocumentReference. */
-    DocumentReference owner;
+    private DocumentReference owner;
+
+    /** Collection authorized users, as DocumentReference. */
+    private ArrayList<DocumentReference> authUsers;
+
+    /** Parent Collection, as DocumentReference */
+    private DocumentReference parentCollection;
+
+    /** Children Collections, as DocumentReference */
+    private ArrayList<DocumentReference> childrenCollections;
+
+    /** List of contained items as DocumentReferences. */
+    private ArrayList<DocumentReference> items;
 
     /**
      * Empty Constructor.
@@ -39,6 +48,40 @@ public class Collection
     public Collection ()
     {
 
+    }
+
+    public Collection (String name)
+    {
+        this.name = name;
+    }
+
+    public Collection (String name, String location)
+    {
+        this(name);
+        this.location = location;
+    }
+
+    public Collection (String name, String location, String description)
+    {
+        this(name, location);
+        this.description = description;
+    }
+
+    public void setOwner (DocumentReference owner)
+    {
+        this.owner = owner;
+    }
+
+    public void setParentCollection (DocumentReference parentCollection)
+    {
+        this.parentCollection = parentCollection;
+    }
+
+    public void setArrayFieldsEmpty ()
+    {
+        this.items = new ArrayList<>();
+        this.authUsers = new ArrayList<>();
+        this.childrenCollections = new ArrayList<>();
     }
 
     /**
@@ -93,6 +136,21 @@ public class Collection
     public DocumentReference getOwner()
     {
         return owner;
+    }
+
+    public ArrayList<DocumentReference> getAuthUsers()
+    {
+        return authUsers;
+    }
+
+    public DocumentReference getParentCollection()
+    {
+        return parentCollection;
+    }
+
+    public ArrayList<DocumentReference> getChildrenCollections()
+    {
+        return childrenCollections;
     }
 
 }

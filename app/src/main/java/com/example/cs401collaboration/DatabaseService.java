@@ -72,8 +72,6 @@ public class DatabaseService
         Map<String, Object> user = new HashMap<>();
         user.put("uid", uid);
         user.put("name", name);
-        user.put("collabs", Arrays.asList());
-        user.put("collections", Arrays.asList());
 
         db.collection("users")
             .document(uid)
@@ -91,6 +89,210 @@ public class DatabaseService
                     onCreationFailureCB.onFailure(e);
                 }
             });
+    }
+
+    /**
+     * Get Owned Collections for Home.
+     * @param onSuccess Ultimate callback to work with chained data.
+     * @param onFailure If any db failure occurs.
+     * @param onCompletionPassthrough Callback to facilitate chaining between
+     *                                getHomeCollectionsOwned and getHomeCollectionsAuthorized.
+     */
+    public void getHomeCollectionsOwned (
+            OnSuccessListener<ArrayList<Collection>> onSuccess,
+            OnFailureListener onFailure,
+            OnSuccessListener<ArrayList<Collection>> onCompletionPassthrough
+    )
+    {
+        DocumentReference userDocRef =
+                db.collection("users").document(auth.getUid());
+
+        // Retrieve User
+        userDocRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful())
+                {
+                    DocumentSnapshot userDocSnap = task.getResult();
+                    if (userDocSnap.exists())
+                    {
+                        /* Proceed with accessing all collections for authorized user. */
+                        User user = userDocSnap.toObject(User.class);
+
+                        ArrayList<Collection> collections = new ArrayList<Collection>();
+
+                        db.collection("collections")
+                            .whereEqualTo("parentCollection", null)
+                            .whereEqualTo("owner", userDocSnap.getReference())
+                            .get()
+                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                @Override
+                                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                    if (task.isSuccessful())
+                                    {
+                                        // Have collections
+                                        Log.d (
+                                                TAG,
+                                                "getHomeCollectionsOwned: collection return count = "
+                                                        + task.getResult().size()
+                                        );
+                                        for (QueryDocumentSnapshot document : task.getResult())
+                                        {
+                                            Log.d (
+                                                    TAG,
+                                                    "getHomeCollectionsOwned " +
+                                                            document.getId() +
+                                                            " => " + document.getData()
+                                            );
+                                            collections.add(document.toObject(Collection.class));
+                                        }
+                                        // passthrough
+                                        onCompletionPassthrough.onSuccess(collections);
+                                    }
+                                    // Failure to get collections
+                                    else
+                                    {
+                                        Log.d (
+                                                TAG,
+                                                "getHomeCollections: Error getting collections ",
+                                                task.getException()
+                                        );
+                                        onFailure.onFailure(task.getException());
+                                    }
+                                }
+                            });
+                    }
+                    else
+                    {
+                        Log.d (
+                                TAG,
+                                "getHomeCollections: No such document of collection 'users'."
+                        );
+                        onFailure.onFailure(task.getException());
+                    }
+                }
+                // User Retrieve Task Unsuccessful
+                else
+                {
+                    Log.d (TAG,
+                            "getHomeCollectionsOwned: Unable to retrieve user ",
+                            task.getException()
+                    );
+                    onFailure.onFailure(task.getException());
+                }
+            }
+        });
+    }
+
+    /**
+     * Get Authorized Collections for Home.
+     * @param onSuccess Callback to handle when all data is received (owned + authorized).
+     * @param onFailure If any db failure occurs.
+     * @param collections List of collections (from getHomeCollectionsOwned).
+     */
+    public void getHomeCollectionsAuthorized (
+            OnSuccessListener<ArrayList<Collection>> onSuccess,
+            OnFailureListener onFailure,
+            ArrayList<Collection> collections
+    )
+    {
+        DocumentReference userDocRef =
+                db.collection("users").document(auth.getUid());
+
+        // Retrieve User
+        userDocRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful())
+                {
+                    DocumentSnapshot userDocSnap = task.getResult();
+                    if (userDocSnap.exists())
+                    {
+                        /* Proceed with accessing all collections for authorized user. */
+                        User user = userDocSnap.toObject(User.class);
+
+                        db.collection("collections")
+                                .whereEqualTo("parentCollection", null)
+                                .whereArrayContains("authUsers", userDocSnap.getReference())
+                                .get()
+                                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                        if (task.isSuccessful())
+                                        {
+                                            // Have collections
+                                            Log.d (
+                                                    TAG,
+                                                    "getHomeCollectionsAuthorized: collection return count = "
+                                                            + task.getResult().size()
+                                            );
+                                            for (QueryDocumentSnapshot document : task.getResult())
+                                            {
+                                                Log.d (
+                                                        TAG,
+                                                        "getHomeCollectionsAuthorized " +
+                                                                document.getId() +
+                                                                " => " + document.getData()
+                                                );
+                                                collections.add(document.toObject(Collection.class));
+                                            }
+                                            // Call callback, should update UI here
+                                            onSuccess.onSuccess(collections);
+                                        }
+                                        // Failure to get collections
+                                        else
+                                        {
+                                            Log.d (
+                                                    TAG,
+                                                    "getHomeCollectionsAuthorized: Error getting collections ",
+                                                    task.getException()
+                                            );
+                                            onFailure.onFailure(task.getException());
+                                        }
+                                    }
+                                });
+                    }
+                    else
+                    {
+                        Log.d (
+                                TAG,
+                                "getHomeCollectionsAuthorized: No such document of collection 'users'."
+                        );
+                        onFailure.onFailure(task.getException());
+                    }
+                }
+                // User Retrieve Task Unsuccessful
+                else
+                {
+                    Log.d (TAG,
+                            "getHomeCollectionsAuthorized: Unable to retrieve user ",
+                            task.getException()
+                    );
+                    onFailure.onFailure(task.getException());
+                }
+            }
+        });
+    }
+
+
+    /**
+     * Get all collections, owned and authorized, for home screen.
+     * @param onSuccess On success when all data is retrieved.
+     * @param onFailure On failure for whenever any db error occurs.
+     */
+    public void getHomeCollections (
+            OnSuccessListener<ArrayList<Collection>> onSuccess,
+            OnFailureListener onFailure
+    )
+    {
+        if (auth.getUid() == null) return;
+
+        this.getHomeCollectionsOwned(onSuccess, onFailure, new OnSuccessListener<ArrayList<Collection>>() {
+            @Override
+            public void onSuccess(ArrayList<Collection> collections) {
+                getHomeCollectionsAuthorized(onSuccess, onFailure, collections);
+            }
+        });
     }
 
     /**

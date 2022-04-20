@@ -1,5 +1,6 @@
 package com.example.cs401collaboration;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -18,6 +19,8 @@ import com.example.cs401collaboration.model.Collection;
 import com.example.cs401collaboration.interfaces.OnCollectionsRetrievedCallback;
 
 import com.example.cs401collaboration.rvAdapters.CollectionRvAdapter;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -70,12 +73,11 @@ public class HomeScreenActivity extends AppCompatActivity
         else
             Log.d(LOG_TAG_MAIN, "onStart: User not logged in");
 
-        mDB.getAllCollections(new OnCollectionsRetrievedCallback() {
+        mDB.getHomeCollections(new OnSuccessListener<ArrayList<Collection>>() {
             @Override
-            public void OnCollectionsRetrieved(ArrayList<Collection> collections) {
-                for (Collection collection : collections)
-                {
-                    Log.d (
+            public void onSuccess(ArrayList<Collection> collections) {
+                for (Collection collection : collections) {
+                    Log.d(
                             LOG_TAG_MAIN,
                             "start:OnCollectionsRetrievedCallback: " +
                             collection.getDocID() + " " + collection.getOwner() + " " +
@@ -90,6 +92,10 @@ public class HomeScreenActivity extends AppCompatActivity
                 GridLayoutManager gridLayoutManager = new GridLayoutManager(HomeScreenActivity.this, 2);
                 collectionRView.setLayoutManager(gridLayoutManager);
                 collectionRView.setAdapter(collectionRvAdapter);
+            }
+        }, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
 
             }
         });
