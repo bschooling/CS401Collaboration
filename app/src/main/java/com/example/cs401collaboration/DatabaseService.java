@@ -381,4 +381,65 @@ public class DatabaseService
         });
     }
 
+    public void getCollection (String docId, OnSuccessListener<Collection> successCB, OnFailureListener failureCB)
+    {
+        db.collection("collections")
+                .document(docId).get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task)
+                    {
+                        if (task.isSuccessful())
+                        {
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists())
+                            {
+                                Collection collection = document.toObject(Collection.class);
+                                successCB.onSuccess(collection);
+                                Log.d(TAG, "getCollection created w/ id=" + document.getData());
+                            }
+                            else
+                            {
+                                Log.d(TAG, "getCollection: No such document");
+                            }
+                        }
+                        else
+                        {
+                            failureCB.onFailure(task.getException());
+                        }
+                    }
+                });
+    }
+
+    public void createCollection (
+            Collection collection,
+            String parentCollectionID,
+            OnSuccessListener<String> successCB,
+            OnFailureListener failureCB
+    )
+    {
+        collection.setOwner(db.collection("users").document(auth.getUid()));
+        if (!parentCollectionID.isEmpty())
+            collection.setParentCollection(db.collection("collections").document(parentCollectionID));
+        collection.setArrayFieldsEmpty();
+        db.collection("collections")
+            .add(collection)
+            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                @Override
+                public void onSuccess (DocumentReference documentReference)
+                {
+                    Log.d(TAG, "createCollection: written with ID: " + documentReference.getId());
+                    successCB.onSuccess(documentReference.getId());
+                }
+            })
+            .addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure (@NonNull Exception e)
+                {
+                    Log.w(TAG, "createCollection: error adding document", e);
+                    failureCB.onFailure(e);
+                }
+            });
+    }
+
 }

@@ -13,6 +13,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Toast;
 
 import com.example.cs401collaboration.DatabaseService;
 import com.example.cs401collaboration.model.Collection;
@@ -21,6 +23,7 @@ import com.example.cs401collaboration.interfaces.OnCollectionsRetrievedCallback;
 import com.example.cs401collaboration.rvAdapters.CollectionRvAdapter;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -33,8 +36,9 @@ public class HomeScreenActivity extends AppCompatActivity
     /* Database */
     private DatabaseService mDB;
 
-    /* recycler view for displaying collections*/
+    /* UI Element Handlers */
     private RecyclerView collectionRView;
+    private FloatingActionButton fab;
 
     private final String LOG_TAG_MAIN = "HomeScreenActivity";
 
@@ -58,6 +62,7 @@ public class HomeScreenActivity extends AppCompatActivity
 
         mDB = DatabaseService.getInstance();
 
+        fab = findViewById(R.id.floatingActionButton);
     }
 
     @Override
@@ -66,6 +71,8 @@ public class HomeScreenActivity extends AppCompatActivity
         super.onStart();
 
         if (mAuth.getCurrentUser() == null) return;
+
+        fab.setOnClickListener(new fabOnClickListener());
 
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null)
@@ -128,6 +135,21 @@ public class HomeScreenActivity extends AppCompatActivity
 
         Log.d(LOG_TAG_MAIN, "onOptionsItemSelected: default triggered");
         return super.onOptionsItemSelected(item);
+    }
+
+    /* FAB On Click */
+    private class fabOnClickListener implements View.OnClickListener
+    {
+        public void onClick (View v)
+        {
+            Log.d(LOG_TAG_MAIN, "fabOnClickListener: directing to NewCollectionActivity");
+            Intent intent = new Intent (
+                    HomeScreenActivity.this,
+                    NewCollectionActivity.class
+            );
+            intent.putExtra("collectionID", "");
+            startActivity(intent);
+        }
     }
 
 }
