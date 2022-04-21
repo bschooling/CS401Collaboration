@@ -20,6 +20,7 @@ import com.example.cs401collaboration.DatabaseService;
 import com.example.cs401collaboration.model.Collection;
 import com.example.cs401collaboration.interfaces.OnCollectionsRetrievedCallback;
 
+import com.example.cs401collaboration.model.Entity;
 import com.example.cs401collaboration.rvAdapters.CollectionRvAdapter;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -80,20 +81,10 @@ public class HomeScreenActivity extends AppCompatActivity
         else
             Log.d(LOG_TAG_MAIN, "onStart: User not logged in");
 
-        mDB.getHomeCollections(new OnSuccessListener<ArrayList<Collection>>() {
+        mDB.getCollections(null, new OnSuccessListener<ArrayList<Collection>>() {
             @Override
             public void onSuccess(ArrayList<Collection> collections) {
-                for (Collection collection : collections) {
-                    Log.d(
-                            LOG_TAG_MAIN,
-                            "start:OnCollectionsRetrievedCallback: " +
-                            collection.getDocID() + " " + collection.getOwner() + " " +
-                            collection.getName() + " " +  collection.getDescription() + " " +
-                            collection.getLocation()
-                    );
-                }
-
-                // rView handler
+                // Populate retrieved collections on home screen rv
                 collectionRView = findViewById(R.id.collection_view_rv);
                 CollectionRvAdapter collectionRvAdapter = new CollectionRvAdapter(HomeScreenActivity.this, collections);
                 GridLayoutManager gridLayoutManager = new GridLayoutManager(HomeScreenActivity.this, 2);
@@ -103,7 +94,11 @@ public class HomeScreenActivity extends AppCompatActivity
         }, new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-
+                Toast.makeText (
+                        HomeScreenActivity.this,
+                        "Unable to retrieve collections",
+                        Toast.LENGTH_LONG
+                ).show();
             }
         });
 

@@ -27,6 +27,9 @@ public class Collection
     /** Location */
     private String location;
 
+    /** Image URL */
+    private String imageResourceID;
+
     /** User owner of collection, as DocumentReference. */
     private DocumentReference owner;
 
@@ -118,6 +121,15 @@ public class Collection
     public String getLocation()
     {
         return location;
+    }
+
+    /**
+     * Get Image Resource ID.
+     * @return Image Resource ID.
+     */
+    public String getImageResourceID ()
+    {
+        return imageResourceID;
     }
 
     /**
