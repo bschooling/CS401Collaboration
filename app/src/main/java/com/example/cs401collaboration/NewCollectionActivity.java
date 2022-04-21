@@ -99,7 +99,7 @@ public class NewCollectionActivity extends AppCompatActivity
 
             Collection newCollection = new Collection(name, location, description);
 
-            mDB.createCollection(newCollection, parentCollectionID, new OnSuccessListener<String>() {
+            mDB.createRootCollection(newCollection, new OnSuccessListener<String>() {
                 @Override
                 public void onSuccess(String s)
                 {

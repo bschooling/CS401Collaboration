@@ -11,6 +11,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -98,7 +99,7 @@ public class DatabaseService
      * @param onCompletionPassthrough Callback to facilitate chaining between
      *                                getHomeCollectionsOwned and getHomeCollectionsAuthorized.
      */
-    public void getHomeCollectionsOwned (
+    private void getHomeCollectionsOwned (
             OnSuccessListener<ArrayList<Collection>> onSuccess,
             OnFailureListener onFailure,
             OnSuccessListener<ArrayList<Collection>> onCompletionPassthrough
@@ -190,7 +191,7 @@ public class DatabaseService
      * @param onFailure If any db failure occurs.
      * @param collections List of collections (from getHomeCollectionsOwned).
      */
-    public void getHomeCollectionsAuthorized (
+    private void getHomeCollectionsAuthorized (
             OnSuccessListener<ArrayList<Collection>> onSuccess,
             OnFailureListener onFailure,
             ArrayList<Collection> collections
@@ -295,92 +296,6 @@ public class DatabaseService
         });
     }
 
-    /**
-     * Get all collections that a user can access.
-     *
-     * This includes the authenticated user's collections, as well as any collections of current
-     * user's collaborators.
-     *
-     * @param cb Callback of interface OnCollectionsRetrievedCallback to be called with returned
-     *           collections once database successfully returns collections.
-     */
-    public void getAllCollections (OnCollectionsRetrievedCallback cb)
-    {
-        if (auth.getUid() == null) return;
-
-        DocumentReference userDocRef = db.collection("users")
-                .document(auth.getUid());
-
-        // Retrieve User
-        userDocRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful())
-                {
-                    DocumentSnapshot userDocSnap = task.getResult();
-                    if (userDocSnap.exists())
-                    {
-                        /* Proceed with accessing all collections for authorized user. */
-                        User user = userDocSnap.toObject(User.class);
-
-                        ArrayList<Collection> collections = new ArrayList<Collection>();
-                        ArrayList<DocumentReference> userGrp = new ArrayList<DocumentReference>();
-                        ArrayList<DocumentReference> collabs = user.getCollabs();
-
-                        // Populate userGrp
-                        userGrp.add(userDocSnap.getReference());
-                        for (DocumentReference collab : collabs)
-                            userGrp.add(collab);
-
-                        db.collection("collections").whereIn("owner", userGrp)
-                            .get()
-                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                @Override
-                                public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                    if (task.isSuccessful())
-                                    { // Have collections
-                                        Log.d(
-                                                TAG,
-                                                "getAllCollections: collection return count = "
-                                                        + task.getResult().size()
-                                        );
-                                        for (QueryDocumentSnapshot document : task.getResult())
-                                        {
-                                            Log.d(
-                                                    TAG,
-                                                    "getAllCollections" +
-                                                            document.getId() +
-                                                            " => " + document.getData()
-                                            );
-                                            collections.add(document.toObject(Collection.class));
-                                        }
-                                        // Call callback, should update UI here
-                                        cb.OnCollectionsRetrieved(collections);
-                                    } // Failure to get collections
-                                    else
-                                    {
-                                        Log.d(
-                                                TAG,
-                                                "getAllCollections: Error getting collections ",
-                                                task.getException()
-                                        );
-                                    }
-                                }
-                            });
-                    }
-                    else
-                    {
-                        Log.d(TAG, "getAllCollections: No such document of collection users.");
-                    }
-                } // User Retrieve Task Unsuccessful
-                else
-                {
-                    Log.d(TAG, "getAllCollections: Unable to retrieve user", task.getException());
-                }
-            }
-        });
-    }
-
     public void getCollection (String docId, OnSuccessListener<Collection> successCB, OnFailureListener failureCB)
     {
         db.collection("collections")
@@ -395,8 +310,27 @@ public class DatabaseService
                             if (document.exists())
                             {
                                 Collection collection = document.toObject(Collection.class);
-                                successCB.onSuccess(collection);
-                                Log.d(TAG, "getCollection created w/ id=" + document.getData());
+                                DocumentReference currentUserDocRef = db.document (
+                                        "/users/" + auth.getUid()
+                                );
+                                // ensure current user is allowed to access collection
+                                if (
+                                        collection.getOwner() == currentUserDocRef ||
+                                        collection.getAuthUsers().contains(currentUserDocRef)
+                                )
+                                {
+                                    successCB.onSuccess(collection);
+                                    Log.d(TAG, "getCollection w/ id=" + document.getData());
+                                }
+                                else
+                                {
+                                    Log.d (
+                                            TAG,
+                                            "getCollection invalid permissions"
+                                                    + document.getData()
+                                    );
+                                    failureCB.onFailure(new Exception("UserInvalidPermissions"));
+                                }
                             }
                             else
                             {
@@ -411,35 +345,121 @@ public class DatabaseService
                 });
     }
 
-    public void createCollection (
+    /**
+     * createRootCollection creates a collection without a parent,
+     * e.g. one to be displayed on the home screen.
+     *
+     * @param collection Collection to create.
+     * @param successCB Callback for successful creation.
+     * @param failureCB Callback for any creation related failures.
+     */
+    public void createRootCollection (
             Collection collection,
-            String parentCollectionID,
             OnSuccessListener<String> successCB,
             OnFailureListener failureCB
     )
     {
+        if (auth.getUid() == null)
+        {
+            Log.d(TAG, "createRootCollection: user not logged in!");
+            return;
+        }
+
         collection.setOwner(db.collection("users").document(auth.getUid()));
-        if (!parentCollectionID.isEmpty())
-            collection.setParentCollection(db.collection("collections").document(parentCollectionID));
         collection.setArrayFieldsEmpty();
+
         db.collection("collections")
             .add(collection)
             .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                 @Override
+                // Collection Creation Success
                 public void onSuccess (DocumentReference documentReference)
                 {
-                    Log.d(TAG, "createCollection: written with ID: " + documentReference.getId());
+                    Log.d (
+                            TAG,
+                            "createRootCollection: written with id="
+                                    + documentReference.getId()
+                    );
                     successCB.onSuccess(documentReference.getId());
                 }
             })
             .addOnFailureListener(new OnFailureListener() {
                 @Override
+                // Collection Creation Failure
                 public void onFailure (@NonNull Exception e)
                 {
-                    Log.w(TAG, "createCollection: error adding document", e);
+                    Log.w(TAG, "createRootCollection: error adding document ", e);
                     failureCB.onFailure(e);
                 }
             });
+    }
+
+    /**
+     * createCollection that is a child collection, e.g. belongs within a parent collection.
+     *
+     * @param collection Collection to add.
+     * @param parentCollectionID Parent collection id, document id.
+     * @param parentCollectionOwner Parent collection owner, as Document Reference.
+     * @param successCB Callback for successful creation.
+     * @param failureCB Callback for any creation related failures.
+     */
+    public void createCollection (
+            Collection collection,
+            String parentCollectionID,
+            DocumentReference parentCollectionOwner,
+            OnSuccessListener<String> successCB,
+            OnFailureListener failureCB
+    )
+    {
+        if (auth.getUid() == null)
+        {
+            Log.d(TAG, "createCollection: user not logged in!");
+            return;
+        }
+
+        collection.setOwner(parentCollectionOwner);
+        collection.setParentCollection (
+                db.collection("collections").document(parentCollectionID)
+        );
+
+        collection.setArrayFieldsEmpty();
+        db.collection("collections")
+                .add(collection)
+                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    @Override
+                    // Collection Creation Success
+                    public void onSuccess (DocumentReference documentReference)
+                    {
+                        Log.d (
+                                TAG,
+                                "createCollection: written with id="
+                                        + documentReference.getId()
+                        );
+                        // Add present user as authorized user to collection
+                        documentReference.update (
+                                "authUsers",
+                                FieldValue.arrayUnion(
+                                        db.document("/users/" + auth.getUid())
+                                )
+                        );
+                        // Add newly created collection as child of parent collection
+                        collection.getParentCollection().update (
+                                "childrenCollections",
+                                FieldValue.arrayUnion(documentReference)
+                        );
+                        // call onSuccess
+                        successCB.onSuccess(documentReference.getId());
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    // Collection Creation Failure
+                    public void onFailure (@NonNull Exception e)
+                    {
+                        Log.w(TAG, "createCollection: error adding document ", e);
+                        failureCB.onFailure(e);
+                    }
+                });
     }
 
 }
