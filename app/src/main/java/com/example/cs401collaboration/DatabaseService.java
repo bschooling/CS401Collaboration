@@ -320,6 +320,33 @@ public class DatabaseService
     }
 
     /**
+     * Update Collection.
+     *
+     * @param collection Collection to update.
+     * @param successCB On Success.
+     * @param failureCB On Failure.
+     */
+    public void updateCollection (
+            Collection collection,
+            OnSuccessListener<Boolean> successCB,
+            OnFailureListener failureCB
+    )
+    {
+        db.collection("collections").document(collection.getDocID())
+            .set(collection)
+            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task)
+                {
+                    if (task.isSuccessful())
+                        successCB.onSuccess(true);
+                    else
+                        failureCB.onFailure(task.getException());
+                }
+            });
+    }
+
+    /**
      * Get Items for a Collection.
      *
      * @param collectionID Collection ID.
@@ -555,6 +582,33 @@ public class DatabaseService
                         }
                     }
                 });
+    }
+
+    /**
+     * Update Item.
+     *
+     * @param item Item to update.
+     * @param successCB On Success.
+     * @param failureCB On Failure.
+     */
+    public void updateItem (
+            Item item,
+            OnSuccessListener<Boolean> successCB,
+            OnFailureListener failureCB
+    )
+    {
+        db.collection("items").document(item.getDocID())
+            .set(item)
+            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task)
+                {
+                    if (task.isSuccessful())
+                        successCB.onSuccess(true);
+                    else
+                        failureCB.onFailure(task.getException());
+                }
+            });
     }
 
     /**
