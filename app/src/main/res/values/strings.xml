@@ -116,5 +116,7 @@
     <string name="location">Location</string>
     <string name="create">Create</string>
     <string name="description">Description</string>
+    <string name="add_collection">Add Collection</string>
+    <string name="add_item">Add Item</string>
 
 </resources>
