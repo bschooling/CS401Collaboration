@@ -5,14 +5,16 @@
       <map>
         <entry key="..\:/Users/sport/AndroidStudioProjects/CS401Collaboration/app/src/main/res/layout-w1240dp/activity_login.xml" value="0.20515394912985274" />
         <entry key="..\:/Users/sport/AndroidStudioProjects/CS401Collaboration/app/src/main/res/layout-w936dp/activity_login.xml" value="0.2380464480874317" />
-        <entry key="..\:/Users/sport/AndroidStudioProjects/CS401Collaboration/app/src/main/res/layout/activity_collection_view.xml" value="0.3108786610878661" />
+        <entry key="..\:/Users/sport/AndroidStudioProjects/CS401Collaboration/app/src/main/res/layout/activity_collection_view.xml" value="0.25" />
         <entry key="..\:/Users/sport/AndroidStudioProjects/CS401Collaboration/app/src/main/res/layout/activity_home.xml" value="0.31567028985507245" />
         <entry key="..\:/Users/sport/AndroidStudioProjects/CS401Collaboration/app/src/main/res/layout/activity_home_screen.xml" value="0.33" />
         <entry key="..\:/Users/sport/AndroidStudioProjects/CS401Collaboration/app/src/main/res/layout/activity_item_view.xml" value="0.31567028985507245" />
         <entry key="..\:/Users/sport/AndroidStudioProjects/CS401Collaboration/app/src/main/res/layout/activity_login.xml" value="0.33" />
         <entry key="..\:/Users/sport/AndroidStudioProjects/CS401Collaboration/app/src/main/res/layout/activity_login2.xml" value="0.31567028985507245" />
         <entry key="..\:/Users/sport/AndroidStudioProjects/CS401Collaboration/app/src/main/res/layout/activity_main.xml" value="0.2015625" />
+        <entry key="..\:/Users/sport/AndroidStudioProjects/CS401Collaboration/app/src/main/res/layout/activity_new_collection.xml" value="0.2015625" />
         <entry key="..\:/Users/sport/AndroidStudioProjects/CS401Collaboration/app/src/main/res/layout/collection_card.xml" value="0.67" />
+        <entry key="..\:/Users/sport/AndroidStudioProjects/CS401Collaboration/app/src/main/res/layout/collection_information_text.xml" value="0.2015625" />
       </map>
     </option>
   </component>

@@ -11,17 +11,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.example.cs401collaboration.DatabaseService;
 import com.example.cs401collaboration.model.Collection;
-import com.example.cs401collaboration.interfaces.OnCollectionsRetrievedCallback;
 
 import com.example.cs401collaboration.model.Entity;
-import com.example.cs401collaboration.rvAdapters.CollectionRvAdapter;
+import com.example.cs401collaboration.rvAdapters.EntityRvAdapter;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -84,12 +81,23 @@ public class HomeScreenActivity extends AppCompatActivity
         mDB.getCollections(null, new OnSuccessListener<ArrayList<Collection>>() {
             @Override
             public void onSuccess(ArrayList<Collection> collections) {
+                ArrayList<Entity> entityList = new ArrayList<>();
+                for (Collection collection : collections)
+                {
+                    entityList.add(new Entity(
+                            collection.getName(),
+                            collection.getLocation(),
+                            collection.getImageResourceID(),
+                            collection.getDocID(),
+                            Entity.TYPE_COLLECTION
+                    ));
+                }
                 // Populate retrieved collections on home screen rv
                 collectionRView = findViewById(R.id.collection_view_rv);
-                CollectionRvAdapter collectionRvAdapter = new CollectionRvAdapter(HomeScreenActivity.this, collections);
+                EntityRvAdapter entityRvAdapter = new EntityRvAdapter(HomeScreenActivity.this, entityList);
                 GridLayoutManager gridLayoutManager = new GridLayoutManager(HomeScreenActivity.this, 2);
                 collectionRView.setLayoutManager(gridLayoutManager);
-                collectionRView.setAdapter(collectionRvAdapter);
+                collectionRView.setAdapter(entityRvAdapter);
             }
         }, new OnFailureListener() {
             @Override

@@ -108,5 +108,13 @@
     <string name="camera_permission_denied">Denied permission to use Camera</string>
     <string name="select_image_string">Select an image</string>
     <string name="ioException_string">Image not found or IOException occurred</string>
+    <string name="collection_appbar_image">collection_appbar_image</string>
+    <string name="collections">Collections</string>
+    <string name="addcollectionfab">AddCollectionFAB</string>
+    <string name="create_new_collection">Create New Collection</string>
+    <string name="name">Name</string>
+    <string name="location">Location</string>
+    <string name="create">Create</string>
+    <string name="description">Description</string>
 
 </resources>
