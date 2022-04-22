@@ -3,6 +3,9 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/sport/AndroidStudioProjects/CS401Collaboration/app/src/main/res/drawable/collection_card_colors.xml" value="0.2575" />
+        <entry key="..\:/Users/sport/AndroidStudioProjects/CS401Collaboration/app/src/main/res/drawable/edit_text_border.xml" value="0.2575" />
+        <entry key="..\:/Users/sport/AndroidStudioProjects/CS401Collaboration/app/src/main/res/drawable/item_card_colors.xml" value="0.2575" />
         <entry key="..\:/Users/sport/AndroidStudioProjects/CS401Collaboration/app/src/main/res/drawable/rounded_text_view.xml" value="0.2575" />
         <entry key="..\:/Users/sport/AndroidStudioProjects/CS401Collaboration/app/src/main/res/layout-w1240dp/activity_login.xml" value="0.20515394912985274" />
         <entry key="..\:/Users/sport/AndroidStudioProjects/CS401Collaboration/app/src/main/res/layout-w936dp/activity_login.xml" value="0.2380464480874317" />

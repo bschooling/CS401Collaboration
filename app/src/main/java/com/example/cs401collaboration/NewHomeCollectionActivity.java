@@ -11,7 +11,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.example.cs401collaboration.DatabaseService;
 import com.example.cs401collaboration.model.Collection;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -19,7 +18,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 /**
  * @author Arshdeep Padda
  */
-public class NewCollectionActivity extends AppCompatActivity
+public class NewHomeCollectionActivity extends AppCompatActivity
 {
     DatabaseService mDB;
 
@@ -36,7 +35,7 @@ public class NewCollectionActivity extends AppCompatActivity
     protected void onCreate (Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_new_collection);
+        setContentView(R.layout.activity_new_entity);
 
         /* Action Bar */
 
@@ -50,10 +49,10 @@ public class NewCollectionActivity extends AppCompatActivity
 
         /* Handle UI Elements */
 
-        btCreate = (Button) findViewById(R.id.bt_newcolact_create);
-        etName = (EditText) findViewById(R.id.et_newcolact_name);
-        etLocation = (EditText) findViewById(R.id.et_newcolact_loc);
-        etDescription = (EditText) findViewById(R.id.et_newcolact_desc);
+        btCreate = (Button) findViewById(R.id.bt_new_entity_create);
+        etName = (EditText) findViewById(R.id.et_new_entity_name);
+        etLocation = (EditText) findViewById(R.id.et_new_entity_location);
+        etDescription = (EditText) findViewById(R.id.et_new_entity_desc);
 
         btCreate.setOnClickListener(new btCreateOnClickListener());
     }
@@ -90,7 +89,7 @@ public class NewCollectionActivity extends AppCompatActivity
             if (name.isEmpty())
             {
                 Toast.makeText (
-                        NewCollectionActivity.this,
+                        NewHomeCollectionActivity.this,
                         "Name field cannot be empty.",
                         Toast.LENGTH_LONG
                 ).show();
@@ -110,7 +109,7 @@ public class NewCollectionActivity extends AppCompatActivity
                 public void onFailure(@NonNull Exception e)
                 {
                     Toast.makeText (
-                            NewCollectionActivity.this,
+                            NewHomeCollectionActivity.this,
                             "Could not create the collection.",
                             Toast.LENGTH_LONG
                     ).show();

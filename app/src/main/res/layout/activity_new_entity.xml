@@ -5,21 +5,22 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFFFFF"
-    tools:context=".NewCollectionActivity">
+    tools:context=".NewHomeCollectionActivity">
 
     <TextView
-        android:id="@+id/tv_newcolact_header"
+        android:id="@+id/tv_new_entity_header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="28dp"
         android:layout_marginTop="24dp"
         android:text="@string/create_new_collection"
+        android:textColor="#000000"
         android:textSize="24sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
-        android:id="@+id/et_newcolact_name"
+        android:id="@+id/et_new_entity_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="28dp"
@@ -28,12 +29,14 @@
         android:ems="10"
         android:hint="@string/name"
         android:inputType="textPersonName"
+        android:textColorHint="#808080"
+        android:background="@drawable/edit_text_border"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_newcolact_header" />
+        app:layout_constraintTop_toBottomOf="@+id/tv_new_entity_header" />
 
     <EditText
-        android:id="@+id/et_newcolact_loc"
+        android:id="@+id/et_new_entity_location"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="28dp"
@@ -42,12 +45,15 @@
         android:ems="10"
         android:hint="@string/location"
         android:inputType="textPersonName"
+        android:textColorHint="#808080"
+        android:background="@drawable/edit_text_border"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/et_newcolact_name" />
+        app:layout_constraintTop_toBottomOf="@+id/et_new_entity_name"
+        />
 
     <Button
-        android:id="@+id/bt_newcolact_create"
+        android:id="@+id/bt_new_entity_create"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="18dp"
@@ -58,7 +64,7 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
     <EditText
-        android:id="@+id/et_newcolact_desc"
+        android:id="@+id/et_new_entity_desc"
         android:layout_width="0dp"
         android:layout_height="100dp"
         android:layout_marginStart="28dp"
@@ -68,8 +74,10 @@
         android:gravity="start|top"
         android:hint="@string/description"
         android:inputType="textMultiLine"
+        android:textColorHint="#808080"
+        android:background="@drawable/edit_text_border"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/et_newcolact_loc" />
+        app:layout_constraintTop_toBottomOf="@+id/et_new_entity_location" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

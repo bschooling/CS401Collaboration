@@ -10,7 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CS401Collaboration">
         <activity
-            android:name=".NewCollectionActivity"
+            android:name=".NewHomeCollectionActivity"
             android:exported="false" />
         <activity
             android:name=".LoginActivity"

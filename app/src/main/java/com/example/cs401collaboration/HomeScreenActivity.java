@@ -148,7 +148,7 @@ public class HomeScreenActivity extends AppCompatActivity
             Log.d(LOG_TAG_MAIN, "fabOnClickListener: directing to NewCollectionActivity");
             Intent intent = new Intent (
                     HomeScreenActivity.this,
-                    NewCollectionActivity.class
+                    NewHomeCollectionActivity.class
             );
             intent.putExtra("collectionID", "");
             startActivity(intent);
