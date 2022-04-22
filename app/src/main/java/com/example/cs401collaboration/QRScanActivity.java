@@ -4,10 +4,12 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -23,6 +25,7 @@ import com.google.mlkit.vision.barcode.BarcodeScanning;
 import com.google.mlkit.vision.barcode.common.Barcode;
 import com.google.mlkit.vision.common.InputImage;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -32,6 +35,22 @@ import java.util.List;
 public class QRScanActivity extends AppCompatActivity {
 
     // Class variables
+
+    /**
+     *
+     */
+    private final int GALLERY_REQUEST = 100;
+
+    /**
+     *
+     */
+    private final int CAMERA_REQUEST = 200;
+
+    /**
+     *
+     */
+    private final String LOG_TAG = "Invii_QRScan";
+
 
     /**
      * resultText is the TextView that displays the barcodeScanner result
@@ -56,6 +75,9 @@ public class QRScanActivity extends AppCompatActivity {
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Button cameraButton;
+        Button selectButton;
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_qr_scan);
 
@@ -65,7 +87,27 @@ public class QRScanActivity extends AppCompatActivity {
 
         barcodeScanner = BarcodeScanning.getClient(options);
         resultText = (TextView) findViewById(R.id.result_text);
-        image = (ImageView) findViewById(R.id.imageView);
+        image = (ImageView) findViewById(R.id.qr_scan_image);
+        cameraButton = (Button) findViewById(R.id.camera_button);
+        selectButton = (Button) findViewById(R.id.select_image_button);
+
+        cameraButton.setOnClickListener(new View.OnClickListener() {
+            // Take the image from the camera activity
+            @Override
+            public void onClick(View view) {
+                takeImage(view);
+            }
+        });
+
+        selectButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                galleryIntent.setType("image/*");
+
+                startActivityForResult(Intent.createChooser(galleryIntent, "Select Image"), GALLERY_REQUEST);
+            }
+        });
     }
 
     /**
@@ -76,7 +118,7 @@ public class QRScanActivity extends AppCompatActivity {
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
         if (checkPermission(Manifest.permission.CAMERA))
-            startActivityForResult(cameraIntent, 200); // Deprecated!
+            startActivityForResult(cameraIntent, CAMERA_REQUEST); // Deprecated!
 
         else {
             resultText.setText(R.string.camera_permission_denied);
@@ -94,28 +136,43 @@ public class QRScanActivity extends AppCompatActivity {
 
     /**
      * onActivityResult process the result from the takeImage method
-     * @param requestCode is the request code to the camera activity
-     * @param resultCode is the result code from the camera activity
+     * @param requestCode is the request code to the activity
+     * @param resultCode is the result code from the activity
      * @param data is the Intent object that contains the result
      */
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Bitmap takenPhoto;
-        InputImage qrImage;
+        Uri imageUri;
+        Bitmap photo;
+        InputImage qrImage = null;
 
         super.onActivityResult(requestCode, resultCode, data);
 
         if (resultCode == RESULT_OK) {
-            if (requestCode == 200) {
-                takenPhoto = (Bitmap) data.getExtras().get("data");
+            if (requestCode == CAMERA_REQUEST) {
+                photo = (Bitmap) data.getExtras().get("data");
 
-                image.setImageBitmap(takenPhoto);
-                qrImage = InputImage.fromBitmap(takenPhoto, 0);
+                image.setImageBitmap(photo);
+                qrImage = InputImage.fromBitmap(photo, 0);
+            }
 
+            else if (requestCode == GALLERY_REQUEST) {
+                imageUri = data.getData();
+
+                if (imageUri != null) {
+                    image.setImageURI(imageUri);
+
+                    try {
+                        qrImage = InputImage.fromFilePath(this, imageUri);
+                    }
+
+                    catch (IOException ioException) {
+                        Log.e(LOG_TAG, R.string.ioException_string + ": " + ioException.getMessage());
+                    }
+                }
+            }
+
+            if (qrImage != null) {
                 barcodeScanner.process(qrImage).addOnSuccessListener(new OnSuccessListener<List<Barcode>>() {
-                    /**
-                     * onSuccess process the result when the process method is successful
-                     * @param barcodes is the List of Barcodes generated by the process method
-                     */
                     @Override
                     public void onSuccess(List<Barcode> barcodes) {
                         int valueType;
@@ -130,7 +187,9 @@ public class QRScanActivity extends AppCompatActivity {
                                     if (valueType == Barcode.TYPE_TEXT) {
                                         resultText.setText(barcode.getDisplayValue());
                                     }
-                                } else {
+                                }
+
+                                else {
                                     resultText.setText(R.string.invalid_coding_string);
                                 }
                             }
@@ -141,16 +200,12 @@ public class QRScanActivity extends AppCompatActivity {
                         }
                     }
                 }).addOnFailureListener(new OnFailureListener() {
-                    /**
-                     * onFailure gives the error when the process method fails
-                     * @param except is an Exception from the process method
-                     */
                     @Override
                     public void onFailure(@NonNull Exception except) {
-                        Log.e("Invii_QRScan", "QR Scan Error occurred: " + except.getMessage());
+                        //resultText.setText(R.string.no_qr_text);
+                        Log.e(LOG_TAG, "Failed to generate QR Code: " + except.getMessage());
                     }
                 });
-
             }
         }
     }

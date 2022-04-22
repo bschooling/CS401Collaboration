@@ -106,5 +106,7 @@
     <string name="invalid_coding_string">Image coding not recognized</string>
     <string name="no_qr_text">No QR code found in the image</string>
     <string name="camera_permission_denied">Denied permission to use Camera</string>
+    <string name="select_image_string">Select an image</string>
+    <string name="ioException_string">Image not found or IOException occurred</string>
 
 </resources>
