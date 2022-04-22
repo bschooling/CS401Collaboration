@@ -418,6 +418,47 @@ public class DatabaseService
     }
 
     /**
+     * Get Single Item by ID.
+     *
+     * @param itemID Item ID.
+     * @param successCB Called with Item on Sucess.
+     * @param failureCB Called if failure occurs.
+     */
+    public void getItem (
+        String itemID,
+        OnSuccessListener<Item> successCB,
+        OnFailureListener failureCB
+    )
+    {
+        db.collection("items")
+                .document(itemID).get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task)
+                    {
+                        if (task.isSuccessful())
+                        {
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists())
+                            {
+                                Item item = document.toObject(Item.class);
+                                Log.d(TAG, "getItem w/ id=" + document.getData());
+                                successCB.onSuccess(item);
+                            }
+                            else
+                            {
+                                Log.d(TAG, "getItem: No such document");
+                            }
+                        }
+                        else
+                        {
+                            failureCB.onFailure(task.getException());
+                        }
+                    }
+                });
+    }
+
+    /**
      * Gets all items and collections, as Entity objects, for a given collection.
      *
      * OnSuccess receives an array list of Entity objects describing all items and collections
@@ -490,8 +531,8 @@ public class DatabaseService
                                         collection.getAuthUsers().contains(currentUserDocRef)
                                 )
                                 {
-                                    successCB.onSuccess(collection);
                                     Log.d(TAG, "getCollection w/ id=" + document.getData());
+                                    successCB.onSuccess(collection);
                                 }
                                 else
                                 {
