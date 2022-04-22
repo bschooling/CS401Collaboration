@@ -486,7 +486,7 @@ public class DatabaseService
                                 );
                                 // ensure current user is allowed to access collection
                                 if (
-                                        collection.getOwner() == currentUserDocRef ||
+                                        collection.getOwner().equals(currentUserDocRef) ||
                                         collection.getAuthUsers().contains(currentUserDocRef)
                                 )
                                 {
@@ -497,7 +497,7 @@ public class DatabaseService
                                 {
                                     Log.d (
                                             TAG,
-                                            "getCollection invalid permissions"
+                                            "getCollection invalid permissions "
                                                     + document.getData()
                                     );
                                     failureCB.onFailure(new Exception("UserInvalidPermissions"));
