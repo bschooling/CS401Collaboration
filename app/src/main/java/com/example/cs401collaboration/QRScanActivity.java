@@ -37,17 +37,17 @@ public class QRScanActivity extends AppCompatActivity {
     // Class variables
 
     /**
-     *
+     * GALLERY_REQUEST is a request code to the onActivityResult method to use the Gallery
      */
     private final int GALLERY_REQUEST = 100;
 
     /**
-     *
+     * CAMERA_REQUEST is a request code to the onActivityResult method to use the Camera
      */
     private final int CAMERA_REQUEST = 200;
 
     /**
-     *
+     * LOG_TAG is a Tag String with the app name and activity name
      */
     private final String LOG_TAG = "Invii_QRScan";
 
