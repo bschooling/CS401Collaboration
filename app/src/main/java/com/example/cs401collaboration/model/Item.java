@@ -82,6 +82,33 @@ public class Item
     }
 
     /**
+     * Set Name.
+     * @param name Name.
+     */
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+
+    /**
+     * Set Location.
+     * @param location Location.
+     */
+    public void setLocation(String location)
+    {
+        this.location = location;
+    }
+
+    /**
+     * Set Description.
+     * @param description Description.
+     */
+    public void setDescription(String description)
+    {
+        this.description = description;
+    }
+
+    /**
      * Get Item Description.
      * @return Description.
      */
