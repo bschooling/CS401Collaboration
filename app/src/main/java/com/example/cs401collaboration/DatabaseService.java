@@ -665,14 +665,14 @@ public class DatabaseService
      *
      * @param collection Collection to add.
      * @param parentCollectionID Parent collection id, document id.
-     * @param parentCollectionOwner Parent collection owner, as Document Reference.
+     * @param parentCollectionOwnerID Parent collection owner, document id.
      * @param successCB Callback for successful creation.
      * @param failureCB Callback for any creation related failures.
      */
     public void createCollection (
             Collection collection,
             String parentCollectionID,
-            DocumentReference parentCollectionOwner,
+            String parentCollectionOwnerID,
             OnSuccessListener<String> successCB,
             OnFailureListener failureCB
     )
@@ -683,7 +683,7 @@ public class DatabaseService
             return;
         }
 
-        collection.setOwner(parentCollectionOwner);
+        collection.setOwner(db.collection("users").document(parentCollectionOwnerID));
         collection.setParentCollection (
                 db.collection("collections").document(parentCollectionID)
         );
@@ -702,12 +702,15 @@ public class DatabaseService
                                         + documentReference.getId()
                         );
                         // Add present user as authorized user to collection
-                        documentReference.update (
-                                "authUsers",
-                                FieldValue.arrayUnion(
-                                        db.document("/users/" + auth.getUid())
-                                )
-                        );
+                        if (!auth.getUid().equals(parentCollectionOwnerID))
+                        {
+                            documentReference.update (
+                                    "authUsers",
+                                    FieldValue.arrayUnion (
+                                            db.document("/users/" + auth.getUid())
+                                    )
+                            );
+                        }
                         // Add newly created collection as child of parent collection
                         collection.getParentCollection().update (
                                 "childrenCollections",
