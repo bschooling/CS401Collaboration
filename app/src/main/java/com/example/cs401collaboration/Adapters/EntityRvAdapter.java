@@ -86,14 +86,17 @@ public class EntityRvAdapter extends RecyclerView.Adapter<EntityRvAdapter.Viewho
             }
         });
 
+        // Event for holding down a card
         holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
+                // Creating the Dialog
                 LayoutInflater inflater = LayoutInflater.from(context);
                 View dialogView = inflater.inflate(R.layout.edit_dialogue, null);
 
                 final AlertDialog editDialog = new AlertDialog.Builder(context).create();
 
+                // UI elements for Dialog
                 Button btDelete = (Button) dialogView.findViewById(R.id.dialogDelete);
                 Button btConfirm = (Button) dialogView.findViewById(R.id.dialogConfirm);
                 Button btCancel = (Button) dialogView.findViewById(R.id.dialogCancel);
@@ -101,10 +104,12 @@ public class EntityRvAdapter extends RecyclerView.Adapter<EntityRvAdapter.Viewho
                 EditText editLocation = (EditText) dialogView.findViewById(R.id.editLocation);
                 EditText editDescription = (EditText) dialogView.findViewById((R.id.editDescription));
 
+                // Checks for if Collection or Item
                 if (entity.getType().equals(Entity.TYPE_COLLECTION)) {
                     mDB.getCollection(entity.getDocID(), new OnSuccessListener<Collection>() {
                         @Override
                         public void onSuccess(Collection collection) {
+                            // Populates fields with existing data
                             editName.setText(collection.getName());
                             editLocation.setText(collection.getLocation());
                             editDescription.setText(collection.getDescription());
@@ -123,6 +128,7 @@ public class EntityRvAdapter extends RecyclerView.Adapter<EntityRvAdapter.Viewho
                     mDB.getItem(entity.getDocID(), new OnSuccessListener<Item>() {
                         @Override
                         public void onSuccess(Item item) {
+                            // Populates fields with existing data
                             editName.setText(item.getName());
                             editLocation.setText(item.getLocation());
                             editDescription.setText(item.getDescription());
@@ -139,6 +145,7 @@ public class EntityRvAdapter extends RecyclerView.Adapter<EntityRvAdapter.Viewho
                     });
                 }
 
+                // Closes dialog on Cancel press
                 btCancel.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -146,6 +153,30 @@ public class EntityRvAdapter extends RecyclerView.Adapter<EntityRvAdapter.Viewho
                     }
                 });
 
+                // Saves changes on Confirm press
+                btConfirm.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        // Check for Collection or Item
+                        if (entity.getType().equals(Entity.TYPE_COLLECTION)) {
+                            // TODO update collection with edited fields
+                        } else if (entity.getType().equals(Entity.TYPE_ITEM)) {
+                            // TODO update Item with edited fields
+                        }
+                    }
+                });
+
+                btDelete.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        // Check for Collection or Item
+                        if (entity.getType().equals(Entity.TYPE_COLLECTION)) {
+                            // TODO Delete collection with edited fields
+                        } else if (entity.getType().equals(Entity.TYPE_ITEM)) {
+                            // TODO Delete Item with edited fields
+                        }
+                    }
+                });
 
                 editDialog.setView(dialogView);
                 editDialog.show();
