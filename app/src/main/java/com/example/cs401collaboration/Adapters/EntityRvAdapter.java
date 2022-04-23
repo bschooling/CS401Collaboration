@@ -104,6 +104,9 @@ public class EntityRvAdapter extends RecyclerView.Adapter<EntityRvAdapter.Viewho
                 EditText editLocation = (EditText) dialogView.findViewById(R.id.editLocation);
                 EditText editDescription = (EditText) dialogView.findViewById((R.id.editDescription));
 
+                Collection updatedCollection = new Collection();
+                Item updatedItem = new Item();
+
                 // Checks for if Collection or Item
                 if (entity.getType().equals(Entity.TYPE_COLLECTION)) {
                     mDB.getCollection(entity.getDocID(), new OnSuccessListener<Collection>() {
@@ -113,6 +116,10 @@ public class EntityRvAdapter extends RecyclerView.Adapter<EntityRvAdapter.Viewho
                             editName.setText(collection.getName());
                             editLocation.setText(collection.getLocation());
                             editDescription.setText(collection.getDescription());
+
+                            // Copy collection
+                            updatedCollection.copyOther(collection);
+
                         }
                     }, new OnFailureListener() {
                         @Override
@@ -132,6 +139,9 @@ public class EntityRvAdapter extends RecyclerView.Adapter<EntityRvAdapter.Viewho
                             editName.setText(item.getName());
                             editLocation.setText(item.getLocation());
                             editDescription.setText(item.getDescription());
+
+                            // Copy Item
+                            updatedItem.copyOther(item);
                         }
                     }, new OnFailureListener() {
                         @Override
@@ -159,9 +169,53 @@ public class EntityRvAdapter extends RecyclerView.Adapter<EntityRvAdapter.Viewho
                     public void onClick(View view) {
                         // Check for Collection or Item
                         if (entity.getType().equals(Entity.TYPE_COLLECTION)) {
-                            // TODO update collection with edited fields
+                            // Assign values to updated collection
+                            updatedCollection.setName(editName.getText().toString());
+                            updatedCollection.setLocation(editLocation.getText().toString());
+                            updatedCollection.setDescription(editDescription.getText().toString());
+
+                            // Update Collection
+                            mDB.updateCollection(updatedCollection, new OnSuccessListener<Boolean>() {
+                                @Override
+                                public void onSuccess(Boolean aBoolean) {
+                                    // Update RV and close dialog
+                                    notifyItemChanged(holder.getAdapterPosition());
+                                    editDialog.dismiss();
+                                }
+                            }, new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Toast.makeText (
+                                            context,
+                                            "Could not update Collection",
+                                            Toast.LENGTH_LONG
+                                    ).show();
+                                }
+                            });
                         } else if (entity.getType().equals(Entity.TYPE_ITEM)) {
-                            // TODO update Item with edited fields
+                            // Assign values to updated Item
+                            updatedItem.setName(editName.getText().toString());
+                            updatedItem.setLocation(editLocation.getText().toString());
+                            updatedItem.setDescription(editDescription.getText().toString());
+
+                            // Update Item
+                            mDB.updateItem(updatedItem, new OnSuccessListener<Boolean>() {
+                                @Override
+                                public void onSuccess(Boolean aBoolean) {
+                                    // Update RV and close dialog
+                                    notifyItemChanged(holder.getAdapterPosition());
+                                    editDialog.dismiss();
+                                }
+                            }, new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Toast.makeText (
+                                            context,
+                                            "Could not update Item",
+                                            Toast.LENGTH_LONG
+                                    ).show();
+                                }
+                            });
                         }
                     }
                 });

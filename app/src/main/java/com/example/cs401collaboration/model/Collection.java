@@ -87,6 +87,20 @@ public class Collection
         this.childrenCollections = new ArrayList<>();
     }
 
+    // Copy method
+    public void copyOther(Collection otherCollection) {
+        docID = otherCollection.getDocID();
+        name = otherCollection.getName();
+        description = otherCollection.getDescription();
+        location = otherCollection.getLocation();
+        imageResourceID = otherCollection.getImageResourceID();
+        owner = otherCollection.getOwner();
+        authUsers = otherCollection.getAuthUsers();
+        parentCollection = otherCollection.getParentCollection();
+        childrenCollections = otherCollection.getChildrenCollections();
+        items = otherCollection.getItems();
+    }
+
     /**
      * Get Document ID.
      * @return Document ID.

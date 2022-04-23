@@ -58,6 +58,15 @@ public class Item
         this.description = description;
     }
 
+    public void copyOther (Item otherItem) {
+        docID = otherItem.getDocID();
+        name = otherItem.getName();
+        description = otherItem.getDescription();
+        location = otherItem.getLocation();
+        imageResourceID = otherItem.getImageResourceID();
+        parentCollection = otherItem.getParentCollection();
+    }
+
     public void setParentCollection (DocumentReference parentCollection)
     {
         this.parentCollection = parentCollection;
