@@ -118,5 +118,8 @@
     <string name="description">Description</string>
     <string name="add_collection">Add Collection</string>
     <string name="add_item">Add Item</string>
+    <string name="delete">DELETE</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
 
 </resources>

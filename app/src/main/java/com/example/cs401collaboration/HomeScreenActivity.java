@@ -18,7 +18,7 @@ import android.widget.Toast;
 import com.example.cs401collaboration.model.Collection;
 
 import com.example.cs401collaboration.model.Entity;
-import com.example.cs401collaboration.rvAdapters.EntityRvAdapter;
+import com.example.cs401collaboration.Adapters.EntityRvAdapter;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
