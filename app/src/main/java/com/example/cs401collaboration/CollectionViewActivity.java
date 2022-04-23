@@ -47,6 +47,7 @@ public class CollectionViewActivity extends AppCompatActivity {
         getSupportActionBar().hide();
         setContentView(R.layout.activity_collection_view);
 
+        // Database
         mDB = DatabaseService.getInstance();
 
         // Location and Description text

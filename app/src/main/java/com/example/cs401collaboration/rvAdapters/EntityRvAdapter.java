@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.cs401collaboration.CollectionViewActivity;
+import com.example.cs401collaboration.ItemViewActivity;
 import com.example.cs401collaboration.R;
 import com.example.cs401collaboration.model.Entity;
 
@@ -55,12 +56,14 @@ public class EntityRvAdapter extends RecyclerView.Adapter<EntityRvAdapter.Viewho
             public void onClick(View view) {
                 if (entity.getType().equals(Entity.TYPE_COLLECTION)) {
                     /*  Creates new activity for the collection */
-                    Intent intent = new Intent(context, CollectionViewActivity.class);
-                    intent.putExtra("entity_clicked_id", entity.getDocID());
-                    context.startActivity(intent);
+                    Intent intentCollection = new Intent(context, CollectionViewActivity.class);
+                    intentCollection.putExtra("entity_clicked_id", entity.getDocID());
+                    context.startActivity(intentCollection);
                 } else if (entity.getType().equals(Entity.TYPE_ITEM)) {
                     /* Creates new activity for the Item */
-                    //TODO Item activity
+                    Intent intentItem = new Intent(context, ItemViewActivity.class);
+                    intentItem.putExtra("entity_clicked_id", entity.getDocID());
+                    context.startActivity(intentItem);
                 } else {
                     Toast.makeText (
                             context,
