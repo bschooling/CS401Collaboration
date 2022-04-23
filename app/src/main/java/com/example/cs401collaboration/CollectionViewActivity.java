@@ -177,6 +177,8 @@ public class CollectionViewActivity extends AppCompatActivity {
             createCollectionIntent.putExtra("entity_type", Entity.TYPE_COLLECTION);
             createCollectionIntent.putExtra("collectionID", entityID);
             createCollectionIntent.putExtra("entity_owner", entityOwner);
+
+            startActivity(createCollectionIntent);
         }
     };
 
