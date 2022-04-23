@@ -126,5 +126,8 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="confirm_delete">Are you sure you want to delete?</string>
+    <string name="unknown_type">Unknown Type</string>
+    <string name="item">Item</string>
+    <string name="collection">Collection</string>
 
 </resources>

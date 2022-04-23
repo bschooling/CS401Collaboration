@@ -60,12 +60,27 @@ public class EntityRvAdapter extends RecyclerView.Adapter<EntityRvAdapter.Viewho
     /** Replace the default contents of a view with data from collections */
     @Override
     public void onBindViewHolder(@NonNull EntityRvAdapter.Viewholder holder, int position) {
+        // Get Entity
         Entity entity = entityArrayList.get(position);
+
+        // Populating UI
         holder.entityFirstLine.setText(entity.getFirstLine());
         holder.entitySecondLine.setText(entity.getSecondLine());
         //TODO swap hardcoded image for image from collection
         holder.entityImage.setImageResource(android.R.drawable.ic_menu_gallery);
 
+        // Setting Label
+        if (entity.getType().equals(Entity.TYPE_COLLECTION)) {
+            holder.entityLabel.setText(R.string.collection);
+            holder.entityLabel.setBackgroundResource(R.color.violet);
+        } else if (entity.getType().equals(Entity.TYPE_ITEM)) {
+            holder.entityLabel.setText(R.string.item);
+            holder.entityLabel.setBackgroundResource(R.color.mint_green);
+        } else {
+            holder.entityLabel.setText(R.string.unknown_type);
+        }
+
+        // Card onClick
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -90,7 +105,7 @@ public class EntityRvAdapter extends RecyclerView.Adapter<EntityRvAdapter.Viewho
             }
         });
 
-        // Event for holding down a card
+        // Card onLongClick
         holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
@@ -288,7 +303,7 @@ public class EntityRvAdapter extends RecyclerView.Adapter<EntityRvAdapter.Viewho
     /** Reference to the view being used */
     public class Viewholder extends RecyclerView.ViewHolder {
 
-        private TextView entityFirstLine, entitySecondLine;
+        private TextView entityFirstLine, entitySecondLine, entityLabel;
         private ImageView entityImage;
 
 
@@ -296,6 +311,7 @@ public class EntityRvAdapter extends RecyclerView.Adapter<EntityRvAdapter.Viewho
             super(itemView);
             entityFirstLine = itemView.findViewById(R.id.card_field_top);
             entitySecondLine = itemView.findViewById(R.id.card_field_bottom);
+            entityLabel = itemView.findViewById(R.id.typeLabel);
             entityImage = itemView.findViewById(R.id.card_field_image);
         }
     }
