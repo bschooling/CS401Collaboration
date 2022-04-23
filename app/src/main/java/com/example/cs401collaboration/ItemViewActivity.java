@@ -57,7 +57,6 @@ public class ItemViewActivity extends AppCompatActivity {
         btDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO connect Delete button
                 AlertDialog.Builder deleteWarning = new AlertDialog.Builder(ItemViewActivity.this);
 
                 deleteWarning.setMessage(R.string.confirm_delete);
