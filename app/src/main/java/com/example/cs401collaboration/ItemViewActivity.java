@@ -16,6 +16,9 @@ import com.example.cs401collaboration.model.Item;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+/**
+ * @author Bryce Schooling
+ */
 public class ItemViewActivity extends AppCompatActivity {
 
     /* Database */

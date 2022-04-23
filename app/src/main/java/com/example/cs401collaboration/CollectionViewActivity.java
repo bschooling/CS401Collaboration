@@ -23,6 +23,9 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 
+/**
+ * @author Bryce Schooling
+ */
 public class CollectionViewActivity extends AppCompatActivity {
 
     /* Database */
@@ -36,6 +39,9 @@ public class CollectionViewActivity extends AppCompatActivity {
     private FloatingActionButton mAddFab, mAddCollectionFab, mAddItemFab;
     private TextView addCollectionsFabLabel, addItemsFabLabel;
     private boolean isFabVisible;
+
+    // EntityID holds the parent ID passed in
+    String entityID;
 
     /* recyclerView UI element */
     private RecyclerView entityRView;
@@ -67,6 +73,23 @@ public class CollectionViewActivity extends AppCompatActivity {
         addCollectionsFabLabel = findViewById(R.id.add_collection_text);
         addItemsFabLabel = findViewById(R.id.add_item_text);
 
+        // Add Fab onClick
+        mAddFab.setOnClickListener(addFabListener);
+
+        // Add Collection onClick
+        mAddCollectionFab.setOnClickListener(addCollectionFabListener);
+
+        // Add Item onClick
+        mAddItemFab.setOnClickListener(addItemFabListener);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        Intent intent = getIntent();
+        entityID = intent.getStringExtra("entity_clicked_id");
+
         // Fab and Label starting visibility.  Set to hidden
         mAddCollectionFab.setVisibility(View.GONE);
         addCollectionsFabLabel.setVisibility(View.GONE);
@@ -75,51 +98,6 @@ public class CollectionViewActivity extends AppCompatActivity {
 
         // Fab visibility boolean
         isFabVisible = false;
-
-        // Add Fab onClick
-        mAddFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!isFabVisible) {
-                    mAddCollectionFab.show();
-                    mAddItemFab.show();
-                    addCollectionsFabLabel.setVisibility(View.VISIBLE);
-                    addItemsFabLabel.setVisibility(View.VISIBLE);
-
-                    isFabVisible = true;
-                } else {
-                    mAddCollectionFab.hide();
-                    mAddItemFab.hide();
-                    addCollectionsFabLabel.setVisibility(View.GONE);
-                    addItemsFabLabel.setVisibility(View.GONE);
-
-                    isFabVisible = false;
-                }
-            }
-        });
-
-        // Add Collection onClick
-        mAddCollectionFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick (View view) {
-                //TODO Add Collection
-            }
-        });
-
-        mAddItemFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //TODO Add Item
-            }
-        });
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        Intent intent = getIntent();
-        String entityID = intent.getStringExtra("entity_clicked_id");
 
         mDB.getCollection(entityID, new OnSuccessListener<Collection>() {
             @Override
@@ -133,7 +111,6 @@ public class CollectionViewActivity extends AppCompatActivity {
                 mDB.getAllEntitiesForCollection(entityID, new OnSuccessListener<ArrayList<Entity>>() {
                     @Override
                     public void onSuccess(ArrayList<Entity> entities) {
-                        ArrayList<Entity> entityList = new ArrayList<>();
 
                         // Populate retrieved collections on home screen rv
                         entityRView = findViewById(R.id.collectionViewActivity_rv);
@@ -167,4 +144,45 @@ public class CollectionViewActivity extends AppCompatActivity {
         });
 
     }
+
+    private View.OnClickListener addFabListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            if (!isFabVisible) {
+                mAddCollectionFab.show();
+                mAddItemFab.show();
+                addCollectionsFabLabel.setVisibility(View.VISIBLE);
+                addItemsFabLabel.setVisibility(View.VISIBLE);
+
+                isFabVisible = true;
+            } else {
+                mAddCollectionFab.hide();
+                mAddItemFab.hide();
+                addCollectionsFabLabel.setVisibility(View.GONE);
+                addItemsFabLabel.setVisibility(View.GONE);
+
+                isFabVisible = false;
+            }
+        }
+    };
+
+    private View.OnClickListener addCollectionFabListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            //TODO Add Collection
+        }
+    };
+
+    private View.OnClickListener addItemFabListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            if (entityID != null){
+                Intent createItemIntent = new Intent(CollectionViewActivity.this, NewEntityActivity.class);
+                createItemIntent.putExtra("entity_type", Entity.TYPE_ITEM);
+                createItemIntent.putExtra("collectionID", entityID);
+
+                startActivity(createItemIntent);
+            }
+        }
+    };
 }

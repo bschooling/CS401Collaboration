@@ -28,7 +28,11 @@ import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.ArrayList;
 
-/** Adapter class for the recyclerview */
+/**
+ * Adapter class for the recyclerview
+ *
+ * @author Bryce Schooling
+ */
 public class EntityRvAdapter extends RecyclerView.Adapter<EntityRvAdapter.Viewholder> {
 
     private Context context;
@@ -229,9 +233,9 @@ public class EntityRvAdapter extends RecyclerView.Adapter<EntityRvAdapter.Viewho
                     public void onClick(View view) {
                         // Check for Collection or Item
                         if (entity.getType().equals(Entity.TYPE_COLLECTION)) {
-                            // TODO Delete collection with edited fields
+                            // TODO Delete collection
                         } else if (entity.getType().equals(Entity.TYPE_ITEM)) {
-                            // TODO Delete Item with edited fields
+                            // TODO Delete Item
                         }
                     }
                 });

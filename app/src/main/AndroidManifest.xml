@@ -10,6 +10,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CS401Collaboration">
         <activity
+            android:name=".NewEntityActivity"
+            android:exported="false" />
+        <activity
             android:name=".NewHomeCollectionActivity"
             android:exported="false" />
         <activity
