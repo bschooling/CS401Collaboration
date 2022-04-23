@@ -179,6 +179,8 @@ public class EntityRvAdapter extends RecyclerView.Adapter<EntityRvAdapter.Viewho
                                 @Override
                                 public void onSuccess(Boolean aBoolean) {
                                     // Update RV and close dialog
+                                    entity.setFirstLine(updatedCollection.getName());
+                                    entity.setSecondLine((updatedCollection.getLocation()));
                                     notifyItemChanged(holder.getAdapterPosition());
                                     editDialog.dismiss();
                                 }
@@ -203,6 +205,8 @@ public class EntityRvAdapter extends RecyclerView.Adapter<EntityRvAdapter.Viewho
                                 @Override
                                 public void onSuccess(Boolean aBoolean) {
                                     // Update RV and close dialog
+                                    entity.setFirstLine(updatedItem.getName());
+                                    entity.setSecondLine((updatedItem.getLocation()));
                                     notifyItemChanged(holder.getAdapterPosition());
                                     editDialog.dismiss();
                                 }
