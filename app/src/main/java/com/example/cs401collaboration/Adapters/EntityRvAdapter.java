@@ -234,7 +234,7 @@ public class EntityRvAdapter extends RecyclerView.Adapter<EntityRvAdapter.Viewho
 
                         AlertDialog.Builder deleteWarning = new AlertDialog.Builder(context);
 
-                        deleteWarning.setMessage("Are you sure you want to delete?");
+                        deleteWarning.setMessage(R.string.confirm_delete);
                         deleteWarning.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
@@ -242,7 +242,18 @@ public class EntityRvAdapter extends RecyclerView.Adapter<EntityRvAdapter.Viewho
                                 if (entity.getType().equals(Entity.TYPE_COLLECTION)) {
                                     // TODO Delete collection
                                 } else if (entity.getType().equals(Entity.TYPE_ITEM)) {
-                                    // TODO Delete Item
+                                    // DB call for delete item
+                                    mDB.deleteItem(entity.getDocID(), new OnSuccessListener<Boolean>() {
+                                        @Override
+                                        public void onSuccess(Boolean aBoolean) { }
+                                    }, new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) { }
+                                    });
+
+                                    entityArrayList.remove(holder.getAdapterPosition());
+                                    notifyItemRemoved(holder.getAdapterPosition());
+                                    notifyItemRangeChanged(holder.getAdapterPosition(), entityArrayList.size());
                                 }
 
                                 dialogInterface.dismiss();

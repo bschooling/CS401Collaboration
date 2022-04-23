@@ -3,6 +3,8 @@ package com.example.cs401collaboration;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -12,6 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
+import com.example.cs401collaboration.model.Entity;
 import com.example.cs401collaboration.model.Item;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -29,6 +32,9 @@ public class ItemViewActivity extends AppCompatActivity {
     private ImageView itemImage;
     private Toolbar itemTitle;
     private Button  btDelete, btQr;
+
+    // Current Item ID
+    String itemID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +58,34 @@ public class ItemViewActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 //TODO connect Delete button
+                AlertDialog.Builder deleteWarning = new AlertDialog.Builder(ItemViewActivity.this);
+
+                deleteWarning.setMessage(R.string.confirm_delete);
+                deleteWarning.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                        // DB call for delete item
+                        mDB.deleteItem(itemID, new OnSuccessListener<Boolean>() {
+                            @Override
+                            public void onSuccess(Boolean aBoolean) { }
+                        }, new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) { }
+                        });
+                        dialogInterface.dismiss();
+                        ItemViewActivity.this.finish();
+                    }
+                });
+                deleteWarning.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                });
+
+                AlertDialog warning = deleteWarning.create();
+                warning.show();
             }
         });
 
@@ -71,7 +105,7 @@ public class ItemViewActivity extends AppCompatActivity {
         super.onStart();
         Intent intent = getIntent();
 
-        String itemID = intent.getStringExtra("entity_clicked_id");
+        itemID = intent.getStringExtra("entity_clicked_id");
 
         mDB.getItem(itemID, new OnSuccessListener<Item>() {
             @Override

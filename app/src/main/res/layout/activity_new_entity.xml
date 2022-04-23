@@ -34,7 +34,10 @@
         android:textColorHint="#808080"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_new_entity_header" />
+        app:layout_constraintTop_toBottomOf="@+id/tv_new_entity_header"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"/>
 
     <EditText
         android:id="@+id/et_new_entity_location"
@@ -51,7 +54,10 @@
         android:textColorHint="#808080"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/et_new_entity_name" />
+        app:layout_constraintTop_toBottomOf="@+id/et_new_entity_name"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"/>
 
     <Button
         android:id="@+id/bt_new_entity_create"
@@ -79,6 +85,9 @@
         android:background="@drawable/edit_text_border"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/et_new_entity_location" />
+        app:layout_constraintTop_toBottomOf="@+id/et_new_entity_location"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
