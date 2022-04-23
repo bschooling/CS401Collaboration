@@ -128,8 +128,6 @@ public class NewEntityActivity extends AppCompatActivity {
 
             // Type check
             if (type.equals(Entity.TYPE_COLLECTION)) {
-                /*
-                 TODO FIX COLLECTION ADD
                  // Create new Collection based on fields filled out
                 Collection newCollection = new Collection(name, location, description);
                 mDB.createCollection(newCollection, ParentEntityID, ParentEntityOwner, new OnSuccessListener<String>() {
@@ -144,7 +142,7 @@ public class NewEntityActivity extends AppCompatActivity {
                                 Toast.LENGTH_LONG
                         ).show();
                     }
-                }); */
+                });
             } else if (type.equals(Entity.TYPE_ITEM)) {
                 // Create new Item based on fields filled out
                 Item newItem = new Item(name, location, description);

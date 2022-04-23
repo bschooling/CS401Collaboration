@@ -42,6 +42,7 @@ public class CollectionViewActivity extends AppCompatActivity {
 
     // EntityID holds the parent ID passed in
     String entityID;
+    String entityOwner;
 
     /* recyclerView UI element */
     private RecyclerView entityRView;
@@ -102,7 +103,10 @@ public class CollectionViewActivity extends AppCompatActivity {
         mDB.getCollection(entityID, new OnSuccessListener<Collection>() {
             @Override
             public void onSuccess(Collection collection) {
+                // Get the ParentCollection
+                entityOwner = collection.getOwner().getId();
 
+                // Sets UI fields with Collection Data
                 mCollectionLocation.setText(collection.getLocation());
                 mCollectionDescription.setText(collection.getDescription());
                 mCollectionBar.setTitle(collection.getName());
@@ -169,7 +173,10 @@ public class CollectionViewActivity extends AppCompatActivity {
     private View.OnClickListener addCollectionFabListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            //TODO Add Collection
+            Intent createCollectionIntent = new Intent(CollectionViewActivity.this, NewEntityActivity.class);
+            createCollectionIntent.putExtra("entity_type", Entity.TYPE_COLLECTION);
+            createCollectionIntent.putExtra("collectionID", entityID);
+            createCollectionIntent.putExtra("entity_owner", entityOwner);
         }
     };
 
