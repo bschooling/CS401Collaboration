@@ -612,6 +612,32 @@ public class DatabaseService
     }
 
     /**
+     * Delete Item Based on ID.
+     * @param itemID Item ID.
+     * @param successCB On Success.
+     * @param failureCB On Failure.
+     */
+    public void deleteItem (
+            String itemID,
+            OnSuccessListener<Boolean> successCB,
+            OnFailureListener failureCB
+    )
+    {
+        db.collection("items")
+                .document(itemID)
+                .delete()
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful())
+                            successCB.onSuccess(true);
+                        else
+                            failureCB.onFailure(task.getException());
+                    }
+                });
+    }
+
+    /**
      * createRootCollection creates a collection without a parent,
      * e.g. one to be displayed on the home screen.
      *
