@@ -69,6 +69,12 @@ public class Entity
     }
 
     /**
+     * Set First Line
+     * @param firstLine First Line
+     */
+    public void setFirstLine(String firstLine) {this.firstLine = firstLine;}
+
+    /**
      * Get Second Line.
      * @return Second Line.
      */
@@ -76,6 +82,12 @@ public class Entity
     {
         return secondLine;
     }
+
+    /**
+     * Set Second Line
+     * @param secondLine Second Line
+     */
+    public void setSecondLine(String secondLine) {this.secondLine = secondLine;}
 
     /**
      * Get Image Resource ID.
@@ -87,6 +99,12 @@ public class Entity
     }
 
     /**
+     * Set Image Resource ID
+     * @param imageResourceID
+     */
+    public void setImageResourceID(String imageResourceID) {this.imageResourceID = imageResourceID;}
+
+    /**
      * Get Document ID.
      * @return Document ID.
      */
@@ -94,6 +112,12 @@ public class Entity
     {
         return docID;
     }
+
+    /**
+     * Set DocID
+     * @param docID Doc ID
+     */
+    public void setDocID(String docID) {this.docID = docID;}
 
     /**
      * Get Type of Entity.
@@ -106,5 +130,12 @@ public class Entity
     {
         return type;
     }
+
+    /**
+     * Set Type
+     * @param type type
+     */
+    public void setType (Integer type) {this.type = type;}
+
 
 }
