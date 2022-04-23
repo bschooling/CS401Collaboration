@@ -2,6 +2,7 @@ package com.example.cs401collaboration.Adapters;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,7 +19,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.cs401collaboration.CollectionViewActivity;
 import com.example.cs401collaboration.DatabaseService;
 import com.example.cs401collaboration.ItemViewActivity;
-import com.example.cs401collaboration.NewHomeCollectionActivity;
 import com.example.cs401collaboration.R;
 import com.example.cs401collaboration.model.Collection;
 import com.example.cs401collaboration.model.Entity;
@@ -231,13 +231,35 @@ public class EntityRvAdapter extends RecyclerView.Adapter<EntityRvAdapter.Viewho
                 btDelete.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        // Check for Collection or Item
-                        if (entity.getType().equals(Entity.TYPE_COLLECTION)) {
-                            // TODO Delete collection
-                        } else if (entity.getType().equals(Entity.TYPE_ITEM)) {
-                            // TODO Delete Item
-                        }
+
+                        AlertDialog.Builder deleteWarning = new AlertDialog.Builder(context);
+
+                        deleteWarning.setMessage("Are you sure you want to delete?");
+                        deleteWarning.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                // Check for Collection or Item
+                                if (entity.getType().equals(Entity.TYPE_COLLECTION)) {
+                                    // TODO Delete collection
+                                } else if (entity.getType().equals(Entity.TYPE_ITEM)) {
+                                    // TODO Delete Item
+                                }
+
+                                dialogInterface.dismiss();
+                                editDialog.dismiss();
+                            }
+                        });
+                        deleteWarning.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialogInterface.dismiss();
+                            }
+                        });
+
+                        AlertDialog warning = deleteWarning.create();
+                        warning.show();
                     }
+
                 });
 
                 editDialog.setView(dialogView);
