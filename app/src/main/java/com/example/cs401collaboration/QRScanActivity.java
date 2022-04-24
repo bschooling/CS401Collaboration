@@ -92,7 +92,10 @@ public class QRScanActivity extends AppCompatActivity {
         selectButton = (Button) findViewById(R.id.select_image_button);
 
         cameraButton.setOnClickListener(new View.OnClickListener() {
-            // Take the image from the camera activity
+            /**
+             * onClick takes the image from the camera activity
+             * @param view is a View object
+             */
             @Override
             public void onClick(View view) {
                 takeImage(view);
@@ -100,6 +103,10 @@ public class QRScanActivity extends AppCompatActivity {
         });
 
         selectButton.setOnClickListener(new View.OnClickListener() {
+            /**
+             * onClick takes the image from the Gallery activity
+             * @param view is a View object
+             */
             @Override
             public void onClick(View view) {
                 Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
