@@ -93,6 +93,12 @@ public class ItemViewActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 //TODO connect QR button
+                Intent qrViewIntent = new Intent(getBaseContext(), QRViewActivity.class);
+                String inputTitle = itemTitle.getTitle().toString();
+
+                qrViewIntent.putExtra("qrTitle", inputTitle);
+
+                startActivity(qrViewIntent);
             }
         });
 

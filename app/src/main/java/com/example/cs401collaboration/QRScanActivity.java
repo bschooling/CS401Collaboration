@@ -67,7 +67,7 @@ public class QRScanActivity extends AppCompatActivity {
      */
     private BarcodeScanner barcodeScanner;
 
-    // Class methods
+    // Instance methods
 
     /**
      * onCreate handles the creation of QRScanActivity
