@@ -17,6 +17,9 @@
             android:name=".NewEntityActivity"
             android:exported="false" />
         <activity
+            android:name=".CollaboratorViewActivity"
+            android:exported="false"/>
+        <activity
             android:name=".NewHomeCollectionActivity"
             android:exported="false" />
         <activity

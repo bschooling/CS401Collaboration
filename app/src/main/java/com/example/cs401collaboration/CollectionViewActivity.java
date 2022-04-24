@@ -48,7 +48,7 @@ public class CollectionViewActivity extends AppCompatActivity {
     String entityOwner;
 
     /* recyclerView UI element */
-    private RecyclerView entityRView;
+    private RecyclerView entityRvView;
 
     private final String TAG = "CollectionViewActivity";
 
@@ -121,11 +121,11 @@ public class CollectionViewActivity extends AppCompatActivity {
                     public void onSuccess(ArrayList<Entity> entities) {
 
                         // Populate retrieved collections on home screen rv
-                        entityRView = findViewById(R.id.collectionViewActivity_rv);
+                        entityRvView = findViewById(R.id.collectionViewActivity_rv);
                         EntityRvAdapter entityRvAdapter = new EntityRvAdapter(CollectionViewActivity.this, entities);
                         GridLayoutManager gridLayoutManager = new GridLayoutManager(CollectionViewActivity.this, 2);
-                        entityRView.setLayoutManager(gridLayoutManager);
-                        entityRView.setAdapter(entityRvAdapter);
+                        entityRvView.setLayoutManager(gridLayoutManager);
+                        entityRvView.setAdapter(entityRvAdapter);
 
 
                     }
@@ -215,7 +215,9 @@ public class CollectionViewActivity extends AppCompatActivity {
         {
             Log.d(TAG, "onOptionsItemSelected: to collab screen option selected");
             // TODO: @bryce, send to collab screen below
-            // startActivity(new Intent(this, CollabScreenActivity.class));
+            Intent collaboratorIntent = new Intent(this, CollaboratorViewActivity.class);
+            collaboratorIntent.putExtra("collection_id", entityID);
+            startActivity(collaboratorIntent);
             return true;
         }
         Log.d(TAG, "onOptionsItemSelected: default triggered");

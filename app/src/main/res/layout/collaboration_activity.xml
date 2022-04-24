@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/white">
 
     <TextView
         android:id="@+id/display_owner"
@@ -45,7 +46,6 @@
         android:textColorHint="#808080"
         android:textColor="@color/black"
         android:textSize="18sp"
-        android:textStyle="bold"
         android:background="@drawable/edit_text_border"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/btNewCollaborator"
