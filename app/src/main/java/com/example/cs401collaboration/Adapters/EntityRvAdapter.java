@@ -29,7 +29,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import java.util.ArrayList;
 
 /**
- * Adapter class for the recyclerview
+ * Adapter class for the Entity recyclerview
  *
  * @author Bryce Schooling
  */
