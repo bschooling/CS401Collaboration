@@ -9,7 +9,7 @@
 
     <android.widget.Toolbar
         android:id="@+id/item_title"
-        android:layout_width="409dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimary"
         android:minHeight="?attr/actionBarSize"
