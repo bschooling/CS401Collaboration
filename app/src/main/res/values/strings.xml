@@ -98,7 +98,6 @@
     <string name="login_string">Log In</string>
     <string name="default_collection_name">DEFAULT_NAME</string>
     <string name="default_collection_location">DEFAULT_LOCATION</string>
-    <!-- QRTest strings -->
     <string name="resultString">Result</string>
     <string name="defaultResult">Empty QR Code</string>
     <string name="scan_qr_text">Take an Image</string>
@@ -108,6 +107,12 @@
     <string name="camera_permission_denied">Denied permission to use Camera</string>
     <string name="select_image_string">Select an image</string>
     <string name="ioException_string">Image not found or IOException occurred</string>
+    <string name="scan_qr_button">Scan QR Code</string>
+    <string name="gen_qr_string">Generate QR Code</string>
+    <string name="encode_string">Input Text to Encode</string>
+    <string name="save_qr_button">Save QR Code</string>
+    <string name="input_title_hint">Input Title</string>
+
     <string name="collection_appbar_image">collection_appbar_image</string>
     <string name="collections">Collections</string>
     <string name="addcollectionfab">AddCollectionFAB</string>
