@@ -798,8 +798,14 @@ public class DatabaseService
         for (DocumentReference user : collection.getAuthUsers())
             authUserIds.add(user.getId());
 
-        db.collection("users").
-                whereIn("uid", authUserIds)
+        if (authUserIds.isEmpty())
+        {
+            successCB.onSuccess(new ArrayList<User>());
+            return;
+        }
+
+        db.collection("users")
+                .whereIn("uid", authUserIds)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
