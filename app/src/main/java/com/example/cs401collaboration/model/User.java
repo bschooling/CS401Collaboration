@@ -24,6 +24,9 @@ public class User
     /** User Name */
     private String name;
 
+    /** User Email */
+    private String email;
+
     /** Document References to User's Collections. */
     private ArrayList<DocumentReference> collections;
 
@@ -63,6 +66,15 @@ public class User
     public String getName()
     {
         return name;
+    }
+
+    /**
+     * Get Email.
+     * @return User Email.
+     */
+    public String getEmail()
+    {
+        return email;
     }
 
     /**
