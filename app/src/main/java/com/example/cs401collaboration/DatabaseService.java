@@ -964,4 +964,45 @@ public class DatabaseService
                 });
     }
 
+    /**
+     * Add Collab to Collection.
+     *
+     * User is added as a collab on $collection, and all parent collections upstream up to root.
+     *
+     * @param collection Collection to add collab on.
+     * @param userID UID of user to add as collab.
+     * @param successCB
+     * @param failureCB
+     */
+    public void addCollab (
+            Collection collection,
+            String userID,
+            OnSuccessListener<Boolean> successCB,
+            OnFailureListener failureCB
+    )
+    {
+        DocumentReference userDR = db.collection("users").document(userID);
+        if (!collection.getAuthUsers().contains(userDR))
+        {
+            // Add user as authorized user
+            DocumentReference collectionDR =
+                    db.collection("collections").document(collection.getDocID());
+            collectionDR.update("authUsers", FieldValue.arrayUnion(userDR));
+            // Climb upstream
+            if (collection.getParentCollection() == null) return;
+            collection.getParentCollection().get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    addCollab (
+                            task.getResult().toObject(Collection.class),
+                            userID,
+                            successCB,
+                            failureCB
+                    );
+                }
+            });
+        }
+    }
+
 }
