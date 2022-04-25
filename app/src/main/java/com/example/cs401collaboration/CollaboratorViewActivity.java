@@ -118,6 +118,7 @@ public class CollaboratorViewActivity extends AppCompatActivity {
                             collaboratorRvView = findViewById(R.id.rvCollaborator);
                             CollaboratorRvAdapter collaboratorRvAdapter = new CollaboratorRvAdapter(
                                     CollaboratorViewActivity.this,
+                                    currCollection,
                                     users,
                                     currentFbUser.getUid(),
                                     isOwner);
@@ -135,7 +136,6 @@ public class CollaboratorViewActivity extends AppCompatActivity {
                 public void onFailure(@NonNull Exception e) {}
             });
         }
-        //TODO set Add Collaborator
         btNewCollab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

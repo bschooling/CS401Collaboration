@@ -13,7 +13,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.cs401collaboration.DatabaseService;
 import com.example.cs401collaboration.R;
+import com.example.cs401collaboration.model.Collection;
 import com.example.cs401collaboration.model.User;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.ArrayList;
 
@@ -25,6 +28,7 @@ import java.util.ArrayList;
 public class CollaboratorRvAdapter extends RecyclerView.Adapter<CollaboratorRvAdapter.Viewholder> {
 
     private Context context;
+    private Collection currCollection;
     private ArrayList<User> CollaboratorArrayList;
     private DatabaseService mDB;
     private String currentUserID;
@@ -32,8 +36,9 @@ public class CollaboratorRvAdapter extends RecyclerView.Adapter<CollaboratorRvAd
 
     /** Initialize the data for the adapter
      * Collection ArrayList holds the data to populate views with */
-    public CollaboratorRvAdapter(Context context, ArrayList<User> CollaboratorArrayList, String currentUserID, Boolean isOwner) {
+    public CollaboratorRvAdapter(Context context, Collection currCollection, ArrayList<User> CollaboratorArrayList, String currentUserID, Boolean isOwner) {
         this.context = context;
+        this.currCollection = currCollection;
         this.CollaboratorArrayList = CollaboratorArrayList;
         this.currentUserID = currentUserID;
         this.isOwner = isOwner;
@@ -54,7 +59,7 @@ public class CollaboratorRvAdapter extends RecyclerView.Adapter<CollaboratorRvAd
     @Override
     public void onBindViewHolder(@NonNull CollaboratorRvAdapter.Viewholder holder, int position) {
         // Get User
-        User user = CollaboratorArrayList.get(position);
+        User user = CollaboratorArrayList.get(holder.getAdapterPosition());
 
         // Populate UI
         holder.tvCollaboratorName.setText(user.getName());
@@ -65,6 +70,23 @@ public class CollaboratorRvAdapter extends RecyclerView.Adapter<CollaboratorRvAd
                 holder.btDelete.setVisibility(View.GONE);
             }
         }
+
+        holder.btDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mDB.removeCollab(currCollection, CollaboratorArrayList.get(holder.getAdapterPosition()).getUid(), new OnSuccessListener<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean aBoolean) {
+
+                    }
+                }, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                    }
+                });
+            }
+        });
     }
 
     /** gets number of views to create */
@@ -83,6 +105,7 @@ public class CollaboratorRvAdapter extends RecyclerView.Adapter<CollaboratorRvAd
             tvCollaboratorEmail = collaboratorView.findViewById(R.id.collaborator_email);
             //TODO Add functionality to Delete button
             btDelete = collaboratorView.findViewById(R.id.collaborator_delete);
+
         }
     }
 }
