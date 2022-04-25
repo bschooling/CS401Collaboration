@@ -92,7 +92,6 @@ public class ItemViewActivity extends AppCompatActivity {
         btQr.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO connect QR button
                 Intent qrViewIntent = new Intent(getBaseContext(), QRViewActivity.class);
                 String inputTitle = itemTitle.getTitle().toString();
 

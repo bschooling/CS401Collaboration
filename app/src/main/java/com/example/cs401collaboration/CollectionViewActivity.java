@@ -214,7 +214,6 @@ public class CollectionViewActivity extends AppCompatActivity {
         if (item.getItemId() == R.id.miCollectionCollabScreen)
         {
             Log.d(TAG, "onOptionsItemSelected: to collab screen option selected");
-            // TODO: @bryce, send to collab screen below
             Intent collaboratorIntent = new Intent(this, CollaboratorViewActivity.class);
             collaboratorIntent.putExtra("collection_id", entityID);
             startActivity(collaboratorIntent);
