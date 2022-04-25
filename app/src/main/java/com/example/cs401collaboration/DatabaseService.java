@@ -96,6 +96,35 @@ public class DatabaseService
     }
 
     /**
+     * Get User Model Object for User Given UID.
+     * @param uid UID of User.
+     * @param onSuccess On Success, passed User Model Object.
+     * @param onFailure On Failure, passed task exception.
+     */
+    public void getUser (
+            String uid,
+            OnSuccessListener<User> onSuccess,
+            OnFailureListener onFailure
+    )
+    {
+        db.collection("users")
+                .document(uid)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful())
+                        {
+                            Log.d(TAG, "getUser: task success");
+                            onSuccess.onSuccess(task.getResult().toObject(User.class));
+                        }
+                        else
+                            Log.d(TAG, "getUser: task failed... " + task.getException());
+                    }
+                });
+    }
+
+    /**
      * Get owned collections for a given parent collection.
      *
      * Parent collection is provided as a DocRef. If it is null, home collections are queried.
@@ -769,8 +798,14 @@ public class DatabaseService
         for (DocumentReference user : collection.getAuthUsers())
             authUserIds.add(user.getId());
 
-        db.collection("users").
-                whereIn("uid", authUserIds)
+        if (authUserIds.isEmpty())
+        {
+            successCB.onSuccess(new ArrayList<User>());
+            return;
+        }
+
+        db.collection("users")
+                .whereIn("uid", authUserIds)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
