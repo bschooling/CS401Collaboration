@@ -103,7 +103,6 @@ public class CollaboratorRvAdapter extends RecyclerView.Adapter<CollaboratorRvAd
             super(collaboratorView);
             tvCollaboratorName = collaboratorView.findViewById(R.id.collaborator_name);
             tvCollaboratorEmail = collaboratorView.findViewById(R.id.collaborator_email);
-            //TODO Add functionality to Delete button
             btDelete = collaboratorView.findViewById(R.id.collaborator_delete);
 
         }
