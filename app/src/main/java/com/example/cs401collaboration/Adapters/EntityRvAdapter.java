@@ -274,7 +274,6 @@ public class EntityRvAdapter extends RecyclerView.Adapter<EntityRvAdapter.Viewho
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 // Check for Collection or Item
                                 if (entity.getType().equals(Entity.TYPE_COLLECTION)) {
-                                    // TODO Delete collection
                                     // DB call for delete Collection
                                     mDB.deleteCollection(entity.getDocID(), new OnSuccessListener<Boolean>() {
                                         @Override
