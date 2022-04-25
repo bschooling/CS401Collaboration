@@ -28,7 +28,7 @@ public class Collection
     private String location;
 
     /** Image URL */
-    private String imageResourceID;
+    private String imageResourceID = "placeholder.png";
 
     /** User owner of collection, as DocumentReference. */
     private DocumentReference owner;
@@ -171,6 +171,16 @@ public class Collection
     public String getImageResourceID ()
     {
         return imageResourceID;
+    }
+
+    /**
+     * Set Image Resource ID.
+     * @param imageResourceID Image Resource ID.
+     * @return
+     */
+    public void setImageResourceID (String imageResourceID)
+    {
+        this.imageResourceID = imageResourceID;
     }
 
     /**

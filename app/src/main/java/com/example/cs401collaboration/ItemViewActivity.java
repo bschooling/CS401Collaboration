@@ -27,6 +27,9 @@ public class ItemViewActivity extends AppCompatActivity {
     /* Database */
     private DatabaseService mDB;
 
+    /* Storage */
+    StorageService mStorage = StorageService.getInstance();
+
     // UI elements
     private TextView itemDescription, itemLocation;
     private ImageView itemImage;
@@ -116,8 +119,18 @@ public class ItemViewActivity extends AppCompatActivity {
             public void onSuccess(Item item) {
                 itemDescription.setText(item.getDescription());
                 itemLocation.setText(item.getLocation());
-                //TODO change hardcoded image call
-                itemImage.setImageResource(android.R.drawable.ic_menu_gallery);
+                // Set Image
+                mStorage.downloadResource(item.getImageResourceID(), new OnSuccessListener<byte[]>() {
+                    @Override
+                    public void onSuccess(byte[] bytes) {
+                        itemImage.setImageBitmap(mStorage.toBitmap(bytes));
+                    }
+                }, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                    }
+                });
                 itemTitle.setTitle(item.getName());
             }
         }, new OnFailureListener() {

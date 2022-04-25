@@ -20,6 +20,7 @@ import com.example.cs401collaboration.CollectionViewActivity;
 import com.example.cs401collaboration.DatabaseService;
 import com.example.cs401collaboration.ItemViewActivity;
 import com.example.cs401collaboration.R;
+import com.example.cs401collaboration.StorageService;
 import com.example.cs401collaboration.model.Collection;
 import com.example.cs401collaboration.model.Entity;
 import com.example.cs401collaboration.model.Item;
@@ -38,6 +39,7 @@ public class EntityRvAdapter extends RecyclerView.Adapter<EntityRvAdapter.Viewho
     private Context context;
     private ArrayList<Entity> entityArrayList;
     private DatabaseService mDB;
+    private StorageService mStorage = StorageService.getInstance();
 
     /** Initialize the data for the adapter
      * Collection ArrayList holds the data to populate views with */
@@ -66,8 +68,19 @@ public class EntityRvAdapter extends RecyclerView.Adapter<EntityRvAdapter.Viewho
         // Populating UI
         holder.entityFirstLine.setText(entity.getFirstLine());
         holder.entitySecondLine.setText(entity.getSecondLine());
-        //TODO swap hardcoded image for image from collection
-        holder.entityImage.setImageResource(android.R.drawable.ic_menu_gallery);
+
+        // Set Image
+        mStorage.downloadResource(entity.getImageResourceID(), new OnSuccessListener<byte[]>() {
+            @Override
+            public void onSuccess(byte[] bytes) {
+                holder.entityImage.setImageBitmap(mStorage.toBitmap(bytes));
+            }
+        }, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+
+            }
+        });
 
         // Setting Label
         if (entity.getType().equals(Entity.TYPE_COLLECTION)) {

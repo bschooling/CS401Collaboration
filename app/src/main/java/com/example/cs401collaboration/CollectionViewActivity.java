@@ -34,6 +34,9 @@ public class CollectionViewActivity extends AppCompatActivity {
     /* Database */
     private DatabaseService mDB;
 
+    /* Storage */
+    private StorageService mStorage = StorageService.getInstance();
+
     /* UI Element Handlers */
     private TextView mCollectionLocation;
     private TextView mCollectionDescription;
@@ -115,6 +118,19 @@ public class CollectionViewActivity extends AppCompatActivity {
                 mCollectionDescription.setText(collection.getDescription());
                 mCollectionBar.setTitle(collection.getName());
                 mCollectionImage.setImageResource(android.R.drawable.ic_menu_gallery);
+
+                // Set Image
+                mStorage.downloadResource(collection.getImageResourceID(), new OnSuccessListener<byte[]>() {
+                    @Override
+                    public void onSuccess(byte[] bytes) {
+                        mCollectionImage.setImageBitmap(mStorage.toBitmap(bytes));
+                    }
+                }, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                    }
+                });
 
                 mDB.getAllEntitiesForCollection(entityID, new OnSuccessListener<ArrayList<Entity>>() {
                     @Override
