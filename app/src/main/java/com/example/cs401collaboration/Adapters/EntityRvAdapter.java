@@ -256,6 +256,18 @@ public class EntityRvAdapter extends RecyclerView.Adapter<EntityRvAdapter.Viewho
                                 // Check for Collection or Item
                                 if (entity.getType().equals(Entity.TYPE_COLLECTION)) {
                                     // TODO Delete collection
+                                    // DB call for delete Collection
+                                    mDB.deleteCollection(entity.getDocID(), new OnSuccessListener<Boolean>() {
+                                        @Override
+                                        public void onSuccess(Boolean aBoolean) {
+
+                                        }
+                                    }, new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+
+                                        }
+                                    });
                                 } else if (entity.getType().equals(Entity.TYPE_ITEM)) {
                                     // DB call for delete item
                                     mDB.deleteItem(entity.getDocID(), new OnSuccessListener<Boolean>() {
@@ -266,10 +278,12 @@ public class EntityRvAdapter extends RecyclerView.Adapter<EntityRvAdapter.Viewho
                                         public void onFailure(@NonNull Exception e) { }
                                     });
 
-                                    entityArrayList.remove(holder.getAdapterPosition());
-                                    notifyItemRemoved(holder.getAdapterPosition());
-                                    notifyItemRangeChanged(holder.getAdapterPosition(), entityArrayList.size());
                                 }
+
+                                // Remove from ArrayList and notify RV
+                                entityArrayList.remove(holder.getAdapterPosition());
+                                notifyItemRemoved(holder.getAdapterPosition());
+                                notifyItemRangeChanged(holder.getAdapterPosition(), entityArrayList.size());
 
                                 dialogInterface.dismiss();
                                 editDialog.dismiss();
