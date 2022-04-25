@@ -992,16 +992,62 @@ public class DatabaseService
             if (collection.getParentCollection() == null) return;
             collection.getParentCollection().get()
                 .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                    addCollab (
-                            task.getResult().toObject(Collection.class),
-                            userID,
-                            successCB,
-                            failureCB
-                    );
-                }
-            });
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        addCollab (
+                                task.getResult().toObject(Collection.class),
+                                userID,
+                                successCB,
+                                failureCB
+                        );
+                    }
+                });
+        }
+    }
+
+    /**
+     * Remove Collab from Collection.
+     *
+     * User is removed as collab from $collection, and all children collections downstream from there.
+     *
+     * @param collection Collection to remove collab from.
+     * @param userID UID of user to remove as collab.
+     * @param successCB
+     * @param failureCB
+     */
+    public void removeCollab (
+            Collection collection,
+            String userID,
+            OnSuccessListener<Boolean> successCB,
+            OnFailureListener failureCB
+    )
+    {
+        /*
+            If user in auth list of collection here, remove
+            then get all child collections, and call same function on each
+         */
+        DocumentReference userDR = db.collection("users").document(userID);
+        if (collection.getAuthUsers().contains(userDR))
+        {
+            // Add user as authorized user
+            DocumentReference collectionDR =
+                    db.collection("collections").document(collection.getDocID());
+            collectionDR.update("authUsers", FieldValue.arrayRemove(userDR));
+            // Trickle downstream
+            for (DocumentReference childCollectionDR : collection.getChildrenCollections())
+            {
+                getCollection(childCollectionDR.getId(), new OnSuccessListener<Collection>() {
+                    @Override
+                    public void onSuccess(Collection collection) {
+                        removeCollab(collection, userID, successCB, failureCB);
+                    }
+                }, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                    }
+                });
+            }
         }
     }
 
