@@ -786,6 +786,143 @@ public class DatabaseService
                 });
     }
 
+    private void deleteAllItemsForCollection (
+            String collectionID,
+            OnSuccessListener<Boolean> successCB,
+            OnFailureListener failureCB
+    )
+    {
+        DocumentReference parentCollectionDR =
+                db.collection("collections").document(collectionID);
+        db.collection("items")
+                .whereEqualTo("parentCollection", parentCollectionDR)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful())
+                        {
+                            Log.d ( TAG,
+                                    "deleteAllItemsForCollection task successful... deleting now"
+                            );
+                            for (QueryDocumentSnapshot document : task.getResult())
+                                document.getReference().delete();
+                        }
+                        else
+                        {
+                            Log.d ( TAG,
+                                    "deleteAllItemsForCollection task unsuccessful " +
+                                            task.getException()
+                            );
+                            failureCB.onFailure(task.getException());
+                        }
+                    }
+                });
+    }
+
+    /**
+     * Helper for Collection Deletion.
+     *
+     * Deletes all items in collection, and collection itself.
+     * Then called recursively on all childCollections.
+     *
+     * @param collection Collection to delete.
+     * @param successCB On Success.
+     * @param failureCB On Failure.
+     */
+    private void deleteCollectionHelper (
+            Collection collection,
+            OnSuccessListener<Boolean> successCB,
+            OnFailureListener failureCB
+    )
+    {
+        Log.d(TAG, "deleteCollectionHelper: on collection id=" + collection.getDocID());
+        // Delete Items
+        deleteAllItemsForCollection(collection.getDocID(), new OnSuccessListener<Boolean>() {
+            @Override
+            public void onSuccess(Boolean aBoolean) {
+
+            }
+        }, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                failureCB.onFailure(new Exception("ItemsDeletionFailure"));
+            }
+        });
+        // Delete Collection
+        db.collection("collections").document(collection.getDocID()).delete();
+        // Call Deletion on Children Collections
+        for (DocumentReference childCollectionDR : collection.getChildrenCollections())
+        {
+            // deleteCollectionHelper(childCollectionDR.getId(), successCB, failureCB);
+            childCollectionDR.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if (task.isSuccessful())
+                    {
+                        deleteCollectionHelper(task.getResult().toObject(Collection.class), successCB, failureCB);
+                    }
+                }
+            });
+        }
+    }
+
+    /**
+     * Delete Collection.
+     *
+     * Adjusts childCollections of parentCollection if applicable
+     * (not so for root collection), then calls deleteCollectionHelper.
+     *
+     * @param collectionID Collection ID.
+     * @param successCB On Success. Passed dummy true Boolean.
+     * @param failureCB On Failure. Passed exception.
+     */
+    public void deleteCollection (
+            String collectionID,
+            OnSuccessListener<Boolean> successCB,
+            OnFailureListener failureCB
+    )
+    {
+        getCollection(collectionID, new OnSuccessListener<Collection>() {
+            @Override
+            public void onSuccess(Collection collection) {
+                if (!(collection.getOwner().getId()).equals(auth.getUid()))
+                    failureCB.onFailure(new Exception("InvalidPermissionToDelete"));
+
+                DocumentReference collectionDR =
+                        db.collection("collections").document(collectionID);
+
+                // Adjust parent
+                if (collection.getParentCollection() != null)
+                {
+                    collection.getParentCollection()
+                            .update (
+                                    "childCollections",
+                                    FieldValue.arrayRemove(collectionDR)
+                            );
+                }
+                // Deletion
+                deleteCollectionHelper(collection, new OnSuccessListener<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean aBoolean) {
+
+                    }
+                }, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                    }
+                });
+            }
+        }, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d(TAG, "getCollection: failure trying to retrieve collection for deletion");
+                failureCB.onFailure(e);
+            }
+        });
+    }
+
     /* Collaboration */
 
     public void getCollabs (
@@ -825,6 +962,93 @@ public class DatabaseService
                         }
                     }
                 });
+    }
+
+    /**
+     * Add Collab to Collection.
+     *
+     * User is added as a collab on $collection, and all parent collections upstream up to root.
+     *
+     * @param collection Collection to add collab on.
+     * @param userID UID of user to add as collab.
+     * @param successCB
+     * @param failureCB
+     */
+    public void addCollab (
+            Collection collection,
+            String userID,
+            OnSuccessListener<Boolean> successCB,
+            OnFailureListener failureCB
+    )
+    {
+        DocumentReference userDR = db.collection("users").document(userID);
+        if (!collection.getAuthUsers().contains(userDR))
+        {
+            // Add user as authorized user
+            DocumentReference collectionDR =
+                    db.collection("collections").document(collection.getDocID());
+            collectionDR.update("authUsers", FieldValue.arrayUnion(userDR));
+            // Climb upstream
+            if (collection.getParentCollection() == null) return;
+            collection.getParentCollection().get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        addCollab (
+                                task.getResult().toObject(Collection.class),
+                                userID,
+                                successCB,
+                                failureCB
+                        );
+                    }
+                });
+        }
+    }
+
+    /**
+     * Remove Collab from Collection.
+     *
+     * User is removed as collab from $collection, and all children collections downstream from there.
+     *
+     * @param collection Collection to remove collab from.
+     * @param userID UID of user to remove as collab.
+     * @param successCB
+     * @param failureCB
+     */
+    public void removeCollab (
+            Collection collection,
+            String userID,
+            OnSuccessListener<Boolean> successCB,
+            OnFailureListener failureCB
+    )
+    {
+        /*
+            If user in auth list of collection here, remove
+            then get all child collections, and call same function on each
+         */
+        DocumentReference userDR = db.collection("users").document(userID);
+        if (collection.getAuthUsers().contains(userDR))
+        {
+            // Add user as authorized user
+            DocumentReference collectionDR =
+                    db.collection("collections").document(collection.getDocID());
+            collectionDR.update("authUsers", FieldValue.arrayRemove(userDR));
+            // Trickle downstream
+            for (DocumentReference childCollectionDR : collection.getChildrenCollections())
+            {
+                getCollection(childCollectionDR.getId(), new OnSuccessListener<Collection>() {
+                    @Override
+                    public void onSuccess(Collection collection) {
+                        removeCollab(collection, userID, successCB, failureCB);
+                    }
+                }, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                    }
+                });
+            }
+        }
     }
 
 }
