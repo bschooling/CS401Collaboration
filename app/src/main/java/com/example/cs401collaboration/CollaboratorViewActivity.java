@@ -55,6 +55,7 @@ public class CollaboratorViewActivity extends AppCompatActivity {
 
     // Recycler view
     private RecyclerView collaboratorRvView;
+    private CollaboratorRvAdapter collaboratorRvAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,7 +117,7 @@ public class CollaboratorViewActivity extends AppCompatActivity {
 
                             // Populate retrieved collections on home screen rv
                             collaboratorRvView = findViewById(R.id.rvCollaborator);
-                            CollaboratorRvAdapter collaboratorRvAdapter = new CollaboratorRvAdapter(
+                            collaboratorRvAdapter = new CollaboratorRvAdapter(
                                     CollaboratorViewActivity.this,
                                     currCollection,
                                     users,
@@ -152,6 +153,7 @@ public class CollaboratorViewActivity extends AppCompatActivity {
                             mDB.addCollab(currCollection, user.getUid(), new OnSuccessListener<Boolean>() {
                                 @Override
                                 public void onSuccess(Boolean aBoolean) {
+                                    collaboratorRvAdapter.addUserToAdapter(user);
                                     Toast.makeText (
                                             CollaboratorViewActivity.this,
                                             "User Added",

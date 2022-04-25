@@ -47,6 +47,11 @@ public class CollaboratorRvAdapter extends RecyclerView.Adapter<CollaboratorRvAd
         this.isOwner = isOwner;
     }
 
+    // Add a user to the display
+    public void addUserToAdapter(User newUser){
+        CollaboratorArrayList.add(newUser);
+        notifyDataSetChanged();
+    }
 
     /** create the new views */
     @NonNull
@@ -136,4 +141,5 @@ public class CollaboratorRvAdapter extends RecyclerView.Adapter<CollaboratorRvAd
 
         }
     }
+
 }
