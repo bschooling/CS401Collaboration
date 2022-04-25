@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -49,6 +50,9 @@ public class CollaboratorViewActivity extends AppCompatActivity {
     */
     private Boolean isOwner = false;
 
+    // Current collection
+    Collection currCollection;
+
     // Recycler view
     private RecyclerView collaboratorRvView;
 
@@ -87,6 +91,7 @@ public class CollaboratorViewActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(Collection collection) {
                     // Get collection owner
+                    currCollection = collection;
                     mDB.getUser(collection.getOwner().getId(), new OnSuccessListener<User>() {
                         @Override
                         public void onSuccess(User user) {
@@ -131,6 +136,44 @@ public class CollaboratorViewActivity extends AppCompatActivity {
             });
         }
         //TODO set Add Collaborator
+        btNewCollab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mDB.getUserByEmail(btNewCollab.getText().toString(), new OnSuccessListener<User>() {
+                    @Override
+                    public void onSuccess(User user) {
+                        if (user == null){
+                            Toast.makeText (
+                                    CollaboratorViewActivity.this,
+                                    "Can not add User: No user found",
+                                    Toast.LENGTH_LONG
+                            ).show();
+                        } else {
+                            mDB.addCollab(currCollection, user.getUid(), new OnSuccessListener<Boolean>() {
+                                @Override
+                                public void onSuccess(Boolean aBoolean) {
+                                    Toast.makeText (
+                                            CollaboratorViewActivity.this,
+                                            "User Added",
+                                            Toast.LENGTH_LONG
+                                    ).show();
+                                }
+                            }, new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+
+                                }
+                            });
+                        }
+                    }
+                }, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                    }
+                });
+            }
+        });
 
     }
 }
