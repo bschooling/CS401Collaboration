@@ -75,6 +75,7 @@ public class DatabaseService
         Map<String, Object> user = new HashMap<>();
         user.put("uid", uid);
         user.put("name", name);
+        user.put("email", auth.getCurrentUser().getEmail());
 
         db.collection("users")
             .document(uid)
@@ -509,7 +510,6 @@ public class DatabaseService
                 getItemsForCollection(collectionID, new OnSuccessListener<ArrayList<Item>>() {
                     @Override
                     public void onSuccess(ArrayList<Item> items) {
-                        Log.d (TAG, "I have all entities.");
                         Log.d (TAG, "collections = " + collections.size() + " items = " + items.size());
                         ArrayList<Entity> ents = new ArrayList<>();
                         for (Collection collection : collections)
@@ -753,6 +753,41 @@ public class DatabaseService
                     {
                         Log.w(TAG, "createCollection: error adding document ", e);
                         failureCB.onFailure(e);
+                    }
+                });
+    }
+
+    /* Collaboration */
+
+    public void getCollabs (
+            Collection collection,
+            OnSuccessListener<ArrayList<User>> successCB,
+            OnFailureListener failureCB
+    )
+    {
+        ArrayList<String> authUserIds = new ArrayList<>();
+        for (DocumentReference user : collection.getAuthUsers())
+            authUserIds.add(user.getId());
+
+        db.collection("users").
+                whereIn("uid", authUserIds)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful())
+                        {
+                            ArrayList<User> users = new ArrayList<>();
+                            Log.d(TAG, "getCollabs: Collabs retrieved.");
+                            for (QueryDocumentSnapshot document : task.getResult())
+                                users.add(document.toObject(User.class));
+                            successCB.onSuccess(users);
+                        }
+                        else
+                        {
+                            Log.d(TAG, "getCollabs: task failed getting collabs " + task.getException());
+                            failureCB.onFailure(task.getException());
+                        }
                     }
                 });
     }
