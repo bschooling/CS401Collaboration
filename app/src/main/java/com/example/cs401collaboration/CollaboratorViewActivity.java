@@ -2,6 +2,7 @@ package com.example.cs401collaboration;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -40,7 +41,13 @@ public class CollaboratorViewActivity extends AppCompatActivity {
     private Button btNewCollab;
 
     // Logged in user
-    private FirebaseUser currentUser;
+    private FirebaseUser currentFbUser;
+
+    /*Boolean representation of whether or not logged in user is the owner of collection
+    * False by default
+    * True represent current user is owner
+    */
+    private Boolean isOwner = false;
 
     // Recycler view
     private RecyclerView collaboratorRvView;
@@ -59,6 +66,10 @@ public class CollaboratorViewActivity extends AppCompatActivity {
         displayOwnerEmail = findViewById(R.id.tvOwnerEmail);
         etNewCollab = findViewById(R.id.etNewCollaborator);
         btNewCollab = findViewById(R.id.btNewCollaborator);
+
+        // Button and EditText hidden by Default
+        btNewCollab.setVisibility(View.GONE);
+        etNewCollab.setVisibility(View.GONE);
     }
 
     @Override
@@ -68,19 +79,24 @@ public class CollaboratorViewActivity extends AppCompatActivity {
         Intent intent = getIntent();
 
         // Get current logged in user
-        currentUser = Objects.requireNonNull(mAuth.getCurrentUser(), "User cant be null");
+        currentFbUser = Objects.requireNonNull(mAuth.getCurrentUser(), "User cant be null");
 
         String currentCollection = intent.getStringExtra("collection_id");
         if (currentCollection != null){
             mDB.getCollection(currentCollection, new OnSuccessListener<Collection>() {
                 @Override
                 public void onSuccess(Collection collection) {
-                    // TODO set display owner with collection.getOwner
+                    // Get collection owner
                     mDB.getUser(collection.getOwner().getId(), new OnSuccessListener<User>() {
                         @Override
                         public void onSuccess(User user) {
                             displayOwnerName.setText(user.getName());
                             displayOwnerEmail.setText(user.getEmail());
+                            if (user.getUid().equals(currentFbUser.getUid())){
+                                btNewCollab.setVisibility(View.VISIBLE);
+                                etNewCollab.setVisibility(View.VISIBLE);
+                                isOwner = true;
+                            }
                         }
                     }, new OnFailureListener() {
                         @Override
@@ -95,7 +111,11 @@ public class CollaboratorViewActivity extends AppCompatActivity {
 
                             // Populate retrieved collections on home screen rv
                             collaboratorRvView = findViewById(R.id.rvCollaborator);
-                            CollaboratorRvAdapter collaboratorRvAdapter = new CollaboratorRvAdapter(CollaboratorViewActivity.this, users, null);
+                            CollaboratorRvAdapter collaboratorRvAdapter = new CollaboratorRvAdapter(
+                                    CollaboratorViewActivity.this,
+                                    users,
+                                    currentFbUser.getUid(),
+                                    isOwner);
                             LinearLayoutManager linearLayoutManager = new LinearLayoutManager(CollaboratorViewActivity.this);
                             collaboratorRvView.setLayoutManager(linearLayoutManager);
                             collaboratorRvView.setAdapter(collaboratorRvAdapter);
@@ -110,7 +130,7 @@ public class CollaboratorViewActivity extends AppCompatActivity {
                 public void onFailure(@NonNull Exception e) {}
             });
         }
-
+        //TODO set Add Collaborator
 
     }
 }

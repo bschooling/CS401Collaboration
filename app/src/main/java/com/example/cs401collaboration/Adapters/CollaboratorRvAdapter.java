@@ -28,13 +28,15 @@ public class CollaboratorRvAdapter extends RecyclerView.Adapter<CollaboratorRvAd
     private ArrayList<User> CollaboratorArrayList;
     private DatabaseService mDB;
     private String currentUserID;
+    private Boolean isOwner;
 
     /** Initialize the data for the adapter
      * Collection ArrayList holds the data to populate views with */
-    public CollaboratorRvAdapter(Context context, ArrayList<User> CollaboratorArrayList, String currentUserID) {
+    public CollaboratorRvAdapter(Context context, ArrayList<User> CollaboratorArrayList, String currentUserID, Boolean isOwner) {
         this.context = context;
         this.CollaboratorArrayList = CollaboratorArrayList;
         this.currentUserID = currentUserID;
+        this.isOwner = isOwner;
     }
 
 
@@ -58,6 +60,11 @@ public class CollaboratorRvAdapter extends RecyclerView.Adapter<CollaboratorRvAd
         holder.tvCollaboratorName.setText(user.getName());
         holder.tvCollaboratorEmail.setText(user.getEmail());
 
+        if (!isOwner) {
+            if (!user.getUid().equals(currentUserID)){
+                holder.btDelete.setVisibility(View.GONE);
+            }
+        }
     }
 
     /** gets number of views to create */
@@ -74,6 +81,7 @@ public class CollaboratorRvAdapter extends RecyclerView.Adapter<CollaboratorRvAd
             super(collaboratorView);
             tvCollaboratorName = collaboratorView.findViewById(R.id.collaborator_name);
             tvCollaboratorEmail = collaboratorView.findViewById(R.id.collaborator_email);
+            //TODO Add functionality to Delete button
             btDelete = collaboratorView.findViewById(R.id.collaborator_delete);
         }
     }
