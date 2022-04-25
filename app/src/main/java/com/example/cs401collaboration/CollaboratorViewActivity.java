@@ -139,7 +139,7 @@ public class CollaboratorViewActivity extends AppCompatActivity {
         btNewCollab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mDB.getUserByEmail(btNewCollab.getText().toString(), new OnSuccessListener<User>() {
+                mDB.getUserByEmail(etNewCollab.getText().toString(), new OnSuccessListener<User>() {
                     @Override
                     public void onSuccess(User user) {
                         if (user == null){

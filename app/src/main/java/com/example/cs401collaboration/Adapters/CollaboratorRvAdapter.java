@@ -1,7 +1,9 @@
 package com.example.cs401collaboration.Adapters;
 
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.cs401collaboration.DatabaseService;
 import com.example.cs401collaboration.R;
 import com.example.cs401collaboration.model.Collection;
+import com.example.cs401collaboration.model.Entity;
 import com.example.cs401collaboration.model.User;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -74,17 +77,43 @@ public class CollaboratorRvAdapter extends RecyclerView.Adapter<CollaboratorRvAd
         holder.btDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mDB.removeCollab(currCollection, CollaboratorArrayList.get(holder.getAdapterPosition()).getUid(), new OnSuccessListener<Boolean>() {
-                    @Override
-                    public void onSuccess(Boolean aBoolean) {
+                AlertDialog.Builder deleteWarning = new AlertDialog.Builder(context);
 
+                deleteWarning.setMessage(R.string.confirm_delete);
+                deleteWarning.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        mDB.removeCollab(currCollection, CollaboratorArrayList.get(holder.getAdapterPosition()).getUid(), new OnSuccessListener<Boolean>() {
+                            @Override
+                            public void onSuccess(Boolean aBoolean) {
+
+
+                            }
+                        }, new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+
+                            }
+                        });
+
+                        // Remove from ArrayList and notify RV
+                        CollaboratorArrayList.remove(holder.getAdapterPosition());
+                        notifyItemRemoved(holder.getAdapterPosition());
+                        notifyItemRangeChanged(holder.getAdapterPosition(), CollaboratorArrayList.size());
+
+                        dialogInterface.dismiss();
                     }
-                }, new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
 
+                });
+                deleteWarning.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
                     }
                 });
+
+                AlertDialog warning = deleteWarning.create();
+                warning.show();
             }
         });
     }
