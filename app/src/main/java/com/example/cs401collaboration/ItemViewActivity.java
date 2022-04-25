@@ -14,10 +14,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
+import com.example.cs401collaboration.glide.GlideApp;
 import com.example.cs401collaboration.model.Entity;
 import com.example.cs401collaboration.model.Item;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 /**
  * @author Bryce Schooling
@@ -119,18 +122,6 @@ public class ItemViewActivity extends AppCompatActivity {
             public void onSuccess(Item item) {
                 itemDescription.setText(item.getDescription());
                 itemLocation.setText(item.getLocation());
-                // Set Image
-                mStorage.downloadResource(item.getImageResourceID(), new OnSuccessListener<byte[]>() {
-                    @Override
-                    public void onSuccess(byte[] bytes) {
-                        itemImage.setImageBitmap(mStorage.toBitmap(bytes));
-                    }
-                }, new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-
-                    }
-                });
                 itemTitle.setTitle(item.getName());
             }
         }, new OnFailureListener() {
@@ -143,5 +134,15 @@ public class ItemViewActivity extends AppCompatActivity {
                 ).show();
             }
         });
+
+        // Set Image
+        String resourceID = intent.getStringExtra("getImageResourceID");
+        if (resourceID == null) resourceID = "placeholder.png";
+        StorageReference resourceSR =
+                FirebaseStorage.getInstance().getReference().child(resourceID);
+
+        GlideApp.with(ItemViewActivity.this)
+                .load(resourceSR)
+                .into(itemImage);
     }
 }

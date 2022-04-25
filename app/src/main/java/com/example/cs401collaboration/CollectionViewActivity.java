@@ -17,12 +17,15 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.cs401collaboration.glide.GlideApp;
 import com.example.cs401collaboration.model.Collection;
 import com.example.cs401collaboration.model.Entity;
 import com.example.cs401collaboration.Adapters.EntityRvAdapter;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 
@@ -54,7 +57,6 @@ public class CollectionViewActivity extends AppCompatActivity {
     private RecyclerView entityRvView;
 
     private final String TAG = "CollectionViewActivity";
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,20 +119,6 @@ public class CollectionViewActivity extends AppCompatActivity {
                 mCollectionLocation.setText(collection.getLocation());
                 mCollectionDescription.setText(collection.getDescription());
                 mCollectionBar.setTitle(collection.getName());
-                mCollectionImage.setImageResource(android.R.drawable.ic_menu_gallery);
-
-                // Set Image
-                mStorage.downloadResource(collection.getImageResourceID(), new OnSuccessListener<byte[]>() {
-                    @Override
-                    public void onSuccess(byte[] bytes) {
-                        mCollectionImage.setImageBitmap(mStorage.toBitmap(bytes));
-                    }
-                }, new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-
-                    }
-                });
 
                 mDB.getAllEntitiesForCollection(entityID, new OnSuccessListener<ArrayList<Entity>>() {
                     @Override
@@ -142,8 +130,6 @@ public class CollectionViewActivity extends AppCompatActivity {
                         GridLayoutManager gridLayoutManager = new GridLayoutManager(CollectionViewActivity.this, 2);
                         entityRvView.setLayoutManager(gridLayoutManager);
                         entityRvView.setAdapter(entityRvAdapter);
-
-
                     }
                 }, new OnFailureListener() {
                     @Override
@@ -166,6 +152,16 @@ public class CollectionViewActivity extends AppCompatActivity {
                 ).show();
             }
         });
+
+        // Set Image
+        String resourceID = getIntent().getStringExtra("getImageResourceID");
+        if (resourceID == null) resourceID = "placeholder.png";
+        StorageReference resourceSR =
+                FirebaseStorage.getInstance().getReference().child(resourceID);
+
+        GlideApp.with(CollectionViewActivity.this)
+                .load(resourceSR)
+                .into(mCollectionImage);
 
     }
 

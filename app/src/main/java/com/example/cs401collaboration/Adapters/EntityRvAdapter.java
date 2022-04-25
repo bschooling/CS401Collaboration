@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.cs401collaboration.CollectionViewActivity;
 import com.example.cs401collaboration.DatabaseService;
+import com.example.cs401collaboration.glide.GlideApp;
 import com.example.cs401collaboration.ItemViewActivity;
 import com.example.cs401collaboration.R;
 import com.example.cs401collaboration.StorageService;
@@ -26,6 +27,8 @@ import com.example.cs401collaboration.model.Entity;
 import com.example.cs401collaboration.model.Item;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 
@@ -70,17 +73,16 @@ public class EntityRvAdapter extends RecyclerView.Adapter<EntityRvAdapter.Viewho
         holder.entitySecondLine.setText(entity.getSecondLine());
 
         // Set Image
-        mStorage.downloadResource(entity.getImageResourceID(), new OnSuccessListener<byte[]>() {
-            @Override
-            public void onSuccess(byte[] bytes) {
-                holder.entityImage.setImageBitmap(mStorage.toBitmap(bytes));
-            }
-        }, new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
 
-            }
-        });
+        String resourceID = entity.getImageResourceID();
+        if (resourceID == null) resourceID = "placeholder.png";
+        StorageReference resourceSR =
+                FirebaseStorage.getInstance().getReference().child(resourceID);
+
+        GlideApp.with(context)
+                .load(resourceSR)
+                .override(400, 400)
+                .into(holder.entityImage);
 
         // Setting Label
         if (entity.getType().equals(Entity.TYPE_COLLECTION)) {
@@ -107,11 +109,13 @@ public class EntityRvAdapter extends RecyclerView.Adapter<EntityRvAdapter.Viewho
                     /*  Creates new activity for the collection */
                     Intent intentCollection = new Intent(context, CollectionViewActivity.class);
                     intentCollection.putExtra("entity_clicked_id", entity.getDocID());
+                    intentCollection.putExtra("getImageResourceID", entity.getImageResourceID());
                     context.startActivity(intentCollection);
                 } else if (entity.getType().equals(Entity.TYPE_ITEM)) {
                     /* Creates new activity for the Item */
                     Intent intentItem = new Intent(context, ItemViewActivity.class);
                     intentItem.putExtra("entity_clicked_id", entity.getDocID());
+                    intentItem.putExtra("getImageResourceID", entity.getImageResourceID());
                     context.startActivity(intentItem);
                 } else {
                     Toast.makeText (
