@@ -84,8 +84,16 @@ public class EntityRvAdapter extends RecyclerView.Adapter<EntityRvAdapter.Viewho
 
         // Setting Label
         if (entity.getType().equals(Entity.TYPE_COLLECTION)) {
-            holder.entityLabel.setText(R.string.collection);
-            holder.entityLabel.setBackgroundResource(R.color.violet);
+            if (entity.extras.containsKey("isOwned") && entity.extras.get("isOwned").equals("true"))
+            {
+                holder.entityLabel.setText(R.string.collection);
+                holder.entityLabel.setBackgroundResource(R.color.violet);
+            }
+            else
+            {
+                holder.entityLabel.setText("Shared");
+                holder.entityLabel.setBackgroundResource(R.color.mint_green);
+            }
         } else if (entity.getType().equals(Entity.TYPE_ITEM)) {
             holder.entityLabel.setText(R.string.item);
             holder.entityLabel.setBackgroundResource(R.color.mint_green);

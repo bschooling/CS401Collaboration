@@ -2,6 +2,9 @@ package com.example.cs401collaboration.model;
 
 import com.google.firebase.firestore.DocumentReference;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Entity represents a object that mimics Collection or Item for RecyclerView.
  *
@@ -34,6 +37,15 @@ public class Entity
 
     /** Document ID of Entity */
     private String docID = null;
+
+    /**
+     * Extra Attributes About Entity.
+     *
+     * Current Attributes:
+     *      "isOwned" => "true"|"false"|NotPresent (for Item's)
+     *          For Collection's. "true" if Collection is owned by current user.
+     */
+    public Map<String, String> extras = new HashMap<>();
 
     /**
      * Construct entity with all 5 fields.

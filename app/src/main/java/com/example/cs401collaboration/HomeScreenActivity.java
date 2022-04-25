@@ -84,13 +84,15 @@ public class HomeScreenActivity extends AppCompatActivity
                 ArrayList<Entity> entityList = new ArrayList<>();
                 for (Collection collection : collections)
                 {
-                    entityList.add(new Entity(
+                    Entity entity = new Entity(
                             collection.getName(),
                             collection.getLocation(),
                             collection.getImageResourceID(),
                             collection.getDocID(),
                             Entity.TYPE_COLLECTION
-                    ));
+                    );
+                    entity.extras.put("isOwned", String.valueOf(collection.getOwner().getId().equals(mAuth.getCurrentUser().getUid())));
+                    entityList.add(entity);
                 }
                 // Populate retrieved collections on home screen rv
                 collectionRView = findViewById(R.id.collection_view_rv);

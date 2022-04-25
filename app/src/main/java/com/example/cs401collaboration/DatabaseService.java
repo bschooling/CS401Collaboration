@@ -542,13 +542,19 @@ public class DatabaseService
                         Log.d (TAG, "collections = " + collections.size() + " items = " + items.size());
                         ArrayList<Entity> ents = new ArrayList<>();
                         for (Collection collection : collections)
-                            ents.add(new Entity (
+                        {
+                            Entity entity = new Entity (
                                     collection.getName(),
                                     collection.getLocation(),
                                     collection.getImageResourceID(),
                                     collection.getDocID(),
                                     Entity.TYPE_COLLECTION
-                            ));
+                            );
+                            String isOwned = String.valueOf((collection.getOwner().getId()).equals(auth.getUid()));
+                            Log.d(TAG, "samplexxxxx=" + isOwned + " " + collection.getOwner().getId() + " " + auth.getUid());
+                            entity.extras.put("isOwned", isOwned);
+                            ents.add(entity);
+                        }
                         for (Item item : items)
                             ents.add(new Entity (
                                     item.getName(),
