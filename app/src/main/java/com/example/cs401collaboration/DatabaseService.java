@@ -854,7 +854,6 @@ public class DatabaseService
         // Call Deletion on Children Collections
         for (DocumentReference childCollectionDR : collection.getChildrenCollections())
         {
-            // deleteCollectionHelper(childCollectionDR.getId(), successCB, failureCB);
             childCollectionDR.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -897,7 +896,7 @@ public class DatabaseService
                 {
                     collection.getParentCollection()
                             .update (
-                                    "childCollections",
+                                    "childrenCollections",
                                     FieldValue.arrayRemove(collectionDR)
                             );
                 }
