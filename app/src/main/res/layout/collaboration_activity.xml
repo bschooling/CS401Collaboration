@@ -19,9 +19,9 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvCollaborator"
-        android:layout_width="0dp"
+    <RelativeLayout
+        android:id="@+id/rvHolder"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginStart="24dp"
         android:layout_marginTop="24dp"
@@ -31,7 +31,15 @@
         app:layout_constraintBottom_toTopOf="@+id/etNewCollaborator"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/display_owner" />
+        app:layout_constraintTop_toBottomOf="@+id/display_owner">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvCollaborator"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </RelativeLayout>
+
+
 
     <EditText
         android:id="@+id/etNewCollaborator"
@@ -39,14 +47,14 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        android:ems="10"
-        android:inputType="textPersonName"
-        android:hint="@string/new_collaborator"
-        android:textColorHint="#808080"
-        android:textColor="@color/black"
-        android:textSize="18sp"
+        android:layout_marginBottom="32dp"
         android:background="@drawable/edit_text_border"
+        android:ems="10"
+        android:hint="@string/new_collaborator"
+        android:inputType="textPersonName"
+        android:textColor="@color/black"
+        android:textColorHint="#808080"
+        android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/btNewCollaborator"
         app:layout_constraintStart_toStartOf="parent" />
@@ -56,10 +64,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="24dp"
-        android:layout_marginBottom="16dp"
         android:text="@string/add"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/etNewCollaborator"
-        />
+        app:layout_constraintBaseline_toBaselineOf="@+id/etNewCollaborator"
+        app:layout_constraintEnd_toEndOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

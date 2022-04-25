@@ -27,12 +27,14 @@ public class CollaboratorRvAdapter extends RecyclerView.Adapter<CollaboratorRvAd
     private Context context;
     private ArrayList<User> CollaboratorArrayList;
     private DatabaseService mDB;
+    private String currentUserID;
 
     /** Initialize the data for the adapter
      * Collection ArrayList holds the data to populate views with */
-    public CollaboratorRvAdapter(Context context, ArrayList<User> CollaboratorArrayList) {
+    public CollaboratorRvAdapter(Context context, ArrayList<User> CollaboratorArrayList, String currentUserID) {
         this.context = context;
         this.CollaboratorArrayList = CollaboratorArrayList;
+        this.currentUserID = currentUserID;
     }
 
 
@@ -53,6 +55,9 @@ public class CollaboratorRvAdapter extends RecyclerView.Adapter<CollaboratorRvAd
         User user = CollaboratorArrayList.get(position);
 
         // Populate UI
+        holder.tvCollaboratorName.setText(user.getName());
+        holder.tvCollaboratorEmail.setText(user.getEmail());
+
     }
 
     /** gets number of views to create */
@@ -62,12 +67,13 @@ public class CollaboratorRvAdapter extends RecyclerView.Adapter<CollaboratorRvAd
     /** Reference to the view being used */
     public class Viewholder extends RecyclerView.ViewHolder {
 
-        private TextView tvCollaboratorName;
+        private TextView tvCollaboratorName, tvCollaboratorEmail;
         private Button btDelete;
 
         public Viewholder (@NonNull View collaboratorView) {
             super(collaboratorView);
             tvCollaboratorName = collaboratorView.findViewById(R.id.collaborator_name);
+            tvCollaboratorEmail = collaboratorView.findViewById(R.id.collaborator_email);
             btDelete = collaboratorView.findViewById(R.id.collaborator_delete);
         }
     }
