@@ -786,6 +786,143 @@ public class DatabaseService
                 });
     }
 
+    private void deleteAllItemsForCollection (
+            String collectionID,
+            OnSuccessListener<Boolean> successCB,
+            OnFailureListener failureCB
+    )
+    {
+        DocumentReference parentCollectionDR =
+                db.collection("collections").document(collectionID);
+        db.collection("items")
+                .whereEqualTo("parentCollection", parentCollectionDR)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful())
+                        {
+                            Log.d ( TAG,
+                                    "deleteAllItemsForCollection task successful... deleting now"
+                            );
+                            for (QueryDocumentSnapshot document : task.getResult())
+                                document.getReference().delete();
+                        }
+                        else
+                        {
+                            Log.d ( TAG,
+                                    "deleteAllItemsForCollection task unsuccessful " +
+                                            task.getException()
+                            );
+                            failureCB.onFailure(task.getException());
+                        }
+                    }
+                });
+    }
+
+    /**
+     * Helper for Collection Deletion.
+     *
+     * Deletes all items in collection, and collection itself.
+     * Then called recursively on all childCollections.
+     *
+     * @param collection Collection to delete.
+     * @param successCB On Success.
+     * @param failureCB On Failure.
+     */
+    private void deleteCollectionHelper (
+            Collection collection,
+            OnSuccessListener<Boolean> successCB,
+            OnFailureListener failureCB
+    )
+    {
+        Log.d(TAG, "deleteCollectionHelper: on collection id=" + collection.getDocID());
+        // Delete Items
+        deleteAllItemsForCollection(collection.getDocID(), new OnSuccessListener<Boolean>() {
+            @Override
+            public void onSuccess(Boolean aBoolean) {
+
+            }
+        }, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                failureCB.onFailure(new Exception("ItemsDeletionFailure"));
+            }
+        });
+        // Delete Collection
+        db.collection("collections").document(collection.getDocID()).delete();
+        // Call Deletion on Children Collections
+        for (DocumentReference childCollectionDR : collection.getChildrenCollections())
+        {
+            // deleteCollectionHelper(childCollectionDR.getId(), successCB, failureCB);
+            childCollectionDR.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if (task.isSuccessful())
+                    {
+                        deleteCollectionHelper(task.getResult().toObject(Collection.class), successCB, failureCB);
+                    }
+                }
+            });
+        }
+    }
+
+    /**
+     * Delete Collection.
+     *
+     * Adjusts childCollections of parentCollection if applicable
+     * (not so for root collection), then calls deleteCollectionHelper.
+     *
+     * @param collectionID Collection ID.
+     * @param successCB On Success. Passed dummy true Boolean.
+     * @param failureCB On Failure. Passed exception.
+     */
+    public void deleteCollection (
+            String collectionID,
+            OnSuccessListener<Boolean> successCB,
+            OnFailureListener failureCB
+    )
+    {
+        getCollection(collectionID, new OnSuccessListener<Collection>() {
+            @Override
+            public void onSuccess(Collection collection) {
+                if (!(collection.getOwner().getId()).equals(auth.getUid()))
+                    failureCB.onFailure(new Exception("InvalidPermissionToDelete"));
+
+                DocumentReference collectionDR =
+                        db.collection("collections").document(collectionID);
+
+                // Adjust parent
+                if (collection.getParentCollection() != null)
+                {
+                    collection.getParentCollection()
+                            .update (
+                                    "childCollections",
+                                    FieldValue.arrayRemove(collectionDR)
+                            );
+                }
+                // Deletion
+                deleteCollectionHelper(collection, new OnSuccessListener<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean aBoolean) {
+
+                    }
+                }, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                    }
+                });
+            }
+        }, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d(TAG, "getCollection: failure trying to retrieve collection for deletion");
+                failureCB.onFailure(e);
+            }
+        });
+    }
+
     /* Collaboration */
 
     public void getCollabs (
