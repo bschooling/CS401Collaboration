@@ -119,7 +119,51 @@ public class DatabaseService
                             onSuccess.onSuccess(task.getResult().toObject(User.class));
                         }
                         else
+                        {
                             Log.d(TAG, "getUser: task failed... " + task.getException());
+                            onFailure.onFailure(task.getException());
+                        }
+                    }
+                });
+    }
+
+    /**
+     * Return User w/ By User Email.
+     *
+     * Performs a query where all users are queried that match doc.email=$email.
+     * The first is returned. In practice, two documents should not exist with
+     * the same email field.
+     *
+     * @param email User Email.
+     * @param onSuccess On Success, passed with User Object. Null if user not found.
+     * @param onFailure On Failure, passed with exception.
+     */
+    public void getUserByEmail (
+            String email,
+            OnSuccessListener<User> onSuccess,
+            OnFailureListener onFailure
+    )
+    {
+        db.collection("users")
+                .whereEqualTo("email", email)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful())
+                        {
+                            ArrayList<User> users = new ArrayList<>();
+                            for (QueryDocumentSnapshot document : task.getResult())
+                                users.add(document.toObject(User.class));
+                            Log.d(TAG, "getUser: task success... ret_count=" + users.size());
+                            if (users.isEmpty()) onSuccess.onSuccess(null);
+                            else onSuccess.onSuccess(users.get(0));
+                        }
+                        else
+                        {
+                            Log.d(TAG, "getUserByEmail: task failed... " + task.getException());
+                            onFailure.onFailure(task.getException());
+                        }
                     }
                 });
     }
