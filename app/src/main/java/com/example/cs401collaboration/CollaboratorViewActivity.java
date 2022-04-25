@@ -2,19 +2,16 @@ package com.example.cs401collaboration;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.AbsListView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.cs401collaboration.Adapters.CollaboratorRvAdapter;
-import com.example.cs401collaboration.Adapters.EntityRvAdapter;
 import com.example.cs401collaboration.model.Collection;
 import com.example.cs401collaboration.model.User;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -38,7 +35,7 @@ public class CollaboratorViewActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
 
     /* UI Element Handlers*/
-    private TextView displayOwner;
+    private TextView displayOwnerName, displayOwnerEmail;
     private EditText etNewCollab;
     private Button btNewCollab;
 
@@ -58,7 +55,8 @@ public class CollaboratorViewActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
 
         // Bind UI Elements
-        displayOwner = findViewById(R.id.display_owner);
+        displayOwnerName = findViewById(R.id.display_owner);
+        displayOwnerEmail = findViewById(R.id.tvOwnerEmail);
         etNewCollab = findViewById(R.id.etNewCollaborator);
         btNewCollab = findViewById(R.id.btNewCollaborator);
     }
@@ -78,6 +76,18 @@ public class CollaboratorViewActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(Collection collection) {
                     // TODO set display owner with collection.getOwner
+                    mDB.getUser(collection.getOwner().getId(), new OnSuccessListener<User>() {
+                        @Override
+                        public void onSuccess(User user) {
+                            displayOwnerName.setText(user.getName());
+                            displayOwnerEmail.setText(user.getEmail());
+                        }
+                    }, new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+
+                        }
+                    });
 
                     mDB.getCollabs(collection, new OnSuccessListener<ArrayList<User>>() {
                         @Override
