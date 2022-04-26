@@ -1,9 +1,11 @@
 package com.example.cs401collaboration.Adapters;
 
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -101,10 +103,23 @@ public class CollaboratorRvAdapter extends RecyclerView.Adapter<CollaboratorRvAd
                             }
                         });
 
-                        // Remove from ArrayList and notify RV
-                        CollaboratorArrayList.remove(holder.getAdapterPosition());
-                        notifyItemRemoved(holder.getAdapterPosition());
-                        notifyItemRangeChanged(holder.getAdapterPosition(), CollaboratorArrayList.size());
+                       // If Owner, Remove from ArrayList and Notify RV
+                       if (isOwner)
+                       {
+                           CollaboratorArrayList.remove(holder.getAdapterPosition());
+                           notifyItemRemoved(holder.getAdapterPosition());
+                           notifyItemRangeChanged(holder.getAdapterPosition(), CollaboratorArrayList.size());
+                       }
+                       // Else, bounce user to previous screen and set extras.finish to true
+                       // to indicate to collection view activity to finish as well.
+                       else
+                       {
+                           Activity activity = (Activity) context;
+                           Intent intent = activity.getIntent();
+                           intent.putExtra("finish", true);
+                           activity.setResult(Activity.RESULT_OK, intent);
+                           activity.finish();
+                       }
 
                         dialogInterface.dismiss();
                     }
