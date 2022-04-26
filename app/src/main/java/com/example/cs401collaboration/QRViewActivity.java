@@ -44,7 +44,7 @@ public class QRViewActivity extends AppCompatActivity {
     /**
      * LOG_TAG is the String used in Android Logcat
      */
-    private final String LOG_TAG = "Invii_QRView";
+    private final String LOG_TAG = "QRViewActivity";
 
     // Instance variables
     /**
@@ -91,38 +91,6 @@ public class QRViewActivity extends AppCompatActivity {
         qrTitle = (TextView) findViewById(R.id.qr_title);
         scanQRButton = (Button) findViewById(R.id.scan_qr_button);
 
-        /*
-        genQRButton.setOnClickListener(new View.OnClickListener() {
-            *//**
-             * inText holds the inputText to encode into QR code
-             *//*
-            String inText;
-
-            *//**
-             * inTitle holds the inputTitle to display in the qr_view_layout
-             *//*
-            String inTitle;
-
-            *//**
-             * qrImage is a Bitmap object that holds the QR bitmap
-             *//*
-            Bitmap qrImage;
-
-            *//**
-             * onClick generates the QR and title
-             * @param view is a View object
-             *//*
-            public void onClick(View view) {
-                inText = inputText.getText().toString();
-                inTitle = inputTitle.getText().toString();
-                qrImage = genQR(inText, QR_SIZE);
-
-                image.setImageBitmap(qrImage);
-                qrTitle.setText(inTitle);
-            }
-        });
-        */
-
         scanQRButton.setOnClickListener(new View.OnClickListener() {
             /**
              * onClick calls the scanQRCode method
@@ -132,9 +100,6 @@ public class QRViewActivity extends AppCompatActivity {
                 scanQRCode(view);
             }
         });
-
-        // image.setImageResource(R.drawable.empty_qr);
-        // image.setImageBitmap(genQR(" ", QR_SIZE));
 
         qrViewIntent = getIntent();
         inputTitle = qrViewIntent.getStringExtra("qrTitle");
