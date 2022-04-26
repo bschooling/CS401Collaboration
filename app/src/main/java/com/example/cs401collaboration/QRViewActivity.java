@@ -98,6 +98,12 @@ public class QRViewActivity extends AppCompatActivity {
              */
             public void onClick(View view) {
                 scanQRCode(view);
+
+                // CAMERA_REQUEST Testing from QRView
+                // Intent intent = new Intent(getBaseContext(), QRScanActivity.class);
+                // intent.putExtra("RequestCode", QRScanActivity.CAMERA_REQUEST);
+
+                // startActivityForResult(intent, QRScanActivity.CAMERA_REQUEST);
             }
         });
 
@@ -111,6 +117,27 @@ public class QRViewActivity extends AppCompatActivity {
 
         qrTitle.setText(inputTitle);
         image.setImageBitmap(genQR(inputTitle, QR_SIZE));
+    }
+
+    // Required method for CAMERA_REQUEST
+    /**
+     * onActivityResult receives and processes the result from another activity
+     * @param requestCode is the integer to request to the activity
+     * @param resultCode is the integer to give the result from the activity
+     * @param data is the Intent to process
+     */
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Bitmap bitmap;
+
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == RESULT_OK) {
+            if (requestCode == QRScanActivity.CAMERA_REQUEST) {
+                bitmap = (Bitmap) data.getExtras().get("data");
+                image.setImageBitmap(bitmap);
+            }
+        }
     }
 
     /**
@@ -217,6 +244,8 @@ public class QRViewActivity extends AppCompatActivity {
      */
     public void scanQRCode(View view) {
         Intent qrScanIntent = new Intent(this, QRScanActivity.class);
+        qrScanIntent.putExtra("RequestCode", QRScanActivity.CAMERA_QR_REQUEST);
+
         startActivity(qrScanIntent);
     }
 

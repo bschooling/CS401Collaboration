@@ -40,17 +40,22 @@ public class QRScanActivity extends AppCompatActivity {
     /**
      * GALLERY_REQUEST is a request code to the onActivityResult method to use the Gallery
      */
-    private final int GALLERY_REQUEST = 100;
+    public static final int GALLERY_REQUEST = 100;
 
     /**
      * CAMERA_REQUEST is a request code to the onActivityResult method to use the Camera
      */
-    private final int CAMERA_REQUEST = 200;
+    public static final int CAMERA_REQUEST = 200;
+
+    /**
+     * CAMERA_QR_REQUEST is a request code to the onActivityResult method to use the Camera for processing the QR image
+     */
+    public static final int CAMERA_QR_REQUEST = 300;
 
     /**
      * LOG_TAG is a Tag String with the app name and activity name
      */
-    private final String LOG_TAG = "Invii_QRScan";
+    private final String LOG_TAG = "QRScanActivity";
 
     // Instance variables
 
@@ -78,6 +83,7 @@ public class QRScanActivity extends AppCompatActivity {
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Intent intent;
         Button cameraButton;
         Button selectButton;
 
@@ -88,6 +94,7 @@ public class QRScanActivity extends AppCompatActivity {
                 Barcode.FORMAT_QR_CODE
         ).build();
 
+        intent = getIntent();
         barcodeScanner = BarcodeScanning.getClient(options);
         resultText = (TextView) findViewById(R.id.result_text);
         image = (ImageView) findViewById(R.id.qr_scan_image);
@@ -101,7 +108,7 @@ public class QRScanActivity extends AppCompatActivity {
              */
             @Override
             public void onClick(View view) {
-                takeImage(view);
+                takeQRImage(view);
             }
         });
 
@@ -118,21 +125,50 @@ public class QRScanActivity extends AppCompatActivity {
                 startActivityForResult(Intent.createChooser(galleryIntent, "Select Image"), GALLERY_REQUEST);
             }
         });
+
     }
 
     /**
-     * takeImage takes an image from the camera activity
+     * onStart starts the activity
+     */
+    public void onStart() {
+        super.onStart();
+
+        Intent intent = getIntent();
+        int requestCode = intent.getIntExtra("RequestCode", 0);
+
+        if (requestCode == CAMERA_REQUEST) {
+            Log.d(LOG_TAG, "CAMERA_REQUEST code");
+
+            String cameraPermission = Manifest.permission.CAMERA;
+            Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+            if (checkPermission(cameraPermission)) {
+                startActivityForResult(cameraIntent, CAMERA_REQUEST); // Deprecated!
+            }
+
+            else
+                ActivityCompat.requestPermissions(QRScanActivity.this, new String[] { cameraPermission }, CAMERA_REQUEST);
+        }
+
+        else if (requestCode == CAMERA_QR_REQUEST) {
+            Log.d(LOG_TAG, "CAMERA_QR_REQUEST code");
+        }
+    }
+
+    /**
+     * takeQRImage takes an image from the camera activity
      * @param view is a View object
      */
-    public void takeImage(View view) {
+    public void takeQRImage(View view) {
         String cameraPermission = Manifest.permission.CAMERA;
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
         if (checkPermission(cameraPermission))
-            startActivityForResult(cameraIntent, CAMERA_REQUEST); // Deprecated!
+            startActivityForResult(cameraIntent, CAMERA_QR_REQUEST); // Deprecated!
 
         else
-            ActivityCompat.requestPermissions(QRScanActivity.this, new String[] { cameraPermission }, CAMERA_REQUEST);
+            ActivityCompat.requestPermissions(QRScanActivity.this, new String[] { cameraPermission }, CAMERA_QR_REQUEST);
     }
 
     /**
@@ -152,21 +188,26 @@ public class QRScanActivity extends AppCompatActivity {
      */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] permissionResults) {
-        // Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
         super.onRequestPermissionsResult(requestCode, permissions, permissionResults);
 
-        if (requestCode == CAMERA_REQUEST) {
-            Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
+        if (requestCode == CAMERA_QR_REQUEST) {
             if (permissionResults.length > 0 && permissionResults[0] == PackageManager.PERMISSION_GRANTED) {
                 resultText.setText(R.string.defaultResult);
-                startActivityForResult(cameraIntent, CAMERA_REQUEST); // Deprecated!
+                startActivityForResult(cameraIntent, requestCode); // Deprecated!
             }
 
             else {
-                resultText.setText(R.string.camera_permission_denied); // Probably do this as a Toast?
+                resultText.setText(R.string.camera_permission_denied); // TODO Probably do this as a Toast?
             }
+        }
+
+        else if (requestCode == CAMERA_REQUEST) {
+            if (permissionResults.length > 0 && permissionResults[0] == PackageManager.PERMISSION_GRANTED)
+                startActivityForResult(cameraIntent, requestCode); // Deprecated!
+
+            // TODO Some way to notify the caller...
         }
     }
 
@@ -179,16 +220,39 @@ public class QRScanActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Uri imageUri;
         Bitmap photo;
-        InputImage qrImage = null;
+        InputImage qrImage;
 
         super.onActivityResult(requestCode, resultCode, data);
 
+        Log.d(LOG_TAG, "ResultCode: " + resultCode);
+
         if (resultCode == RESULT_OK) {
-            if (requestCode == CAMERA_REQUEST) {
+            if (requestCode == CAMERA_QR_REQUEST) {
                 photo = (Bitmap) data.getExtras().get("data");
 
                 image.setImageBitmap(photo);
                 qrImage = InputImage.fromBitmap(photo, 0);
+
+                processImage(qrImage);
+            }
+
+            else if (requestCode == CAMERA_REQUEST) {
+                Log.d(LOG_TAG, "Giving CAMERA_REQUEST Result");
+
+                // Bundle imageBundle = new Bundle();
+                // Intent returnIntent = new Intent();
+
+                Log.d(LOG_TAG, "Receiving Camera Result");
+                Log.d(LOG_TAG, "ResultCode: " + resultCode);
+                Log.d(LOG_TAG, "RequestCode: " + requestCode);
+                // Log.d(LOG_TAG, "Data available: " + data.getExtras().isEmpty());
+
+                // imageBundle.putBundle("data", data.getExtras());
+                // returnIntent.putExtras(imageBundle);
+
+                // setResult(RESULT_OK, returnIntent);
+                setResult(RESULT_OK, data);
+                finish();
             }
 
             else if (requestCode == GALLERY_REQUEST) {
@@ -199,6 +263,7 @@ public class QRScanActivity extends AppCompatActivity {
 
                     try {
                         qrImage = InputImage.fromFilePath(this, imageUri);
+                        processImage(qrImage);
                     }
 
                     catch (IOException ioException) {
@@ -206,52 +271,55 @@ public class QRScanActivity extends AppCompatActivity {
                     }
                 }
             }
+        }
+    }
 
-            if (qrImage != null) {
-                barcodeScanner.process(qrImage).addOnSuccessListener(new OnSuccessListener<List<Barcode>>() {
-                    /**
-                     * onSuccess gives the List of Barcodes when the process is successful
-                     * @param barcodes is a List of Barcodes
-                     */
-                    @Override
-                    public void onSuccess(List<Barcode> barcodes) {
-                        int valueType;
+    /**
+     * processImage process the InputImage into a List of Barcodes and display the result
+     * @param inputImage is an InputImage to process
+     */
+    public void processImage(InputImage inputImage) {
+        if (inputImage != null) {
+            barcodeScanner.process(inputImage).addOnSuccessListener(new OnSuccessListener<List<Barcode>>() {
+                /**
+                 * onSuccess gives the List of Barcodes when the process is successful
+                 *
+                 * @param barcodes is a List of Barcodes
+                 */
+                @Override
+                public void onSuccess(List<Barcode> barcodes) {
+                    int valueType;
 
-                        if (barcodes != null && barcodes.size() > 0) {
-                            for (Barcode barcode : barcodes) { // The last QR code recognized is displayed
-                                int scanFormat = barcode.getFormat();
+                    if (barcodes != null && barcodes.size() > 0) {
+                        for (Barcode barcode : barcodes) { // The last QR code recognized is displayed
+                            int scanFormat = barcode.getFormat();
 
-                                if (scanFormat == Barcode.FORMAT_QR_CODE) {
-                                    valueType = barcode.getValueType();
+                            if (scanFormat == Barcode.FORMAT_QR_CODE) {
+                                valueType = barcode.getValueType();
 
-                                    if (valueType == Barcode.TYPE_TEXT) {
-                                        resultText.setText(barcode.getDisplayValue());
-                                    }
+                                if (valueType == Barcode.TYPE_TEXT) {
+                                    resultText.setText(barcode.getDisplayValue());
                                 }
-
-                                else {
-                                    resultText.setText(R.string.invalid_coding_string);
-                                }
+                            } else {
+                                resultText.setText(R.string.invalid_coding_string);
                             }
                         }
-
-                        else {
-                            resultText.setText(R.string.no_qr_text);
-                        }
+                    } else {
+                        resultText.setText(R.string.no_qr_text);
                     }
-                }).addOnFailureListener(new OnFailureListener() {
-                    /**
-                     * onFailure prints a message when barcodeScanner fails to process the image
-                     * @param except is an Exception thrown by barcodeScanner
-                     */
-                    @Override
-                    public void onFailure(@NonNull Exception except) {
-                        //resultText.setText(R.string.no_qr_text);
-                        Log.e(LOG_TAG, "Failed to generate QR Code: " + except.getMessage());
-                    }
-                });
-
-            }
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                /**
+                 * onFailure prints a message when barcodeScanner fails to process the image
+                 *
+                 * @param except is an Exception thrown by barcodeScanner
+                 */
+                @Override
+                public void onFailure(@NonNull Exception except) {
+                    //resultText.setText(R.string.no_qr_text);
+                    Log.e(LOG_TAG, "Failed to generate QR Code: " + except.getMessage());
+                }
+            });
         }
     }
 
