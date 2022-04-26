@@ -1,5 +1,9 @@
 package com.example.cs401collaboration;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -49,6 +53,23 @@ public class CollectionViewActivity extends AppCompatActivity {
     private TextView addCollectionsFabLabel, addItemsFabLabel;
     private boolean isFabVisible;
 
+    /**
+     * suppressGetCollectionInvalidPermission
+     *
+     * False by default. Ignore invalid permissions exception in db.getCollection in onStart.
+     *
+     * This flag is set by collaborator screen launcher's onActivityResult, based on parameters
+     * in intent's extras.finish. Relevant when a collaborator removes themselves from a collection
+     * and is returned to the collection view of a collection they no longer have access to,
+     * but db.getCollection calls in onStart before they are bounced back to calling activity.
+     */
+    Boolean suppressGetCollectionInvalidPermission = false;
+
+    /**
+     * ActivityResultLauncher for launching collaboration screen.
+     */
+    ActivityResultLauncher<Intent> collabScreenLauncher;
+
     // EntityID holds the parent ID passed in
     String entityID;
     String entityOwner;
@@ -62,6 +83,11 @@ public class CollectionViewActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_collection_view);
+
+        collabScreenLauncher = registerForActivityResult (
+                new ActivityResultContracts.StartActivityForResult(),
+                new collabScreenLauncherActivityResultCallback()
+        );
 
         // Database
         mDB = DatabaseService.getInstance();
@@ -96,7 +122,6 @@ public class CollectionViewActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-
         Intent intent = getIntent();
         entityID = intent.getStringExtra("entity_clicked_id");
 
@@ -145,11 +170,25 @@ public class CollectionViewActivity extends AppCompatActivity {
         }, new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                Toast.makeText (
-                        CollectionViewActivity.this,
-                        "Unable to retrieve collection info",
-                        Toast.LENGTH_LONG
-                ).show();
+                if (e.getMessage().equals("UserInvalidPermissions"))
+                {
+                    if (!suppressGetCollectionInvalidPermission)
+                    {
+                        Toast.makeText (
+                                CollectionViewActivity.this,
+                                "Not Authorized to Access Collection",
+                                Toast.LENGTH_LONG
+                        ).show();
+                    }
+                }
+                else
+                {
+                    Toast.makeText (
+                            CollectionViewActivity.this,
+                            "Unable to Retrieve Collection Information",
+                            Toast.LENGTH_LONG
+                    ).show();
+                }
             }
         });
 
@@ -228,11 +267,40 @@ public class CollectionViewActivity extends AppCompatActivity {
             Log.d(TAG, "onOptionsItemSelected: to collab screen option selected");
             Intent collaboratorIntent = new Intent(this, CollaboratorViewActivity.class);
             collaboratorIntent.putExtra("collection_id", entityID);
-            startActivity(collaboratorIntent);
+            collabScreenLauncher.launch(collaboratorIntent);
             return true;
         }
         Log.d(TAG, "onOptionsItemSelected: default triggered");
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * ActivityResultCallback<ActivityResult> for Collaboration Screen Launcher
+     * ActivityResultLauncher<Intent>.
+     *
+     * Handles bouncing user to previous screen if extras.finish is set (e.g. when logged in user
+     * removes self from collaborators list on present activity).
+     *
+     * Checks extras.finish. If true, sets $suppressGetCollectionInvalidPermission to true
+     * and calls finish().
+     */
+    private class collabScreenLauncherActivityResultCallback
+            implements ActivityResultCallback<ActivityResult>
+    {
+        @Override
+        public void onActivityResult(ActivityResult result)
+        {
+            Log.d(TAG, "collabScreenLauncherActivityResultCallback: running");
+            Intent intent = result.getData();
+            if (
+                    intent.hasExtra("finish") &&
+                            (intent.getBooleanExtra("finish", false) == true)
+            )
+            {
+                suppressGetCollectionInvalidPermission = true;
+                finish();
+            }
+        }
     }
 
 }

@@ -1,5 +1,6 @@
 package com.example.cs401collaboration;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -82,6 +83,7 @@ public class CollaboratorViewActivity extends AppCompatActivity {
         super.onStart();
 
         Intent intent = getIntent();
+        this.setResult(Activity.RESULT_CANCELED, intent);
 
         // Get current logged in user
         currentFbUser = Objects.requireNonNull(mAuth.getCurrentUser(), "User cant be null");
