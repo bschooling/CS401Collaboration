@@ -111,6 +111,9 @@ public class QRViewActivity extends AppCompatActivity {
         inputTitle = qrViewIntent.getStringExtra("qrTitle");
     }
 
+    /**
+     * onStart starts the QRViewActivity
+     */
     @Override
     public void onStart() {
         super.onStart();
@@ -162,7 +165,7 @@ public class QRViewActivity extends AppCompatActivity {
 
         catch (WriterException writerExcept) {
             Log.e(LOG_TAG, writerExcept.getMessage());
-            // Make a Toast that says, "Error in Generating QR Code" on long duration
+            // TODO Make a Toast that says, "Error in Generating QR Code" on long duration
         }
 
         return qrGenImage;
