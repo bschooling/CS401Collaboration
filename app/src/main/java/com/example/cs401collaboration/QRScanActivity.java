@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -51,6 +52,7 @@ public class QRScanActivity extends AppCompatActivity {
      */
     private final String LOG_TAG = "Invii_QRScan";
 
+    // Instance variables
 
     /**
      * resultText is the TextView that displays the barcodeScanner result
@@ -66,6 +68,7 @@ public class QRScanActivity extends AppCompatActivity {
      * barcodeScanner is a BarcodeScanner object that handles scanning the QR code and displaying the result
      */
     private BarcodeScanner barcodeScanner;
+
 
     // Instance methods
 
@@ -122,14 +125,14 @@ public class QRScanActivity extends AppCompatActivity {
      * @param view is a View object
      */
     public void takeImage(View view) {
+        String cameraPermission = Manifest.permission.CAMERA;
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-        if (checkPermission(Manifest.permission.CAMERA))
+        if (checkPermission(cameraPermission))
             startActivityForResult(cameraIntent, CAMERA_REQUEST); // Deprecated!
 
-        else {
-            resultText.setText(R.string.camera_permission_denied);
-        }
+        else
+            ActivityCompat.requestPermissions(QRScanActivity.this, new String[] { cameraPermission }, CAMERA_REQUEST);
     }
 
     /**
@@ -139,6 +142,32 @@ public class QRScanActivity extends AppCompatActivity {
      */
     public boolean checkPermission(String permission) {
         return ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    /**
+     * onRequestPermissionsResult processes the result of the permission request dialog box
+     * @param requestCode is an integer specifying the request code
+     * @param permissions is an Array of Permission Strings to request
+     * @param permissionResults in an Array of Permission Results from permissions
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] permissionResults) {
+        // Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        super.onRequestPermissionsResult(requestCode, permissions, permissionResults);
+
+        if (requestCode == CAMERA_REQUEST) {
+            Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+            if (permissionResults.length > 0 && permissionResults[0] == PackageManager.PERMISSION_GRANTED) {
+                resultText.setText(R.string.defaultResult);
+                startActivityForResult(cameraIntent, CAMERA_REQUEST); // Deprecated!
+            }
+
+            else {
+                resultText.setText(R.string.camera_permission_denied); // Probably do this as a Toast?
+            }
+        }
     }
 
     /**
@@ -180,12 +209,16 @@ public class QRScanActivity extends AppCompatActivity {
 
             if (qrImage != null) {
                 barcodeScanner.process(qrImage).addOnSuccessListener(new OnSuccessListener<List<Barcode>>() {
+                    /**
+                     * onSuccess gives the List of Barcodes when the process is successful
+                     * @param barcodes is a List of Barcodes
+                     */
                     @Override
                     public void onSuccess(List<Barcode> barcodes) {
                         int valueType;
 
                         if (barcodes != null && barcodes.size() > 0) {
-                            for (Barcode barcode : barcodes) {
+                            for (Barcode barcode : barcodes) { // The last QR code recognized is displayed
                                 int scanFormat = barcode.getFormat();
 
                                 if (scanFormat == Barcode.FORMAT_QR_CODE) {
@@ -207,12 +240,17 @@ public class QRScanActivity extends AppCompatActivity {
                         }
                     }
                 }).addOnFailureListener(new OnFailureListener() {
+                    /**
+                     * onFailure prints a message when barcodeScanner fails to process the image
+                     * @param except is an Exception thrown by barcodeScanner
+                     */
                     @Override
                     public void onFailure(@NonNull Exception except) {
                         //resultText.setText(R.string.no_qr_text);
                         Log.e(LOG_TAG, "Failed to generate QR Code: " + except.getMessage());
                     }
                 });
+
             }
         }
     }
