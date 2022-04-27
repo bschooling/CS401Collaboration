@@ -28,7 +28,7 @@ public class Item
     private String location;
 
     /** Image Resource ID */
-    private String imageResourceID = "placeholder";
+    private String imageResourceID = "placeholder.png";
 
     /** User owner of collection, as DocumentReference. */
     private DocumentReference parentCollection;
