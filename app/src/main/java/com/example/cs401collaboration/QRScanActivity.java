@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -144,11 +145,11 @@ public class QRScanActivity extends AppCompatActivity {
             Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
             if (checkPermission(cameraPermission)) {
-                startActivityForResult(cameraIntent, CAMERA_REQUEST); // Deprecated!
+                startActivityForResult(cameraIntent, requestCode); // Deprecated!
             }
 
             else
-                ActivityCompat.requestPermissions(QRScanActivity.this, new String[] { cameraPermission }, CAMERA_REQUEST);
+                ActivityCompat.requestPermissions(QRScanActivity.this, new String[] { cameraPermission }, requestCode);
         }
 
         else if (requestCode == CAMERA_QR_REQUEST) {
@@ -189,6 +190,7 @@ public class QRScanActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] permissionResults) {
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        Toast deniedToast = Toast.makeText(this, R.string.camera_permission_denied, Toast.LENGTH_LONG);
 
         super.onRequestPermissionsResult(requestCode, permissions, permissionResults);
 
@@ -199,7 +201,8 @@ public class QRScanActivity extends AppCompatActivity {
             }
 
             else {
-                resultText.setText(R.string.camera_permission_denied); // TODO Probably do this as a Toast?
+                // resultText.setText(R.string.camera_permission_denied);
+                deniedToast.show();
             }
         }
 

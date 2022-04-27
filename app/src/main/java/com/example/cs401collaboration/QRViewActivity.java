@@ -19,7 +19,6 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
-import com.google.mlkit.vision.barcode.BarcodeScanner;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
@@ -61,11 +60,6 @@ public class QRViewActivity extends AppCompatActivity {
      * qrImageLayout is a ConstraintLayout that holds qrTitle and image
      */
     private ConstraintLayout qrImageLayout;
-
-    /**
-     * barcodeScanner is a BarcodeScanner object used to generate the QR code
-     */
-    private BarcodeScanner barcodeScanner;
 
     /**
      * inputTitle holds the QR Title String to display in qr_view_layout
@@ -119,7 +113,7 @@ public class QRViewActivity extends AppCompatActivity {
         super.onStart();
 
         qrTitle.setText(inputTitle);
-        image.setImageBitmap(genQR(inputTitle, QR_SIZE));
+        image.setImageBitmap(genQR(inputTitle, QR_SIZE)); // Change inputTitle to Collection or Item ID
     }
 
     // Required method for CAMERA_REQUEST
@@ -152,6 +146,7 @@ public class QRViewActivity extends AppCompatActivity {
     public Bitmap genQR(String input, int size) {
         BarcodeEncoder qrEncoder;
         Bitmap qrGenImage = null;
+        Toast failToast = Toast.makeText(this, "Error in Generating QR Code", Toast.LENGTH_LONG);
 
         try {
             qrEncoder = new BarcodeEncoder();
@@ -164,8 +159,8 @@ public class QRViewActivity extends AppCompatActivity {
         }
 
         catch (WriterException writerExcept) {
-            Log.e(LOG_TAG, writerExcept.getMessage());
-            // TODO Make a Toast that says, "Error in Generating QR Code" on long duration
+            Log.e(LOG_TAG, "Error in Generating QR Code: " + writerExcept.getMessage());
+            failToast.show();
         }
 
         return qrGenImage;
