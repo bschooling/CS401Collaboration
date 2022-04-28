@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -123,10 +124,7 @@ public class QRScanActivity extends AppCompatActivity {
              */
             @Override
             public void onClick(View view) {
-                Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
-                galleryIntent.setType("image/*");
-
-                startActivityForResult(Intent.createChooser(galleryIntent, "Select Image"), GALLERY_REQUEST);
+                selectImage(view);
             }
         });
 
@@ -159,6 +157,26 @@ public class QRScanActivity extends AppCompatActivity {
 
         else if (requestCode == CAMERA_QR_REQUEST) {
             Log.d(LOG_TAG, "CAMERA_QR_REQUEST code");
+        }
+    }
+
+    /**
+     * selectImage selects an image from the Gallery
+     * @param view is a View object
+     */
+    public void selectImage(View view) {
+        String galleryPermission = Manifest.permission.WRITE_EXTERNAL_STORAGE;
+        Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        Toast deniedToast = Toast.makeText(this, R.string.gallery_permission_denied, Toast.LENGTH_LONG);
+
+        galleryIntent.setType("image/*");
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            if (checkPermission(galleryPermission))
+                startActivityForResult(Intent.createChooser(galleryIntent, "Select Image"), GALLERY_REQUEST);
+
+            else
+                deniedToast.show();
         }
     }
 
