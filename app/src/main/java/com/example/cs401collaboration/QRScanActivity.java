@@ -54,6 +54,11 @@ public class QRScanActivity extends AppCompatActivity {
     public static final int CAMERA_QR_REQUEST = 300;
 
     /**
+     * RESULT_DENIED is a result code from this activity that indicates the requested permission was denied
+     */
+    public static final int RESULT_DENIED = 2;
+
+    /**
      * LOG_TAG is a Tag String with the app name and activity name
      */
     private final String LOG_TAG = "QRScanActivity";
@@ -84,7 +89,6 @@ public class QRScanActivity extends AppCompatActivity {
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Intent intent;
         Button cameraButton;
         Button selectButton;
 
@@ -95,7 +99,6 @@ public class QRScanActivity extends AppCompatActivity {
                 Barcode.FORMAT_QR_CODE
         ).build();
 
-        intent = getIntent();
         barcodeScanner = BarcodeScanning.getClient(options);
         resultText = (TextView) findViewById(R.id.result_text);
         image = (ImageView) findViewById(R.id.qr_scan_image);
@@ -148,8 +151,10 @@ public class QRScanActivity extends AppCompatActivity {
                 startActivityForResult(cameraIntent, requestCode); // Deprecated!
             }
 
-            else
-                ActivityCompat.requestPermissions(QRScanActivity.this, new String[] { cameraPermission }, requestCode);
+            else {
+                // When requesting permission from CAMERA_REQUEST, it will bring up QRScan Activity with dialog
+                ActivityCompat.requestPermissions(QRScanActivity.this, new String[] {cameraPermission}, requestCode);
+            }
         }
 
         else if (requestCode == CAMERA_QR_REQUEST) {
@@ -210,7 +215,11 @@ public class QRScanActivity extends AppCompatActivity {
             if (permissionResults.length > 0 && permissionResults[0] == PackageManager.PERMISSION_GRANTED)
                 startActivityForResult(cameraIntent, requestCode); // Deprecated!
 
-            // TODO Some way to notify the caller...
+            // Some way to notify the caller when permission is denied
+            else {
+                setResult(RESULT_DENIED);
+                finish(); // Required because no need to process CAMERA_REQUEST result
+            }
         }
     }
 
@@ -242,18 +251,11 @@ public class QRScanActivity extends AppCompatActivity {
             else if (requestCode == CAMERA_REQUEST) {
                 Log.d(LOG_TAG, "Giving CAMERA_REQUEST Result");
 
-                // Bundle imageBundle = new Bundle();
-                // Intent returnIntent = new Intent();
-
                 Log.d(LOG_TAG, "Receiving Camera Result");
                 Log.d(LOG_TAG, "ResultCode: " + resultCode);
                 Log.d(LOG_TAG, "RequestCode: " + requestCode);
                 // Log.d(LOG_TAG, "Data available: " + data.getExtras().isEmpty());
 
-                // imageBundle.putBundle("data", data.getExtras());
-                // returnIntent.putExtras(imageBundle);
-
-                // setResult(RESULT_OK, returnIntent);
                 setResult(RESULT_OK, data);
                 finish();
             }
@@ -274,6 +276,11 @@ public class QRScanActivity extends AppCompatActivity {
                     }
                 }
             }
+        }
+
+        else if (resultCode == RESULT_CANCELED) {
+            if (requestCode == CAMERA_REQUEST)
+                finish();
         }
     }
 
