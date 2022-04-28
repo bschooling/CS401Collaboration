@@ -52,11 +52,6 @@ public class QRViewActivity extends AppCompatActivity {
     private ImageView image;
 
     /**
-     * qrTitle is a TextView to display the title in qr_view_layout
-     */
-    private TextView qrTitle;
-
-    /**
      * qrImageLayout is a ConstraintLayout that holds qrTitle and image
      */
     private ConstraintLayout qrImageLayout;
@@ -74,8 +69,10 @@ public class QRViewActivity extends AppCompatActivity {
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        TextView qrTitle;
         Button scanQRButton;
         Intent qrViewIntent;
+        String encodeString;
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_qr_view);
@@ -94,7 +91,7 @@ public class QRViewActivity extends AppCompatActivity {
                 scanQRCode(view);
 
                 // CAMERA_REQUEST Testing from QRView
-                // Intent intent = new Intent(getBaseContext(), QRScanActivity.class);
+                // Intent intent = new Intent(QRViewActivity.this, QRScanActivity.class);
                 // intent.putExtra("RequestCode", QRScanActivity.CAMERA_REQUEST);
 
                 // startActivityForResult(intent, QRScanActivity.CAMERA_REQUEST);
@@ -103,9 +100,10 @@ public class QRViewActivity extends AppCompatActivity {
 
         qrViewIntent = getIntent();
         inputTitle = qrViewIntent.getStringExtra("qrTitle");
+        encodeString = qrViewIntent.getStringExtra("encodeString");
 
         qrTitle.setText(inputTitle);
-        image.setImageBitmap(genQR(inputTitle, QR_SIZE)); // Change inputTitle to Collection or Item ID
+        image.setImageBitmap(genQR(encodeString, QR_SIZE)); // Change inputTitle to Collection or Item ID
     }
 
     // Required method for CAMERA_REQUEST
@@ -187,6 +185,7 @@ public class QRViewActivity extends AppCompatActivity {
             ContentValues values = new ContentValues();
             ContentResolver resolver = this.getContentResolver();
 
+            // TODO Android 10 Maybe add a dedicated folder for our app...
             values.put(MediaStore.MediaColumns.DISPLAY_NAME, qrFileName);
             values.put(MediaStore.MediaColumns.MIME_TYPE, "image/jpg");
             values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES);
@@ -211,6 +210,7 @@ public class QRViewActivity extends AppCompatActivity {
         }
 
         else {
+            // TODO Android 9 Maybe add a dedicated folder for our app...
             String qrImageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString();
             File qrFile = new File(qrImageDir, qrFileName);
 

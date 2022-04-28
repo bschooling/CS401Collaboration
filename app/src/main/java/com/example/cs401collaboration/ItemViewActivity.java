@@ -1,8 +1,5 @@
 package com.example.cs401collaboration;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -14,8 +11,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.cs401collaboration.glide.GlideApp;
-import com.example.cs401collaboration.model.Entity;
 import com.example.cs401collaboration.model.Item;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -98,10 +97,11 @@ public class ItemViewActivity extends AppCompatActivity {
         btQr.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent qrViewIntent = new Intent(getBaseContext(), QRViewActivity.class);
+                Intent qrViewIntent = new Intent(ItemViewActivity.this, QRViewActivity.class);
                 String inputTitle = itemTitle.getTitle().toString();
 
                 qrViewIntent.putExtra("qrTitle", inputTitle);
+                qrViewIntent.putExtra("encodeString", itemID);
 
                 startActivity(qrViewIntent);
             }
