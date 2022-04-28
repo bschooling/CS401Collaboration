@@ -103,14 +103,6 @@ public class QRViewActivity extends AppCompatActivity {
 
         qrViewIntent = getIntent();
         inputTitle = qrViewIntent.getStringExtra("qrTitle");
-    }
-
-    /**
-     * onStart starts the QRViewActivity
-     */
-    @Override
-    public void onStart() {
-        super.onStart();
 
         qrTitle.setText(inputTitle);
         image.setImageBitmap(genQR(inputTitle, QR_SIZE)); // Change inputTitle to Collection or Item ID
@@ -126,6 +118,7 @@ public class QRViewActivity extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Bitmap bitmap;
+        Toast deniedToast = Toast.makeText(this, R.string.camera_permission_denied, Toast.LENGTH_LONG);
 
         super.onActivityResult(requestCode, resultCode, data);
 
@@ -134,6 +127,10 @@ public class QRViewActivity extends AppCompatActivity {
                 bitmap = (Bitmap) data.getExtras().get("data");
                 image.setImageBitmap(bitmap);
             }
+        }
+
+        else if (resultCode == QRScanActivity.RESULT_DENIED) {
+            deniedToast.show();
         }
     }
 
