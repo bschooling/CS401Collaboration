@@ -29,6 +29,7 @@ import com.google.mlkit.vision.barcode.common.Barcode;
 import com.google.mlkit.vision.common.InputImage;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -58,6 +59,8 @@ public class QRScanActivity extends AppCompatActivity {
      * RESULT_DENIED is a result code from this activity that indicates the requested permission was denied
      */
     public static final int RESULT_DENIED = 2;
+
+    public static final int RESULT_FAILED = 3;
 
     /**
      * LOG_TAG is a Tag String with the app name and activity name
@@ -250,11 +253,15 @@ public class QRScanActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Uri imageUri;
         Bitmap photo;
-        InputImage qrImage;
+        Intent resultIntent;
+        ArrayList<String> resultStringList;
+        InputImage qrImage = null;
 
         super.onActivityResult(requestCode, resultCode, data);
 
         Log.d(LOG_TAG, "ResultCode: " + resultCode);
+        resultIntent = new Intent();
+        resultStringList = new ArrayList<String>();
 
         if (resultCode == RESULT_OK) {
             if (requestCode == CAMERA_QR_REQUEST) {
@@ -263,7 +270,28 @@ public class QRScanActivity extends AppCompatActivity {
                 image.setImageBitmap(photo);
                 qrImage = InputImage.fromBitmap(photo, 0);
 
-                processImage(qrImage);
+                processImage(qrImage, resultStringList, new OnSuccessListener<ArrayList<String>>() {
+                    /**
+                     * onSuccess gives the strings ArrayList when successful
+                     * @param strings is an ArrayList of Strings to process the results
+                     */
+                    @Override
+                    public void onSuccess(ArrayList<String> strings) {
+                        resultIntent.putExtra("ResultString", strings.get(strings.size() - 1));
+                        setResult(RESULT_OK, resultIntent);
+
+                        finish();
+                    }
+                }, new OnFailureListener() {
+                    /**
+                     * onFailure notifies the calling activity that processImage failed
+                     * @param e is an Exception from processImage
+                     */
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        setResult(RESULT_FAILED);
+                    }
+                });
             }
 
             else if (requestCode == CAMERA_REQUEST) {
@@ -286,11 +314,39 @@ public class QRScanActivity extends AppCompatActivity {
 
                     try {
                         qrImage = InputImage.fromFilePath(this, imageUri);
-                        processImage(qrImage);
+                        // resultString = processImage(qrImage);
+                        // resultIntent.putExtra("ResultString", resultString);
+                        // Log.d(LOG_TAG, "ResultString: " + resultString);
                     }
 
                     catch (IOException ioException) {
                         Log.e(LOG_TAG, R.string.ioException_string + ": " + ioException.getMessage());
+                        setResult(RESULT_FAILED);
+                    }
+
+                    if (qrImage != null) {
+                        processImage(qrImage, resultStringList, new OnSuccessListener<ArrayList<String>>() {
+                            /**
+                             * onSuccess gives the strings ArrayList when successful
+                             * @param strings is an ArrayList of Strings to process the results
+                             */
+                            @Override
+                            public void onSuccess(ArrayList<String> strings) {
+                                resultIntent.putExtra("ResultString", strings.get(strings.size() - 1));
+                                setResult(RESULT_OK, resultIntent);
+
+                                finish();
+                            }
+                        }, new OnFailureListener() {
+                            /**
+                             * onFailure notifies the calling activity that processImage failed
+                             * @param e is an Exception from processImage
+                             */
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                setResult(RESULT_FAILED);
+                            }
+                        });
                     }
                 }
             }
@@ -306,12 +362,13 @@ public class QRScanActivity extends AppCompatActivity {
      * processImage process the InputImage into a List of Barcodes and display the result
      * @param inputImage is an InputImage to process
      */
-    public void processImage(InputImage inputImage) {
+    public void processImage(InputImage inputImage, ArrayList<String> resultArrayList,
+                             OnSuccessListener<ArrayList<String>> onSuccess, OnFailureListener onFail) {
+
         if (inputImage != null) {
             barcodeScanner.process(inputImage).addOnSuccessListener(new OnSuccessListener<List<Barcode>>() {
                 /**
                  * onSuccess gives the List of Barcodes when the process is successful
-                 *
                  * @param barcodes is a List of Barcodes
                  */
                 @Override
@@ -320,26 +377,37 @@ public class QRScanActivity extends AppCompatActivity {
 
                     if (barcodes != null && barcodes.size() > 0) {
                         for (Barcode barcode : barcodes) { // The last QR code recognized is displayed
+                            String resultString;
                             int scanFormat = barcode.getFormat();
 
                             if (scanFormat == Barcode.FORMAT_QR_CODE) {
                                 valueType = barcode.getValueType();
 
                                 if (valueType == Barcode.TYPE_TEXT) {
-                                    resultText.setText(barcode.getDisplayValue());
+                                    resultString = barcode.getDisplayValue();
+
+                                    Log.d(LOG_TAG, "Barcode String result: " + resultString);
+
+                                    resultArrayList.add(resultString);
+                                    resultText.setText(resultString);
                                 }
                             } else {
                                 resultText.setText(R.string.invalid_coding_string);
                             }
                         }
-                    } else {
+
+                        if (resultArrayList.size() > 0)
+                            onSuccess.onSuccess(resultArrayList);
+                    }
+
+                    else {
                         resultText.setText(R.string.no_qr_text);
+                        Log.d(LOG_TAG, "No QR code found in the image");
                     }
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 /**
                  * onFailure prints a message when barcodeScanner fails to process the image
-                 *
                  * @param except is an Exception thrown by barcodeScanner
                  */
                 @Override
