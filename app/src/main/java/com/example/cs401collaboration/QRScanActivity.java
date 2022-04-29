@@ -53,7 +53,7 @@ public class QRScanActivity extends AppCompatActivity {
     /**
      * CAMERA_QR_REQUEST is a request code to the onActivityResult method to use the Camera for processing the QR image
      */
-    public static final int CAMERA_QR_REQUEST = 300;
+    public static final int QR_REQUEST = 300;
 
     /**
      * RESULT_DENIED is a result code from this activity that indicates the requested permission was denied
@@ -161,7 +161,7 @@ public class QRScanActivity extends AppCompatActivity {
             }
         }
 
-        else if (requestCode == CAMERA_QR_REQUEST) {
+        else if (requestCode == QR_REQUEST) {
             Log.d(LOG_TAG, "CAMERA_QR_REQUEST code");
         }
     }
@@ -195,10 +195,10 @@ public class QRScanActivity extends AppCompatActivity {
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
         if (checkPermission(cameraPermission))
-            startActivityForResult(cameraIntent, CAMERA_QR_REQUEST); // Deprecated!
+            startActivityForResult(cameraIntent, QR_REQUEST); // Deprecated!
 
         else
-            ActivityCompat.requestPermissions(QRScanActivity.this, new String[] { cameraPermission }, CAMERA_QR_REQUEST);
+            ActivityCompat.requestPermissions(QRScanActivity.this, new String[] { cameraPermission }, QR_REQUEST);
     }
 
     /**
@@ -223,7 +223,7 @@ public class QRScanActivity extends AppCompatActivity {
 
         super.onRequestPermissionsResult(requestCode, permissions, permissionResults);
 
-        if (requestCode == CAMERA_QR_REQUEST) {
+        if (requestCode == QR_REQUEST) {
             if (permissionResults.length > 0 && permissionResults[0] == PackageManager.PERMISSION_GRANTED) {
                 resultText.setText(R.string.defaultResult);
                 startActivityForResult(cameraIntent, requestCode); // Deprecated!
@@ -267,7 +267,7 @@ public class QRScanActivity extends AppCompatActivity {
         resultStringList = new ArrayList<String>();
 
         if (resultCode == RESULT_OK) {
-            if (requestCode == CAMERA_QR_REQUEST) {
+            if (requestCode == QR_REQUEST) {
                 photo = (Bitmap) data.getExtras().get("data");
 
                 image.setImageBitmap(photo);

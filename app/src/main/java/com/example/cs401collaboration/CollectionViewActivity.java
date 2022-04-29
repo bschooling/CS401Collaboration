@@ -276,9 +276,9 @@ public class CollectionViewActivity extends AppCompatActivity {
 
             // TODO ScanQR things here
             Intent scanIntent = new Intent(CollectionViewActivity.this, QRScanActivity.class);
-            scanIntent.putExtra("RequestCode", QRScanActivity.CAMERA_QR_REQUEST);
+            scanIntent.putExtra("RequestCode", QRScanActivity.QR_REQUEST);
 
-            startActivityForResult(scanIntent, QRScanActivity.CAMERA_QR_REQUEST);
+            startActivityForResult(scanIntent, QRScanActivity.QR_REQUEST);
             return true;
         }
 
@@ -293,7 +293,7 @@ public class CollectionViewActivity extends AppCompatActivity {
         Log.d(TAG, "ResultCode from QRScan: " + resultCode);
 
         if (resultCode == RESULT_OK) {
-            if (requestCode == QRScanActivity.CAMERA_QR_REQUEST) {
+            if (requestCode == QRScanActivity.QR_REQUEST) {
                 Log.d(TAG, "ResultString available: " + data.hasExtra("ResultString"));
                 Log.d(TAG, "Result of ScanQR Intent: " + data.getStringExtra("ResultString"));
             }

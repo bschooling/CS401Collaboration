@@ -230,7 +230,7 @@ public class QRViewActivity extends AppCompatActivity {
      */
     public void scanQRCode(View view) {
         Intent qrScanIntent = new Intent(this, QRScanActivity.class);
-        qrScanIntent.putExtra("RequestCode", QRScanActivity.CAMERA_QR_REQUEST);
+        qrScanIntent.putExtra("RequestCode", QRScanActivity.QR_REQUEST);
 
         startActivity(qrScanIntent);
     }
