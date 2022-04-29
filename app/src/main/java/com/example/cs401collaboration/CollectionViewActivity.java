@@ -1,12 +1,5 @@
 package com.example.cs401collaboration;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,14 +10,20 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.cs401collaboration.Adapters.EntityRvAdapter;
 import com.example.cs401collaboration.glide.GlideApp;
 import com.example.cs401collaboration.model.Collection;
 import com.example.cs401collaboration.model.Entity;
-import com.example.cs401collaboration.Adapters.EntityRvAdapter;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -270,8 +269,38 @@ public class CollectionViewActivity extends AppCompatActivity {
             collabScreenLauncher.launch(collaboratorIntent);
             return true;
         }
+
+        else if (item.getItemId() == R.id.miScanQR)
+        {
+            Log.d(TAG, "onOptionsItemSelected: scanQR option selected");
+
+            // TODO ScanQR things here
+            Intent scanIntent = new Intent(CollectionViewActivity.this, QRScanActivity.class);
+            scanIntent.putExtra("RequestCode", QRScanActivity.CAMERA_QR_REQUEST);
+
+            startActivityForResult(scanIntent, QRScanActivity.CAMERA_QR_REQUEST);
+            return true;
+        }
+
         Log.d(TAG, "onOptionsItemSelected: default triggered");
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        Log.d(TAG, "ResultCode from QRScan: " + resultCode);
+
+        if (resultCode == RESULT_OK) {
+            if (requestCode == QRScanActivity.CAMERA_QR_REQUEST) {
+                Log.d(TAG, "ResultString available: " + data.hasExtra("ResultString"));
+                Log.d(TAG, "Result of ScanQR Intent: " + data.getStringExtra("ResultString"));
+            }
+        }
+
+        else
+            Log.d(TAG, "No result from ScanQR Intent");
     }
 
     /**

@@ -112,7 +112,7 @@
     <string name="encode_string">Input Text to Encode</string>
     <string name="save_qr_button">Save QR Code</string>
     <string name="input_title_hint">Input Title</string>
-    <string name="IOException_string">Image not found or IOException occurred</string>
+    <string name="gallery_permission_denied">Denied permission to use Gallery</string>
 
     <string name="collection_appbar_image">collection_appbar_image</string>
     <string name="collections">Collections</string>
@@ -138,6 +138,5 @@
     <string name="owner">Owner</string>
     <string name="new_collaborator">New Collaborator Email</string>
     <string name="add">Add</string>
-    <string name="gallery_permission_denied">Denied permission to use Gallery</string>
 
 </resources>
