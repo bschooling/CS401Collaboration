@@ -60,6 +60,9 @@ public class QRScanActivity extends AppCompatActivity {
      */
     public static final int RESULT_DENIED = 2;
 
+    /**
+     * RESULT_FAILED is a result code from this activity that indicates an exception has occurred
+     */
     public static final int RESULT_FAILED = 3;
 
     /**

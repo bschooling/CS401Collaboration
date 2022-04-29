@@ -70,7 +70,7 @@ public class QRViewActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         TextView qrTitle;
-        Button scanQRButton;
+        Button saveQRButton;
         Intent qrViewIntent;
         String encodeString;
 
@@ -80,21 +80,12 @@ public class QRViewActivity extends AppCompatActivity {
         qrImageLayout = (ConstraintLayout) findViewById(R.id.qr_image_layout);
         image = (ImageView) findViewById(R.id.qr_gen_image);
         qrTitle = (TextView) findViewById(R.id.qr_title);
-        scanQRButton = (Button) findViewById(R.id.scan_qr_button);
+        saveQRButton = (Button) findViewById(R.id.save_image_button);
 
-        scanQRButton.setOnClickListener(new View.OnClickListener() {
-            /**
-             * onClick calls the scanQRCode method
-             * @param view is a View object
-             */
+        saveQRButton.setOnClickListener(new View.OnClickListener() {
+            @Override
             public void onClick(View view) {
-                scanQRCode(view);
-
-                // CAMERA_REQUEST Testing from QRView
-                // Intent intent = new Intent(QRViewActivity.this, QRScanActivity.class);
-                // intent.putExtra("RequestCode", QRScanActivity.CAMERA_REQUEST);
-
-                // startActivityForResult(intent, QRScanActivity.CAMERA_REQUEST);
+                saveQR(view);
             }
         });
 

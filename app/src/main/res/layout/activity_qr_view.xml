@@ -7,16 +7,6 @@
     tools:context=".QRViewActivity"
     android:background="@color/white">
 
-    <Button
-        android:id="@+id/scan_qr_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/scan_qr_button"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/save_image_button" />
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/qr_image_layout"
         android:layout_width="300dp"
@@ -52,8 +42,7 @@
         android:id="@+id/save_image_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:onClick="saveQR"
+        android:layout_marginTop="16dp"
         android:text="@string/save_qr_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.503"
