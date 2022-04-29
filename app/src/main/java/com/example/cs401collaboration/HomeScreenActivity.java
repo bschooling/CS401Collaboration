@@ -1,12 +1,5 @@
 package com.example.cs401collaboration;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import java.util.ArrayList;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,15 +8,21 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.example.cs401collaboration.model.Collection;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.cs401collaboration.model.Entity;
 import com.example.cs401collaboration.Adapters.EntityRvAdapter;
+import com.example.cs401collaboration.model.Collection;
+import com.example.cs401collaboration.model.Entity;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+
+import java.util.ArrayList;
 
 public class HomeScreenActivity extends AppCompatActivity
 {
@@ -138,8 +137,45 @@ public class HomeScreenActivity extends AppCompatActivity
             return true;
         }
 
+        else if (item.getItemId() == R.id.miScanQR)
+        {
+            Log.d(LOG_TAG_MAIN, "onOptionsItemSelected: ScanQR option selected");
+
+            Intent scanIntent = new Intent(HomeScreenActivity.this, QRScanActivity.class);
+            scanIntent.putExtra("RequestCode", QRScanActivity.QR_REQUEST);
+
+            startActivityForResult(scanIntent, QRScanActivity.QR_REQUEST);
+
+            return true;
+        }
+
         Log.d(LOG_TAG_MAIN, "onOptionsItemSelected: default triggered");
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        String resultString;
+
+        super.onActivityResult(requestCode, resultCode, data);
+
+        Log.d(LOG_TAG_MAIN, "ResultCode from QRScan: " + resultCode);
+
+        if (resultCode == RESULT_OK) {
+            if (requestCode == QRScanActivity.QR_REQUEST) {
+                Log.d(LOG_TAG_MAIN, "ResultString available: " + data.hasExtra("ResultString"));
+                Log.d(LOG_TAG_MAIN, "Result of ScanQR Intent: " + data.getStringExtra("ResultString"));
+
+                resultString = data.getStringExtra("ResultString");
+                Intent entityIntent = new Intent(this, CollectionViewActivity.class);
+                entityIntent.putExtra("entity_clicked_id", resultString);
+
+                startActivity(entityIntent);
+            }
+        }
+
+        else
+            Log.d(LOG_TAG_MAIN, "No result from ScanQR Intent");
     }
 
     /* FAB On Click */

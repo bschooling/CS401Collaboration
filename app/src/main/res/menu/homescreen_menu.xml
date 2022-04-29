@@ -4,6 +4,9 @@
       xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Logout Button -->
+    <item
+        android:id="@+id/miScanQR"
+        android:title="@string/scan_qr_button" />
     <item android:id="@+id/miLogout"
         android:title="@string/logout"
         app:showAsAction="never"/>
