@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.cs401collaboration.Adapters.EntityRvAdapter;
 import com.example.cs401collaboration.model.Collection;
 import com.example.cs401collaboration.model.Entity;
+import com.example.cs401collaboration.model.Item;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -23,6 +24,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class HomeScreenActivity extends AppCompatActivity
 {
@@ -167,10 +169,54 @@ public class HomeScreenActivity extends AppCompatActivity
                 Log.d(LOG_TAG_MAIN, "Result of ScanQR Intent: " + data.getStringExtra("ResultString"));
 
                 resultString = data.getStringExtra("ResultString");
-                Intent entityIntent = new Intent(this, CollectionViewActivity.class);
-                entityIntent.putExtra("entity_clicked_id", resultString);
+                Log.d(LOG_TAG_MAIN, "Processing resultString");
 
-                startActivity(entityIntent);
+                mDB.getCollection(resultString, new OnSuccessListener<Collection>() {
+                    @Override
+                    public void onSuccess(Collection collection) {
+                        Intent entityIntent = new Intent(HomeScreenActivity.this, CollectionViewActivity.class);
+                        entityIntent.putExtra("entity_clicked_id", resultString);
+
+                        startActivity(entityIntent);
+                    }
+                }, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        if (Objects.equals(e.getMessage(), "UserInvalidPermissions"))
+                        {
+                            Toast.makeText(
+                                    HomeScreenActivity.this,
+                                    "Not Authorized to Access Collection",
+                                    Toast.LENGTH_LONG
+                            ).show();
+                        }
+                        else if (Objects.equals(e.getMessage(), "NoCollectionFound"))
+                        {
+                            Log.d(LOG_TAG_MAIN, "resultString is not a Collection");
+
+                            mDB.getItem(resultString, new OnSuccessListener<Item>() {
+                                @Override
+                                public void onSuccess(Item item) {
+                                    Log.d(LOG_TAG_MAIN, "resultString is an Item");
+
+                                    Intent entityIntent = new Intent(HomeScreenActivity.this, ItemViewActivity.class);
+                                    entityIntent.putExtra("entity_clicked_id", resultString);
+
+                                    startActivity(entityIntent);
+                                }
+                            }, new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Toast.makeText (
+                                            HomeScreenActivity.this,
+                                            "Unable to retrieve ScanQR result",
+                                            Toast.LENGTH_LONG
+                                    ).show();
+                                }
+                            });
+                        }
+                    }
+                });
             }
         }
 

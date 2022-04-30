@@ -4,6 +4,10 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.example.cs401collaboration.model.Collection;
+import com.example.cs401collaboration.model.Entity;
+import com.example.cs401collaboration.model.Item;
+import com.example.cs401collaboration.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -17,15 +21,8 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.example.cs401collaboration.model.User;
-import com.example.cs401collaboration.model.Collection;
-import com.example.cs401collaboration.model.Item;
-import com.example.cs401collaboration.model.Entity;
-import com.example.cs401collaboration.interfaces.OnCollectionsRetrievedCallback;
 
 /**
  * DatabaseService incorporates functionality for accessing backend database
@@ -653,6 +650,7 @@ public class DatabaseService
                             else
                             {
                                 Log.d(TAG, "getCollection: No such document");
+                                failureCB.onFailure(new Exception("NoCollectionFound"));
                             }
                         }
                         else
