@@ -173,7 +173,6 @@ public class QRScanActivity extends AppCompatActivity {
     public void selectImage(View view) {
         String galleryPermission = Manifest.permission.WRITE_EXTERNAL_STORAGE;
         Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
-        Toast deniedToast = Toast.makeText(this, R.string.gallery_permission_denied, Toast.LENGTH_LONG);
 
         galleryIntent.setType("image/*");
 
@@ -182,8 +181,11 @@ public class QRScanActivity extends AppCompatActivity {
                 startActivityForResult(Intent.createChooser(galleryIntent, "Select Image"), GALLERY_REQUEST);
 
             else
-                deniedToast.show();
+                ActivityCompat.requestPermissions(QRScanActivity.this, new String[] { galleryPermission }, GALLERY_REQUEST);
         }
+
+        else // Android 10 (Q) and above does not need WRITE_EXTERNAL_STORAGE permission to use Gallery
+            startActivityForResult(Intent.createChooser(galleryIntent, "Select Image"), GALLERY_REQUEST);
     }
 
     /**
@@ -218,31 +220,41 @@ public class QRScanActivity extends AppCompatActivity {
      */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] permissionResults) {
-        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        Toast deniedToast = Toast.makeText(this, R.string.camera_permission_denied, Toast.LENGTH_LONG);
+        Toast deniedCameraToast = Toast.makeText(this, R.string.camera_permission_denied, Toast.LENGTH_LONG);
+        Toast deniedGalleryToast = Toast.makeText(this, R.string.gallery_permission_denied, Toast.LENGTH_LONG);
 
         super.onRequestPermissionsResult(requestCode, permissions, permissionResults);
 
-        if (requestCode == QR_REQUEST) {
-            if (permissionResults.length > 0 && permissionResults[0] == PackageManager.PERMISSION_GRANTED) {
-                resultText.setText(R.string.defaultResult);
-                startActivityForResult(cameraIntent, requestCode); // Deprecated!
-            }
+        if (permissionResults.length > 0) {
+            switch (requestCode) {
+                case CAMERA_REQUEST:
+                case QR_REQUEST:
+                    if (permissionResults[0] == PackageManager.PERMISSION_GRANTED) {
+                        resultText.setText(R.string.defaultResult);
 
-            else {
-                // resultText.setText(R.string.camera_permission_denied);
-                deniedToast.show();
-            }
-        }
+                        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                        startActivityForResult(cameraIntent, requestCode); // Deprecated!
+                    }
 
-        else if (requestCode == CAMERA_REQUEST) {
-            if (permissionResults.length > 0 && permissionResults[0] == PackageManager.PERMISSION_GRANTED)
-                startActivityForResult(cameraIntent, requestCode); // Deprecated!
+                    else
+                        deniedCameraToast.show();
 
-            // Some way to notify the caller when permission is denied
-            else {
-                setResult(RESULT_DENIED);
-                finish(); // Required because no need to process CAMERA_REQUEST result
+                    break;
+
+                case GALLERY_REQUEST:
+                    if (permissionResults[0] == PackageManager.PERMISSION_GRANTED) {
+                        resultText.setText(R.string.defaultResult);
+
+                        Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                        galleryIntent.setType("image/*");
+
+                        startActivityForResult(galleryIntent, requestCode); // Deprecated!
+                    }
+
+                    else
+                        deniedGalleryToast.show();
+
+                    break;
             }
         }
     }
