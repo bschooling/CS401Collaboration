@@ -80,7 +80,7 @@ public class QRViewActivity extends AppCompatActivity {
         qrImageLayout = (ConstraintLayout) findViewById(R.id.qr_image_layout);
         image = (ImageView) findViewById(R.id.qr_gen_image);
         qrTitle = (TextView) findViewById(R.id.qr_title);
-        saveQRButton = (Button) findViewById(R.id.save_image_button);
+        saveQRButton = (Button) findViewById(R.id.save_qr_image_button);
 
         saveQRButton.setOnClickListener(new View.OnClickListener() {
             @Override
