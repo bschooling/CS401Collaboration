@@ -17,6 +17,7 @@ import com.example.cs401collaboration.Adapters.EntityRvAdapter;
 import com.example.cs401collaboration.model.Collection;
 import com.example.cs401collaboration.model.Entity;
 import com.example.cs401collaboration.model.Item;
+import com.example.cs401collaboration.model.User;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -40,6 +41,11 @@ public class HomeScreenActivity extends AppCompatActivity
     private FloatingActionButton fab;
 
     private final String LOG_TAG_MAIN = "HomeScreenActivity";
+
+    /**
+     * Instance to User. Represents logged in user, set during onStart.
+     */
+    private User user;
 
     @Override
     protected void onCreate (Bundle savedInstanceState)
@@ -70,6 +76,22 @@ public class HomeScreenActivity extends AppCompatActivity
         super.onStart();
 
         if (mAuth.getCurrentUser() == null) return;
+
+        // Get User From DB and Assign to this.user
+        if (this.user == null)
+        {
+            mDB.getUser(mAuth.getUid(), new OnSuccessListener<User>() {
+                @Override
+                public void onSuccess(User user) {
+                    HomeScreenActivity.this.user = user;
+                }
+            }, new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+
+                }
+            });
+        }
 
         fab.setOnClickListener(new fabOnClickListener());
 
@@ -121,6 +143,22 @@ public class HomeScreenActivity extends AppCompatActivity
     {
         getMenuInflater().inflate(R.menu.homescreen_menu, menu);
         return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu (Menu menu)
+    {
+        // Populate Menu Items for Greeting and Sign Out with dynamic user name and email
+
+        if (user == null) return super.onPrepareOptionsMenu(menu);
+
+        MenuItem itemGreeting = menu.findItem(R.id.miGreeting);
+        itemGreeting.setTitle("Welcome, " + user.getName() + "!");
+
+        MenuItem itemLogout = menu.findItem(R.id.miLogout);
+        itemLogout.setTitle("Sign Out (" + user.getEmail() + ")");
+
+        return super.onPrepareOptionsMenu(menu);
     }
 
     /* Handle Menu Item Clicks */

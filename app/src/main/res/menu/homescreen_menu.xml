@@ -3,10 +3,17 @@
       xmlns:app="http://schemas.android.com/apk/res-auto"
       xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Logout Button -->
+    <!-- Welcome Item -->
+    <item
+        android:id="@+id/miGreeting"
+        android:title="Welcome!" />
+
+    <!-- SCAN QR CODE Button -->
     <item
         android:id="@+id/miScanQR"
         android:title="@string/scan_qr_button" />
+
+    <!-- LOGOUT button -->
     <item android:id="@+id/miLogout"
         android:title="@string/logout"
         app:showAsAction="never"/>
