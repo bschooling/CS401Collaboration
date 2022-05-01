@@ -367,9 +367,13 @@ public class CollectionViewActivity extends AppCompatActivity {
             }
 
             if (requestCode == QRScanActivity.CAMERA_REQUEST) {
-                bitmap = (Bitmap) data.getExtras().get("data");
-                // image.setImageBitmap(bitmap);
-                mCollectionImage.setImageBitmap(bitmap);
+                if (data.getExtras() != null) {
+                    bitmap = (Bitmap) data.getExtras().get("data");
+                    mCollectionImage.setImageBitmap(bitmap);
+                }
+
+                else
+                    mCollectionImage.setImageURI(data.getData());
             }
         }
 
