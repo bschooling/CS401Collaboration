@@ -251,6 +251,10 @@ public class QRScanActivity extends AppCompatActivity {
             }
         }
 
+        else if (activityRequest == QR_REQUEST) {
+            Log.d(LOG_TAG, "QR_REQUEST code");
+        }
+
         if (checkPermission(Manifest.permission.CAMERA))
             startActivityForResult(cameraIntent, CAMERA_REQUEST); // Deprecated!
 
@@ -389,16 +393,21 @@ public class QRScanActivity extends AppCompatActivity {
                 Log.d(LOG_TAG, " Using Camera ResultIntent: " + data);
 
                 try {
-                    // photo = (Bitmap) data.getExtras().get("data");
-                    File photoFile = new File(resultFilePath);
-                    photo = MediaStore.Images.Media.getBitmap(getContentResolver(), Uri.fromFile(photoFile));
-
-                    image.setImageBitmap(photo);
-
-                    if (activityRequest == QR_REQUEST)
+                    if (activityRequest == QR_REQUEST) {
+                        photo = (Bitmap) data.getExtras().get("data");
                         qrImage = InputImage.fromBitmap(photo, 0);
 
-                    else if (activityRequest == CAMERA_REQUEST) {
+                        image.setImageBitmap(photo);
+                    }
+
+                    if (activityRequest == CAMERA_REQUEST) {
+                        Log.d(LOG_TAG, "resultFilePath: " + resultFilePath);
+
+                        File photoFile = new File(resultFilePath);
+                        photo = MediaStore.Images.Media.getBitmap(getContentResolver(), Uri.fromFile(photoFile));
+
+                        image.setImageBitmap(photo);
+
                         returnIntent = data;
                         returnIntent.putExtra("ResultFilePath", resultFilePath);
                         returnCode = RESULT_OK;
