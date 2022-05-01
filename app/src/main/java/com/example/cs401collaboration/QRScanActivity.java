@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -73,6 +74,16 @@ public class QRScanActivity extends AppCompatActivity {
     // Instance variables
 
     /**
+     * activityRequest hold the request code of the calling activity
+     */
+    private int activityRequest;
+
+    /**
+     * resultLabel is a TextView that displays the word "Result"
+     */
+    private TextView resultLabel;
+
+    /**
      * resultText is the TextView that displays the barcodeScanner result
      */
     private TextView resultText;
@@ -86,6 +97,11 @@ public class QRScanActivity extends AppCompatActivity {
      * barcodeScanner is a BarcodeScanner object that handles scanning the QR code and displaying the result
      */
     private BarcodeScanner barcodeScanner;
+
+    /**
+     * qrToolbar is a Toolbar that handles the activity title bar
+     */
+    private Toolbar qrToolbar;
 
 
     // Instance methods
@@ -108,7 +124,9 @@ public class QRScanActivity extends AppCompatActivity {
 
         barcodeScanner = BarcodeScanning.getClient(options);
         resultText = (TextView) findViewById(R.id.result_text);
+        resultLabel = (TextView) findViewById(R.id.textView);
         image = (ImageView) findViewById(R.id.qr_scan_image);
+        qrToolbar = (Toolbar) findViewById(R.id.qrScanToolbar);
         cameraButton = (Button) findViewById(R.id.camera_button);
         selectButton = (Button) findViewById(R.id.select_image_button);
 
@@ -119,7 +137,7 @@ public class QRScanActivity extends AppCompatActivity {
              */
             @Override
             public void onClick(View view) {
-                takeQRImage(view);
+                takeImage(view);
             }
         });
 
@@ -134,6 +152,7 @@ public class QRScanActivity extends AppCompatActivity {
             }
         });
 
+        image.setImageResource(R.drawable.ic_launcher_background);
     }
 
     /**
@@ -143,25 +162,36 @@ public class QRScanActivity extends AppCompatActivity {
         super.onStart();
 
         Intent intent = getIntent();
-        int requestCode = intent.getIntExtra("RequestCode", 0);
+        activityRequest = intent.getIntExtra("RequestCode", 0);
 
-        if (requestCode == CAMERA_REQUEST) {
+        /*
+        if (activityRequest == CAMERA_REQUEST) {
             Log.d(LOG_TAG, "CAMERA_REQUEST code");
 
             String cameraPermission = Manifest.permission.CAMERA;
             Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
             if (checkPermission(cameraPermission)) {
-                startActivityForResult(cameraIntent, requestCode); // Deprecated!
+                startActivityForResult(cameraIntent, activityRequest); // Deprecated!
             }
 
             else {
                 // When requesting permission from CAMERA_REQUEST, it will bring up QRScan Activity with dialog
-                ActivityCompat.requestPermissions(QRScanActivity.this, new String[] {cameraPermission}, requestCode);
+                ActivityCompat.requestPermissions(QRScanActivity.this, new String[] {cameraPermission}, activityRequest);
             }
         }
+        */
 
-        else if (requestCode == QR_REQUEST) {
+        if (activityRequest == CAMERA_REQUEST) {
+            Log.d(LOG_TAG, "CAMERA_REQUEST code");
+
+            qrToolbar.setTitle("Change Image");
+
+            resultLabel.setVisibility(View.GONE);
+            resultText.setVisibility(View.GONE);
+        }
+
+        else if (activityRequest == QR_REQUEST) {
             Log.d(LOG_TAG, "CAMERA_QR_REQUEST code");
         }
     }
@@ -192,7 +222,7 @@ public class QRScanActivity extends AppCompatActivity {
      * takeQRImage takes an image from the camera activity
      * @param view is a View object
      */
-    public void takeQRImage(View view) {
+    public void takeImage(View view) {
         String cameraPermission = Manifest.permission.CAMERA;
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
@@ -278,90 +308,106 @@ public class QRScanActivity extends AppCompatActivity {
         resultIntent = new Intent();
         resultStringList = new ArrayList<String>();
 
+        Log.d(LOG_TAG, "activityRequest: " + activityRequest);
+        Log.d(LOG_TAG, "RequestCode: " + requestCode);
+
         if (resultCode == RESULT_OK) {
-            if (requestCode == QR_REQUEST) {
+            if (activityRequest == QR_REQUEST) {
                 photo = (Bitmap) data.getExtras().get("data");
 
                 image.setImageBitmap(photo);
-                qrImage = InputImage.fromBitmap(photo, 0);
 
-                processImage(qrImage, resultStringList, new OnSuccessListener<ArrayList<String>>() {
-                    /**
-                     * onSuccess gives the strings ArrayList when successful
-                     * @param strings is an ArrayList of Strings to process the results
-                     */
-                    @Override
-                    public void onSuccess(ArrayList<String> strings) {
-                        resultIntent.putExtra("ResultString", strings.get(strings.size() - 1));
-                        setResult(RESULT_OK, resultIntent);
+                if (requestCode == QR_REQUEST) {
+                    qrImage = InputImage.fromBitmap(photo, 0);
 
-                        finish();
-                    }
-                }, new OnFailureListener() {
-                    /**
-                     * onFailure notifies the calling activity that processImage failed
-                     * @param e is an Exception from processImage
-                     */
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        setResult(RESULT_FAILED);
-                    }
-                });
+                    processImage(qrImage, resultStringList, new OnSuccessListener<ArrayList<String>>() {
+                        /**
+                         * onSuccess gives the strings ArrayList when successful
+                         *
+                         * @param strings is an ArrayList of Strings to process the results
+                         */
+                        @Override
+                        public void onSuccess(ArrayList<String> strings) {
+                            resultIntent.putExtra("ResultString", strings.get(strings.size() - 1));
+                            setResult(RESULT_OK, resultIntent);
+
+                            finish();
+                        }
+                    }, new OnFailureListener() {
+                        /**
+                         * onFailure notifies the calling activity that processImage failed
+                         *
+                         * @param e is an Exception from processImage
+                         */
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            setResult(RESULT_FAILED);
+                        }
+                    });
+                }
             }
 
-            else if (requestCode == CAMERA_REQUEST) {
-                Log.d(LOG_TAG, "Giving CAMERA_REQUEST Result");
+            else if (activityRequest == CAMERA_REQUEST) {
+                if (requestCode == CAMERA_REQUEST || requestCode == QR_REQUEST) {
+                    photo = (Bitmap) data.getExtras().get("data");
 
-                Log.d(LOG_TAG, "Receiving Camera Result");
-                Log.d(LOG_TAG, "ResultCode: " + resultCode);
-                Log.d(LOG_TAG, "RequestCode: " + requestCode);
-                // Log.d(LOG_TAG, "Data available: " + data.getExtras().isEmpty());
+                    image.setImageBitmap(photo);
 
-                setResult(RESULT_OK, data);
-                finish();
-            }
+                    Log.d(LOG_TAG, "Giving CAMERA_REQUEST Result");
 
-            else if (requestCode == GALLERY_REQUEST) {
-                imageUri = data.getData();
+                    Log.d(LOG_TAG, "Receiving Camera Result");
+                    Log.d(LOG_TAG, "ResultCode: " + resultCode);
+                    Log.d(LOG_TAG, "RequestCode: " + requestCode);
+                    // Log.d(LOG_TAG, "Data available: " + data.getExtras().isEmpty());
 
-                if (imageUri != null) {
-                    image.setImageURI(imageUri);
+                    Log.d(LOG_TAG, "Intent: " + data);
 
-                    try {
-                        qrImage = InputImage.fromFilePath(this, imageUri);
-                        // resultString = processImage(qrImage);
-                        // resultIntent.putExtra("ResultString", resultString);
-                        // Log.d(LOG_TAG, "ResultString: " + resultString);
-                    }
+                    setResult(RESULT_OK, data);
+                    // finish();
+                }
 
-                    catch (IOException ioException) {
-                        Log.e(LOG_TAG, R.string.ioException_string + ": " + ioException.getMessage());
-                        setResult(RESULT_FAILED);
-                    }
+                else if (requestCode == GALLERY_REQUEST) {
+                    imageUri = data.getData();
 
-                    if (qrImage != null) {
-                        processImage(qrImage, resultStringList, new OnSuccessListener<ArrayList<String>>() {
-                            /**
-                             * onSuccess gives the strings ArrayList when successful
-                             * @param strings is an ArrayList of Strings to process the results
-                             */
-                            @Override
-                            public void onSuccess(ArrayList<String> strings) {
-                                resultIntent.putExtra("ResultString", strings.get(strings.size() - 1));
-                                setResult(RESULT_OK, resultIntent);
+                    if (imageUri != null) {
+                        image.setImageURI(imageUri);
 
-                                finish();
-                            }
-                        }, new OnFailureListener() {
-                            /**
-                             * onFailure notifies the calling activity that processImage failed
-                             * @param e is an Exception from processImage
-                             */
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                setResult(RESULT_FAILED);
-                            }
-                        });
+                        try {
+                            qrImage = InputImage.fromFilePath(this, imageUri);
+                            // resultString = processImage(qrImage);
+                            // resultIntent.putExtra("ResultString", resultString);
+                            // Log.d(LOG_TAG, "ResultString: " + resultString);
+                        } catch (IOException ioException) {
+                            Log.e(LOG_TAG, R.string.ioException_string + ": " + ioException.getMessage());
+                            setResult(RESULT_FAILED);
+                        }
+
+                        if (activityRequest == QR_REQUEST && qrImage != null) {
+                            processImage(qrImage, resultStringList, new OnSuccessListener<ArrayList<String>>() {
+                                /**
+                                 * onSuccess gives the strings ArrayList when successful
+                                 *
+                                 * @param strings is an ArrayList of Strings to process the results
+                                 */
+                                @Override
+                                public void onSuccess(ArrayList<String> strings) {
+                                    resultIntent.putExtra("ResultString", strings.get(strings.size() - 1));
+                                    setResult(RESULT_OK, resultIntent);
+
+                                    finish();
+                                }
+                            }, new OnFailureListener() {
+                                /**
+                                 * onFailure notifies the calling activity that processImage failed
+                                 *
+                                 * @param e is an Exception from processImage
+                                 */
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    setResult(RESULT_FAILED);
+                                }
+                            });
+                        }
                     }
                 }
             }
