@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -20,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -29,8 +31,11 @@ import com.google.mlkit.vision.barcode.BarcodeScanning;
 import com.google.mlkit.vision.barcode.common.Barcode;
 import com.google.mlkit.vision.common.InputImage;
 
+import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -73,12 +78,32 @@ public class QRScanActivity extends AppCompatActivity {
      */
     private final String LOG_TAG = "QRScanActivity";
 
+    /**
+     * WRITE_PERMISSION holds the permission to read and write to the phone's storage
+     */
+    private final String WRITE_PERMISSION = Manifest.permission.WRITE_EXTERNAL_STORAGE;
+
     // Instance variables
 
     /**
      * activityRequest hold the request code of the calling activity
      */
     private int activityRequest;
+
+    /**
+     *
+     */
+    private int returnCode;
+
+    /**
+     *
+     */
+    private String resultFilePath;
+
+    /**
+     *
+     */
+    private Intent returnIntent;
 
     /**
      * resultLabel is a TextView that displays the word "Result"
@@ -94,6 +119,11 @@ public class QRScanActivity extends AppCompatActivity {
      * image is the image object
      */
     private ImageView image;
+
+    /**
+     * saveImageButton is a Button that saves the image when its onClick is triggered
+     */
+    private Button saveImageButton;
 
     /**
      * barcodeScanner is a BarcodeScanner object that handles scanning the QR code and displaying the result
@@ -131,6 +161,10 @@ public class QRScanActivity extends AppCompatActivity {
         qrToolbar = (Toolbar) findViewById(R.id.qrScanToolbar);
         cameraButton = (Button) findViewById(R.id.camera_button);
         selectButton = (Button) findViewById(R.id.select_image_button);
+        saveImageButton = (Button) findViewById(R.id.save_image_button);
+
+        returnIntent = null;
+        returnCode = 0;
 
         cameraButton.setOnClickListener(new View.OnClickListener() {
             /**
@@ -152,6 +186,13 @@ public class QRScanActivity extends AppCompatActivity {
             public void onClick(View view) {
                 selectImage(view);
             }
+        });
+
+        saveImageButton.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View view) {
+               saveImage(view);
+           }
         });
 
         image.setImageResource(R.drawable.ic_launcher_background);
@@ -177,6 +218,8 @@ public class QRScanActivity extends AppCompatActivity {
 
         else if (activityRequest == QR_REQUEST) {
             Log.d(LOG_TAG, "QR_REQUEST code");
+
+            saveImageButton.setVisibility(View.GONE);
         }
     }
 
@@ -188,11 +231,31 @@ public class QRScanActivity extends AppCompatActivity {
         String cameraPermission = Manifest.permission.CAMERA;
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
+        Uri imageUri;
+        File imageFile;
+        String timeStamp = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date());
+        String imageFileName = "photo-" + timeStamp;
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
+        if (activityRequest == CAMERA_REQUEST) {
+            try {
+                imageFile = File.createTempFile(imageFileName, ".jpg", storageDir);
+                imageUri = FileProvider.getUriForFile(this, "com.example.cs401collaboration.fileprovider", imageFile);
+
+                Log.d(LOG_TAG, "ImageURI: " + imageUri);
+
+                resultFilePath = imageFile.getAbsolutePath();
+                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+            } catch (IOException ioException) {
+                Log.d(LOG_TAG, "File IO Error occurred: " + ioException.getMessage());
+            }
+        }
+
         if (checkPermission(Manifest.permission.CAMERA))
             startActivityForResult(cameraIntent, CAMERA_REQUEST); // Deprecated!
 
         else {
-            ActivityCompat.requestPermissions(QRScanActivity.this, new String[] { cameraPermission }, CAMERA_REQUEST);
+            ActivityCompat.requestPermissions(QRScanActivity.this, new String[] { cameraPermission, WRITE_PERMISSION }, CAMERA_REQUEST);
         }
     }
 
@@ -201,21 +264,31 @@ public class QRScanActivity extends AppCompatActivity {
      * @param view is a View object
      */
     public void selectImage(View view) {
-        String galleryPermission = Manifest.permission.WRITE_EXTERNAL_STORAGE;
         Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
 
         galleryIntent.setType("image/*");
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            if (checkPermission(galleryPermission))
+            if (checkPermission(WRITE_PERMISSION))
                 startActivityForResult(Intent.createChooser(galleryIntent, "Select Image"), GALLERY_REQUEST);
 
             else
-                ActivityCompat.requestPermissions(QRScanActivity.this, new String[] { galleryPermission }, GALLERY_REQUEST);
+                ActivityCompat.requestPermissions(QRScanActivity.this, new String[] {WRITE_PERMISSION}, GALLERY_REQUEST);
         }
 
         else // Android 10 (Q) and above does not need WRITE_EXTERNAL_STORAGE permission to use Gallery
             startActivityForResult(Intent.createChooser(galleryIntent, "Select Image"), GALLERY_REQUEST);
+    }
+
+    /**
+     * saveImage sends the result back when the returnCode is RESULT_OK
+     * @param view is a View object
+     */
+    public void saveImage(View view) {
+        if (returnCode == RESULT_OK && activityRequest == CAMERA_REQUEST && returnIntent != null) {
+            setResult(returnCode, returnIntent);
+            finish();
+        }
     }
 
     /**
@@ -241,13 +314,32 @@ public class QRScanActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, permissionResults);
 
         if (permissionResults.length > 0) {
+            Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
             switch (requestCode) {
                 case CAMERA_REQUEST:
-                case QR_REQUEST:
+                    Uri imageUri;
+                    File imageFile;
+                    File storageDir;
+                    String timeStamp = new SimpleDateFormat("yyyyMMdd-HHmm").format(new Date());
+                    String imageFileName = "photo-" + timeStamp;
+
+                    if (activityRequest == CAMERA_REQUEST) {
+                        try {
+                            storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+                            imageFile = File.createTempFile(imageFileName, ".jpg", storageDir);
+                            imageUri = Uri.fromFile(imageFile);
+                            resultFilePath = imageFile.getAbsolutePath();
+
+                            cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+                        } catch (IOException ioException) {
+                            Log.d(LOG_TAG, "File IO Error occurred: " + ioException.getMessage());
+                        }
+                    }
+
                     if (permissionResults[0] == PackageManager.PERMISSION_GRANTED) {
                         resultText.setText(R.string.defaultResult);
 
-                        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                         startActivityForResult(cameraIntent, requestCode); // Deprecated!
                     }
 
@@ -294,16 +386,27 @@ public class QRScanActivity extends AppCompatActivity {
 
         if (resultCode == RESULT_OK) {
             if (requestCode == CAMERA_REQUEST) {
-                photo = (Bitmap) data.getExtras().get("data");
+                Log.d(LOG_TAG, " Using Camera ResultIntent: " + data);
 
-                image.setImageBitmap(photo);
+                try {
+                    // photo = (Bitmap) data.getExtras().get("data");
+                    File photoFile = new File(resultFilePath);
+                    photo = MediaStore.Images.Media.getBitmap(getContentResolver(), Uri.fromFile(photoFile));
 
-                if (activityRequest == QR_REQUEST)
-                    qrImage = InputImage.fromBitmap(photo, 0);
+                    image.setImageBitmap(photo);
 
-                else if (activityRequest == CAMERA_REQUEST) {
-                    setResult(RESULT_OK, data);
-                    finish();
+                    if (activityRequest == QR_REQUEST)
+                        qrImage = InputImage.fromBitmap(photo, 0);
+
+                    else if (activityRequest == CAMERA_REQUEST) {
+                        returnIntent = data;
+                        returnIntent.putExtra("ResultFilePath", resultFilePath);
+                        returnCode = RESULT_OK;
+                    }
+                }
+
+                catch (IOException ioException) {
+                    Log.d(LOG_TAG, "An IO Error occurred: " + ioException.getMessage());
                 }
             }
 
@@ -323,8 +426,8 @@ public class QRScanActivity extends AppCompatActivity {
                     }
 
                     else if (activityRequest == CAMERA_REQUEST) {
-                        setResult(RESULT_OK, data);
-                        finish();
+                        returnIntent = data;
+                        returnCode = RESULT_OK;
                     }
                 }
             }

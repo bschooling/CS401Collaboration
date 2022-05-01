@@ -2,7 +2,9 @@ package com.example.cs401collaboration;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,6 +34,9 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -200,6 +205,8 @@ public class CollectionViewActivity extends AppCompatActivity {
         StorageReference resourceSR =
                 FirebaseStorage.getInstance().getReference().child(resourceID);
 
+        Log.d(TAG, "ResourceSR: " + resourceSR);
+
         GlideApp.with(CollectionViewActivity.this)
                 .load(resourceSR)
                 .into(mCollectionImage);
@@ -367,13 +374,44 @@ public class CollectionViewActivity extends AppCompatActivity {
             }
 
             if (requestCode == QRScanActivity.CAMERA_REQUEST) {
-                if (data.getExtras() != null) {
-                    bitmap = (Bitmap) data.getExtras().get("data");
-                    mCollectionImage.setImageBitmap(bitmap);
+                Bitmap imageBitmap;
+                String imageFilePath = data.getStringExtra("ResultFilePath");
+
+                Log.d(TAG, "Result from ScanQR: " + data);
+                Log.d(TAG, "Result from ScanQR: " + imageFilePath);
+
+                try {
+                    int jpgQuality = 80;
+                    File imageFile = new File(imageFilePath);
+                    Uri imageUri = Uri.fromFile(imageFile);
+                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+                    Log.d(TAG, "imageUri: " + imageUri);
+
+                    imageBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
+                    mCollectionImage.setImageBitmap(imageBitmap);
+
+                    Log.d(TAG, "FileSize: " + imageFile.length());
+
+                    if (imageFile.length() >= 1024 * 1024) {
+                        // mCollectionImage.setDrawingCacheEnabled(true);
+                        // imageBitmap = mCollectionImage.getDrawingCache();
+                        jpgQuality = 75;
+                    }
+
+                    imageBitmap.compress(Bitmap.CompressFormat.JPEG, jpgQuality, byteArrayOutputStream);
+
+                    byte[] uploadBytes = byteArrayOutputStream.toByteArray();
+
+                    Log.d(TAG, "jpgQuality: " + jpgQuality);
+                    Log.d(TAG, "uploadBytes: " + uploadBytes.length);
                 }
 
-                else
-                    mCollectionImage.setImageURI(data.getData());
+                catch (IOException ioException) {
+                    Log.d(TAG, "File IO Error occurred: " + ioException.getMessage());
+                }
+
+                // mStorage.toBytes(mCollectionImage);
             }
         }
 
