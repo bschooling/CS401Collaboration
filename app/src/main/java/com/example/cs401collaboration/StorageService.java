@@ -98,24 +98,30 @@ public class StorageService
     /**
      * Upload Resource Indicated by $bytes.
      *
-     * Resource is assigned a random name that is then passed to onSuccess.
+     * Resource is assigned a random name, in the case that $resourceID is null,
+     * and that is then passed to onSuccess.
      *
+     * @param resourceID Resource name to be uploaded to in database.
      * @param bytes Resource to upload.
      * @param successCB On Success, passed with generated name of resource.
      * @param failureCB On Failure, passed with exception.
      */
     public void uploadResource
             (
+                    String resourceID,
                     byte[] bytes,
                     OnSuccessListener<String> successCB,
                     OnFailureListener failureCB
             )
     {
-        String resourceName = UUID.randomUUID().toString();
+        if (resourceID == null) resourceID = UUID.randomUUID().toString();
 
-        StorageReference sr = storageReference.child(resourceName);
+        StorageReference sr = storageReference.child(resourceID);
 
         UploadTask uploadTask = sr.putBytes(bytes);
+
+        String finalResourceID = resourceID;
+
         uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
@@ -123,7 +129,7 @@ public class StorageService
                         TAG,
                         "uploadResource: success"
                 );
-                successCB.onSuccess(resourceName);
+                successCB.onSuccess(finalResourceID);
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -132,6 +138,35 @@ public class StorageService
                         TAG,
                         "uploadResource: failure"
                 );
+                failureCB.onFailure(exception);
+            }
+        });
+    }
+
+    /**
+     * Delete a resource from storage bucket.
+     *
+     * @param resourceID Resource ID to delete.
+     * @param successCB On success callback, takes void.
+     * @param failureCB On failure callback, called with exception.
+     */
+    public void deleteResource
+    (
+            String resourceID,
+            OnSuccessListener<Void> successCB,
+            OnFailureListener failureCB
+    )
+    {
+        StorageReference delSR = storageReference.child(resourceID);
+
+        delSR.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                successCB.onSuccess(null);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
                 failureCB.onFailure(exception);
             }
         });
