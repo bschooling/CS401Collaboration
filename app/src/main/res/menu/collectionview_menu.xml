@@ -5,6 +5,9 @@
 
     <!-- Collaboration Screen Button -->
     <item
+        android:id="@+id/miChangeImage"
+        android:title="Change Image" />
+    <item
         android:id="@+id/miScanQR"
         android:title="@string/scan_qr_button" />
     <item android:id="@+id/miCollectionCollabScreen"

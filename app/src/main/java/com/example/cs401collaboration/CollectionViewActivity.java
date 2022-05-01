@@ -1,6 +1,7 @@
 package com.example.cs401collaboration;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -284,12 +285,25 @@ public class CollectionViewActivity extends AppCompatActivity {
             return true;
         }
 
+        else if (item.getItemId() == R.id.miChangeImage)
+        {
+            Log.d(TAG, "onOptionsItemSelected: changeImage option selected");
+
+            Intent imageIntent = new Intent(CollectionViewActivity.this, QRScanActivity.class);
+            imageIntent.putExtra("RequestCode", QRScanActivity.CAMERA_REQUEST);
+
+            startActivityForResult(imageIntent, QRScanActivity.CAMERA_REQUEST);
+
+            return true;
+        }
+
         Log.d(TAG, "onOptionsItemSelected: default triggered");
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Bitmap bitmap;
         String resultString;
 
         super.onActivityResult(requestCode, resultCode, data);
@@ -350,6 +364,12 @@ public class CollectionViewActivity extends AppCompatActivity {
                         }
                     }
                 });
+            }
+
+            if (requestCode == QRScanActivity.CAMERA_REQUEST) {
+                bitmap = (Bitmap) data.getExtras().get("data");
+                // image.setImageBitmap(bitmap);
+                mCollectionImage.setImageBitmap(bitmap);
             }
         }
 
