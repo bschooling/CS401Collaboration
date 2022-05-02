@@ -101,10 +101,12 @@ public class HomeScreenActivity extends AppCompatActivity
         else
             Log.d(LOG_TAG_MAIN, "onStart: User not logged in");
 
+        // get the initial collections for signed in user
         mDB.getCollections(null, new OnSuccessListener<ArrayList<Collection>>() {
             @Override
             public void onSuccess(ArrayList<Collection> collections) {
                 ArrayList<Entity> entityList = new ArrayList<>();
+                // convert collections found to entity type
                 for (Collection collection : collections)
                 {
                     Entity entity = new Entity(

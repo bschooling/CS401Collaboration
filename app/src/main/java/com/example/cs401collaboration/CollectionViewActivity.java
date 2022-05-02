@@ -130,6 +130,7 @@ public class CollectionViewActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         Intent intent = getIntent();
+        // get the collection or item clicked when coming to this activity
         entityID = intent.getStringExtra("entity_clicked_id");
 
         // Fab and Label starting visibility.  Set to hidden
@@ -155,6 +156,7 @@ public class CollectionViewActivity extends AppCompatActivity {
                 mCollectionDescription.setText(collection.getDescription());
                 mCollectionBar.setTitle(collection.getName());
 
+                // retrieve a list of all sub collections or items tied to the current collection
                 mDB.getAllEntitiesForCollection(entityID, new OnSuccessListener<ArrayList<Entity>>() {
                     @Override
                     public void onSuccess(ArrayList<Entity> entities) {
@@ -216,6 +218,7 @@ public class CollectionViewActivity extends AppCompatActivity {
 
     }
 
+    // Listener for the add Fab.  Toggles the visibility of the popup menu
     private View.OnClickListener addFabListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
@@ -237,10 +240,13 @@ public class CollectionViewActivity extends AppCompatActivity {
         }
     };
 
+    // Add Collection FAB onClick listener
     private View.OnClickListener addCollectionFabListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
+            // create activity for adding new collection
             Intent createCollectionIntent = new Intent(CollectionViewActivity.this, NewEntityActivity.class);
+            // sets the intent for collection, the id of current collection, and the owner of current collection
             createCollectionIntent.putExtra("entity_type", Entity.TYPE_COLLECTION);
             createCollectionIntent.putExtra("collectionID", entityID);
             createCollectionIntent.putExtra("entity_owner", entityOwner);
@@ -249,11 +255,14 @@ public class CollectionViewActivity extends AppCompatActivity {
         }
     };
 
+    // Add Item FAB onClick listener
     private View.OnClickListener addItemFabListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
             if (entityID != null){
+                // create activity for adding new item
                 Intent createItemIntent = new Intent(CollectionViewActivity.this, NewEntityActivity.class);
+                // sets the intent for item, and the id of the current collection
                 createItemIntent.putExtra("entity_type", Entity.TYPE_ITEM);
                 createItemIntent.putExtra("collectionID", entityID);
 
