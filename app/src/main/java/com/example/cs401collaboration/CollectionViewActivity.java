@@ -35,6 +35,9 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 /**
+ * Class for the Collection View Activity
+ * Displays collections and Items the user has access to inside a recycler view
+ *
  * @author Bryce Schooling
  */
 public class CollectionViewActivity extends AppCompatActivity {

@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 /**
+ * Class for the Collaborator view Activity
+ * Displays all collaborators assigned to current collection
  *
  * @author Bryce Schooling
  */

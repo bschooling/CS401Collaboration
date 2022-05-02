@@ -26,6 +26,8 @@ import com.google.firebase.storage.StorageReference;
 import java.util.Objects;
 
 /**
+ * Displays Item View Activity
+ *
  * @author Bryce Schooling
  */
 public class ItemViewActivity extends AppCompatActivity

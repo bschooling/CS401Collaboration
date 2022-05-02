@@ -27,6 +27,11 @@ import com.google.firebase.auth.FirebaseUser;
 import java.util.ArrayList;
 import java.util.Objects;
 
+/**
+ * Class for the Main Home Screen Activity
+ * Displays root collections for user
+ *
+ */
 public class HomeScreenActivity extends AppCompatActivity
 {
 
