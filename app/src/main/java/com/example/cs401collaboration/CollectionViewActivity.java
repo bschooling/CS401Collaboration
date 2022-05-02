@@ -1,10 +1,7 @@
 package com.example.cs401collaboration;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,9 +31,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -47,9 +41,6 @@ public class CollectionViewActivity extends AppCompatActivity {
 
     /* Database */
     private DatabaseService mDB;
-
-    /* Storage */
-    private StorageService mStorage = StorageService.getInstance();
 
     /* UI Element Handlers */
     private TextView mCollectionLocation;
@@ -310,7 +301,6 @@ public class CollectionViewActivity extends AppCompatActivity {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Bitmap bitmap;
         String resultString;
 
         super.onActivityResult(requestCode, resultCode, data);
@@ -374,44 +364,57 @@ public class CollectionViewActivity extends AppCompatActivity {
             }
 
             if (requestCode == QRScanActivity.CAMERA_REQUEST) {
-                Bitmap imageBitmap;
-                String imageFilePath = data.getStringExtra("ResultFilePath");
+                Collection updatedCollection = new Collection();
+                String imageFilePath = data.getStringExtra("ImageResourceID");
+                String imageFileName = data.getStringExtra("ImageFileName");
 
                 Log.d(TAG, "Result from ScanQR: " + data);
-                Log.d(TAG, "Result from ScanQR: " + imageFilePath);
+                Log.d(TAG, "Result ImageResourceID: " + imageFilePath);
+                Log.d(TAG, "Result ImageFileName: " + imageFileName);
 
-                try {
-                    int jpgQuality = 80;
-                    File imageFile = new File(imageFilePath);
-                    Uri imageUri = Uri.fromFile(imageFile);
-                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                mDB.getCollection(entityID, new OnSuccessListener<Collection>() {
+                    @Override
+                    public void onSuccess(Collection collection) {
+                        // Copy collection
+                        updatedCollection.copyOther(collection);
+                        updatedCollection.setImageResourceID(imageFileName);
 
-                    Log.d(TAG, "imageUri: " + imageUri);
+                        mDB.updateCollection(updatedCollection, new OnSuccessListener<Boolean>() {
+                            @Override
+                            public void onSuccess(Boolean aBoolean) {
+                                Toast.makeText (CollectionViewActivity.this,
+                                        "Update Collection Successful", Toast.LENGTH_SHORT).show();
+                            }
+                        }, new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Toast.makeText (CollectionViewActivity.this,
+                                        "Could not update Collection", Toast.LENGTH_LONG).show();
+                            }
+                        });
 
-                    imageBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
-                    mCollectionImage.setImageBitmap(imageBitmap);
+                        String newImageResourceID = updatedCollection.getImageResourceID();
+                        String oldImageResourceID = collection.getImageResourceID();
 
-                    Log.d(TAG, "FileSize: " + imageFile.length());
+                        if (newImageResourceID != null && !newImageResourceID.equals(oldImageResourceID)) {
+                            StorageReference resourceSR =
+                                    FirebaseStorage.getInstance().getReference().child(newImageResourceID);
 
-                    if (imageFile.length() >= 1024 * 1024) {
-                        // mCollectionImage.setDrawingCacheEnabled(true);
-                        // imageBitmap = mCollectionImage.getDrawingCache();
-                        jpgQuality = 75;
+                            Log.d(TAG, "ResourceSR: " + resourceSR);
+
+                            GlideApp.with(CollectionViewActivity.this)
+                                    .load(resourceSR)
+                                    .into(mCollectionImage);
+
+                        }
                     }
-
-                    imageBitmap.compress(Bitmap.CompressFormat.JPEG, jpgQuality, byteArrayOutputStream);
-
-                    byte[] uploadBytes = byteArrayOutputStream.toByteArray();
-
-                    Log.d(TAG, "jpgQuality: " + jpgQuality);
-                    Log.d(TAG, "uploadBytes: " + uploadBytes.length);
-                }
-
-                catch (IOException ioException) {
-                    Log.d(TAG, "File IO Error occurred: " + ioException.getMessage());
-                }
-
-                // mStorage.toBytes(mCollectionImage);
+                }, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(CollectionViewActivity.this,
+                                "Cant Find Collection Data", Toast.LENGTH_LONG).show();
+                    }
+                });
             }
         }
 

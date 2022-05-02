@@ -31,6 +31,7 @@ import com.google.mlkit.vision.barcode.BarcodeScanning;
 import com.google.mlkit.vision.barcode.common.Barcode;
 import com.google.mlkit.vision.common.InputImage;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -83,6 +84,12 @@ public class QRScanActivity extends AppCompatActivity {
      */
     private final String WRITE_PERMISSION = Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
+    /* Storage */
+    /**
+     *
+     */
+    private StorageService mStorage = StorageService.getInstance();
+
     // Instance variables
 
     /**
@@ -99,6 +106,16 @@ public class QRScanActivity extends AppCompatActivity {
      *
      */
     private String resultFilePath;
+
+    /**
+     *
+     */
+    private String fileName;
+
+    /**
+     *
+     */
+    private ByteArrayOutputStream outputStream;
 
     /**
      *
@@ -155,6 +172,7 @@ public class QRScanActivity extends AppCompatActivity {
         ).build();
 
         barcodeScanner = BarcodeScanning.getClient(options);
+
         resultText = (TextView) findViewById(R.id.result_text);
         resultLabel = (TextView) findViewById(R.id.result_label);
         image = (ImageView) findViewById(R.id.qr_scan_image);
@@ -289,9 +307,36 @@ public class QRScanActivity extends AppCompatActivity {
      * @param view is a View object
      */
     public void saveImage(View view) {
-        if (returnCode == RESULT_OK && activityRequest == CAMERA_REQUEST && returnIntent != null) {
-            setResult(returnCode, returnIntent);
-            finish();
+        Toast failToast = Toast.makeText(this, "Failed to upload image", Toast.LENGTH_LONG);
+
+        if (returnCode == RESULT_OK && activityRequest == CAMERA_REQUEST) {
+            byte[] uploadBytes = outputStream.toByteArray();
+
+            Log.d(LOG_TAG, "uploadBytes: " + uploadBytes.length);
+
+            saveImageButton.setEnabled(false);
+
+            mStorage.uploadResource(fileName, uploadBytes, new OnSuccessListener<String>() {
+                @Override
+                public void onSuccess(String s) {
+                    saveImageButton.setEnabled(true);
+
+                    returnIntent = new Intent();
+                    returnIntent.putExtra("ImageFileName", fileName);
+                    returnIntent.putExtra("ImageResourceID", s);
+
+                    setResult(returnCode, returnIntent);
+                    finish();
+                }
+            }, new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Log.d(LOG_TAG, "Uploading error occurred: " + e.getMessage());
+                    failToast.show();
+
+                    // Go back to calling activity or stay here?
+                }
+            });
         }
     }
 
@@ -325,7 +370,7 @@ public class QRScanActivity extends AppCompatActivity {
                     Uri imageUri;
                     File imageFile;
                     File storageDir;
-                    String timeStamp = new SimpleDateFormat("yyyyMMdd-HHmm").format(new Date());
+                    String timeStamp = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date());
                     String imageFileName = "photo-" + timeStamp;
 
                     if (activityRequest == CAMERA_REQUEST) {
@@ -403,19 +448,31 @@ public class QRScanActivity extends AppCompatActivity {
                     if (activityRequest == CAMERA_REQUEST) {
                         Log.d(LOG_TAG, "resultFilePath: " + resultFilePath);
 
+                        int jpgQuality = 80;
                         File photoFile = new File(resultFilePath);
-                        photo = MediaStore.Images.Media.getBitmap(getContentResolver(), Uri.fromFile(photoFile));
+                        Uri photoUri = Uri.fromFile(photoFile);
+                        fileName = photoFile.getName();
+                        outputStream = new ByteArrayOutputStream();
+                        photo = MediaStore.Images.Media.getBitmap(getContentResolver(), photoUri);
 
                         image.setImageBitmap(photo);
 
-                        returnIntent = data;
-                        returnIntent.putExtra("ResultFilePath", resultFilePath);
+                        Log.d(LOG_TAG, "Result Filename: " + photoFile.getName());
+                        Log.d(LOG_TAG, "Result FileSize: " + photoFile.length());
+
+                        if (photoFile.length() >= 1024 * 1024)
+                            jpgQuality = 75;
+
+                        photo.compress(Bitmap.CompressFormat.JPEG, jpgQuality, outputStream);
+
+                        Log.d(LOG_TAG, "jpgQuality: " + jpgQuality);
+
                         returnCode = RESULT_OK;
                     }
                 }
 
                 catch (IOException ioException) {
-                    Log.d(LOG_TAG, "An IO Error occurred: " + ioException.getMessage());
+                    Log.d(LOG_TAG, "File IO Error occurred: " + ioException.getMessage());
                 }
             }
 
