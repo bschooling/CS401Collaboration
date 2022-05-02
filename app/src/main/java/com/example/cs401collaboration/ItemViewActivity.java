@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -15,11 +16,14 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.cs401collaboration.glide.GlideApp;
+import com.example.cs401collaboration.model.Collection;
 import com.example.cs401collaboration.model.Item;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+
+import java.util.Objects;
 
 /**
  * @author Bryce Schooling
@@ -36,7 +40,7 @@ public class ItemViewActivity extends AppCompatActivity {
     private TextView itemDescription, itemLocation;
     private ImageView itemImage;
     private Toolbar itemTitle;
-    private Button  btDelete, btQr;
+    private Button  btDelete, btQr, btChangeImage;
 
     // Current Item ID
     String itemID;
@@ -55,6 +59,7 @@ public class ItemViewActivity extends AppCompatActivity {
         itemImage = findViewById(R.id.item_image);
         itemTitle = findViewById(R.id.item_title);
         btDelete = findViewById(R.id.bt_delete_item);
+        btChangeImage = findViewById(R.id.bt_change_image);
         btQr = findViewById(R.id.bt_item_qr);
 
 
@@ -107,6 +112,20 @@ public class ItemViewActivity extends AppCompatActivity {
             }
         });
 
+        btChangeImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String resID = getIntent().getStringExtra("getImageResourceID");
+                if (resID == null) resID = "placeholder.png";
+
+                Intent imageIntent = new Intent(ItemViewActivity.this, QRScanActivity.class);
+                imageIntent.putExtra("RequestCode", QRScanActivity.CAMERA_REQUEST);
+                imageIntent.putExtra("ResourceID", resID);
+
+                startActivityForResult(imageIntent, QRScanActivity.CAMERA_REQUEST);
+            }
+        });
+
     }
 
     @Override
@@ -144,5 +163,114 @@ public class ItemViewActivity extends AppCompatActivity {
         GlideApp.with(ItemViewActivity.this)
                 .load(resourceSR)
                 .into(itemImage);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        String resultString;
+
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == RESULT_OK) {
+            if (requestCode == QRScanActivity.QR_REQUEST) {
+
+                resultString = data.getStringExtra("ResultString");
+
+                mDB.getCollection(resultString, new OnSuccessListener<Collection>() {
+                    @Override
+                    public void onSuccess(Collection collection) {
+                        Intent entityIntent = new Intent(ItemViewActivity.this, ItemViewActivity.class);
+                        entityIntent.putExtra("entity_clicked_id", resultString);
+
+                        startActivity(entityIntent);
+                    }
+                }, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        if (Objects.equals(e.getMessage(), "UserInvalidPermissions"))
+                        {
+                            Toast.makeText(
+                                    ItemViewActivity.this,
+                                    "Not Authorized to Access Collection",
+                                    Toast.LENGTH_LONG
+                            ).show();
+                        }
+                        else if (Objects.equals(e.getMessage(), "NoCollectionFound"))
+                        {
+                            mDB.getItem(resultString, new OnSuccessListener<Item>() {
+                                @Override
+                                public void onSuccess(Item item) {
+                                    Intent entityIntent = new Intent(ItemViewActivity.this, ItemViewActivity.class);
+                                    entityIntent.putExtra("entity_clicked_id", resultString);
+
+                                    startActivity(entityIntent);
+                                }
+                            }, new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Toast.makeText (
+                                            ItemViewActivity.this,
+                                            "Unable to retrieve ScanQR result",
+                                            Toast.LENGTH_LONG
+                                    ).show();
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+
+            if (requestCode == QRScanActivity.CAMERA_REQUEST) {
+                Item updatedItem = new Item();
+                String imageFilePath = data.getStringExtra("ImageResourceID");
+                String imageFileName = data.getStringExtra("ImageFileName");
+
+                mDB.getItem(itemID, new OnSuccessListener<Item>() {
+                    @Override
+                    public void onSuccess(Item item) {
+                        updatedItem.copyOther(item);
+                        updatedItem.setImageResourceID(imageFileName);
+
+                        mDB.updateItem(updatedItem, new OnSuccessListener<Boolean>() {
+                            @Override
+                            public void onSuccess(Boolean aBoolean) {
+                                Toast.makeText (ItemViewActivity.this,
+                                        "Update Item Successful", Toast.LENGTH_SHORT).show();
+                            }
+                        }, new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Toast.makeText (ItemViewActivity.this,
+                                        "Could not update Item", Toast.LENGTH_LONG).show();
+                            }
+                        });
+
+                        String newImageResourceID = updatedItem.getImageResourceID();
+                        String oldImageResourceID = item.getImageResourceID();
+
+                        if (newImageResourceID != null && !newImageResourceID.equals(oldImageResourceID)) {
+                            Log.d("ItemViewActivity", "newImageResourceID: " + newImageResourceID);
+                            Log.d("ItemViewActivity", "oldImageResourceID: " + oldImageResourceID);
+
+                            StorageReference resourceSR =
+                                    FirebaseStorage.getInstance().getReference().child(newImageResourceID);
+
+                            Log.d("ItemViewActivity", "ResourceSR: " + resourceSR);
+
+                            GlideApp.with(ItemViewActivity.this)
+                                    .load(resourceSR)
+                                    .into(itemImage);
+
+                        }
+                    }
+                }, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(ItemViewActivity.this,"Unable to retrieve Item",
+                                Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        }
     }
 }

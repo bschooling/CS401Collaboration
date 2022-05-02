@@ -7,6 +7,16 @@
     android:background="#FFFFFF"
     tools:context=".ItemViewActivity">
 
+    <Button
+        android:id="@+id/bt_change_image"
+        android:layout_width="160dp"
+        android:layout_height="70dp"
+        android:layout_marginStart="124dp"
+        android:layout_marginBottom="132dp"
+        android:text="@string/change_image_string"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <android.widget.Toolbar
         android:id="@+id/item_title"
         android:layout_width="0dp"
