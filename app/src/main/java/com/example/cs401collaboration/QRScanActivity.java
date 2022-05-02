@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -23,8 +24,11 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
+import com.example.cs401collaboration.glide.GlideApp;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.google.mlkit.vision.barcode.BarcodeScanner;
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions;
 import com.google.mlkit.vision.barcode.BarcodeScanning;
@@ -239,6 +243,19 @@ public class QRScanActivity extends AppCompatActivity {
 
             saveImageButton.setVisibility(View.GONE);
         }
+
+        // Load preview of current image
+        String imageResourceID = intent.getStringExtra("imageResourceID");
+        Log.d (
+                LOG_TAG,
+                "onStart: CAMERA_REQUEST: loading existing image for preview id=" +
+                        imageResourceID
+        );
+        StorageReference resourceSR =
+                FirebaseStorage.getInstance().getReference().child(imageResourceID);
+        GlideApp.with(QRScanActivity.this)
+                .load(resourceSR)
+                .into(image);
     }
 
     /**
@@ -316,14 +333,15 @@ public class QRScanActivity extends AppCompatActivity {
 
             saveImageButton.setEnabled(false);
 
-            mStorage.uploadResource(fileName, uploadBytes, new OnSuccessListener<String>() {
+            String presentImageResourceID = getIntent().getStringExtra("imageResourceID");
+
+            mStorage.uploadResource(null, uploadBytes, new OnSuccessListener<String>() {
                 @Override
-                public void onSuccess(String s) {
+                public void onSuccess(String newImageResourceID) {
                     saveImageButton.setEnabled(true);
 
                     returnIntent = new Intent();
-                    returnIntent.putExtra("ImageFileName", fileName);
-                    returnIntent.putExtra("ImageResourceID", s);
+                    returnIntent.putExtra("imageResourceID", newImageResourceID);
 
                     setResult(returnCode, returnIntent);
                     finish();
@@ -333,8 +351,6 @@ public class QRScanActivity extends AppCompatActivity {
                 public void onFailure(@NonNull Exception e) {
                     Log.d(LOG_TAG, "Uploading error occurred: " + e.getMessage());
                     failToast.show();
-
-                    // Go back to calling activity or stay here?
                 }
             });
         }
@@ -492,6 +508,11 @@ public class QRScanActivity extends AppCompatActivity {
                     }
 
                     else if (activityRequest == CAMERA_REQUEST) {
+                        // Populate $outputStream with imported image data
+                        outputStream = new ByteArrayOutputStream();
+                        Bitmap bitmap = ((BitmapDrawable) image.getDrawable()).getBitmap();
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream);
+
                         returnIntent = data;
                         returnCode = RESULT_OK;
                     }

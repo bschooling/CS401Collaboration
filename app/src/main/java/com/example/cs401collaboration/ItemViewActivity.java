@@ -28,8 +28,8 @@ import java.util.Objects;
 /**
  * @author Bryce Schooling
  */
-public class ItemViewActivity extends AppCompatActivity {
-
+public class ItemViewActivity extends AppCompatActivity
+{
     /* Database */
     private DatabaseService mDB;
 
@@ -44,6 +44,9 @@ public class ItemViewActivity extends AppCompatActivity {
 
     // Current Item ID
     String itemID;
+
+    // Log Tag
+    private static final String TAG = "ItemViewActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,7 +123,7 @@ public class ItemViewActivity extends AppCompatActivity {
 
                 Intent imageIntent = new Intent(ItemViewActivity.this, QRScanActivity.class);
                 imageIntent.putExtra("RequestCode", QRScanActivity.CAMERA_REQUEST);
-                imageIntent.putExtra("ResourceID", resID);
+                imageIntent.putExtra("imageResourceID", resID);
 
                 startActivityForResult(imageIntent, QRScanActivity.CAMERA_REQUEST);
             }
@@ -222,20 +225,35 @@ public class ItemViewActivity extends AppCompatActivity {
 
             if (requestCode == QRScanActivity.CAMERA_REQUEST) {
                 Item updatedItem = new Item();
-                String imageFilePath = data.getStringExtra("ImageResourceID");
-                String imageFileName = data.getStringExtra("ImageFileName");
+                String imageResourceID = data.getStringExtra("imageResourceID");
 
                 mDB.getItem(itemID, new OnSuccessListener<Item>() {
                     @Override
                     public void onSuccess(Item item) {
                         updatedItem.copyOther(item);
-                        updatedItem.setImageResourceID(imageFileName);
+                        updatedItem.setImageResourceID(imageResourceID);
 
                         mDB.updateItem(updatedItem, new OnSuccessListener<Boolean>() {
                             @Override
                             public void onSuccess(Boolean aBoolean) {
                                 Toast.makeText (ItemViewActivity.this,
                                         "Update Item Successful", Toast.LENGTH_SHORT).show();
+                                // Delete old image
+                                mStorage.deleteResource(item.getImageResourceID(),
+                                    new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void unused) {
+
+                                        }
+                                    }, new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Log.d (TAG,
+                                                    "Unable to delete orphaned image id="
+                                                            + item.getImageResourceID()
+                                            );
+                                        }
+                                    });
                             }
                         }, new OnFailureListener() {
                             @Override
@@ -245,22 +263,24 @@ public class ItemViewActivity extends AppCompatActivity {
                             }
                         });
 
-                        String newImageResourceID = updatedItem.getImageResourceID();
                         String oldImageResourceID = item.getImageResourceID();
 
-                        if (newImageResourceID != null && !newImageResourceID.equals(oldImageResourceID)) {
-                            Log.d("ItemViewActivity", "newImageResourceID: " + newImageResourceID);
+                        if
+                        (
+                            imageResourceID != null && !imageResourceID.equals(oldImageResourceID)
+                        )
+                        {
+                            Log.d("ItemViewActivity", "newImageResourceID: " + imageResourceID);
                             Log.d("ItemViewActivity", "oldImageResourceID: " + oldImageResourceID);
 
                             StorageReference resourceSR =
-                                    FirebaseStorage.getInstance().getReference().child(newImageResourceID);
+                                    FirebaseStorage.getInstance().getReference().child(imageResourceID);
 
                             Log.d("ItemViewActivity", "ResourceSR: " + resourceSR);
 
                             GlideApp.with(ItemViewActivity.this)
                                     .load(resourceSR)
                                     .into(itemImage);
-
                         }
                     }
                 }, new OnFailureListener() {

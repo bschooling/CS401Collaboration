@@ -42,6 +42,9 @@ public class CollectionViewActivity extends AppCompatActivity {
     /* Database */
     private DatabaseService mDB;
 
+    /* Storage */
+    private StorageService mStorage;
+
     /* UI Element Handlers */
     private TextView mCollectionLocation;
     private TextView mCollectionDescription;
@@ -68,6 +71,11 @@ public class CollectionViewActivity extends AppCompatActivity {
      */
     ActivityResultLauncher<Intent> collabScreenLauncher;
 
+    /**
+     * Collection being presently displayed on this screen. Set in onStart getCollection.
+     */
+    private Collection mCollection;
+
     // EntityID holds the parent ID passed in
     String entityID;
     String entityOwner;
@@ -87,8 +95,9 @@ public class CollectionViewActivity extends AppCompatActivity {
                 new collabScreenLauncherActivityResultCallback()
         );
 
-        // Database
+        // Database, Storage
         mDB = DatabaseService.getInstance();
+        mStorage = StorageService.getInstance();
 
         // Location and Description text
         mCollectionLocation = findViewById(R.id.collection_view_location);
@@ -135,6 +144,9 @@ public class CollectionViewActivity extends AppCompatActivity {
         mDB.getCollection(entityID, new OnSuccessListener<Collection>() {
             @Override
             public void onSuccess(Collection collection) {
+                // Set retrieved collection to class instance
+                CollectionViewActivity.this.mCollection = collection;
+
                 // Get the ParentCollection
                 entityOwner = collection.getOwner().getId();
 
@@ -286,12 +298,12 @@ public class CollectionViewActivity extends AppCompatActivity {
         {
             Log.d(TAG, "onOptionsItemSelected: changeImage option selected");
 
-            String resID = getIntent().getStringExtra("getImageResourceID");
-            if (resID == null) resID = "placeholder.png";
+            String imageResourceID = mCollection.getImageResourceID();
+            if (imageResourceID == null) imageResourceID = "placeholder.png";
 
             Intent imageIntent = new Intent(CollectionViewActivity.this, QRScanActivity.class);
             imageIntent.putExtra("RequestCode", QRScanActivity.CAMERA_REQUEST);
-            imageIntent.putExtra("ResourceID", resID);
+            imageIntent.putExtra("imageResourceID", imageResourceID);
 
             startActivityForResult(imageIntent, QRScanActivity.CAMERA_REQUEST);
 
@@ -383,25 +395,39 @@ public class CollectionViewActivity extends AppCompatActivity {
 
             if (requestCode == QRScanActivity.CAMERA_REQUEST) {
                 Collection updatedCollection = new Collection();
-                String imageFilePath = data.getStringExtra("ImageResourceID");
-                String imageFileName = data.getStringExtra("ImageFileName");
+                String imageResourceID = data.getStringExtra("imageResourceID");
 
                 Log.d(TAG, "Result from ScanQR: " + data);
-                Log.d(TAG, "Result ImageResourceID: " + imageFilePath);
-                Log.d(TAG, "Result ImageFileName: " + imageFileName);
+                Log.d(TAG, "Result imageResourceID: " + imageResourceID);
 
                 mDB.getCollection(entityID, new OnSuccessListener<Collection>() {
                     @Override
                     public void onSuccess(Collection collection) {
                         // Copy collection
                         updatedCollection.copyOther(collection);
-                        updatedCollection.setImageResourceID(imageFileName);
+                        updatedCollection.setImageResourceID(imageResourceID);
 
                         mDB.updateCollection(updatedCollection, new OnSuccessListener<Boolean>() {
                             @Override
                             public void onSuccess(Boolean aBoolean) {
                                 Toast.makeText (CollectionViewActivity.this,
                                         "Update Collection Successful", Toast.LENGTH_SHORT).show();
+                                // Delete old image
+                                mStorage.deleteResource(collection.getImageResourceID(),
+                                    new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void unused) {
+
+                                        }
+                                    }, new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Log.d (TAG,
+                                                    "Unable to delete orphaned image id="
+                                                            + collection.getImageResourceID()
+                                            );
+                                        }
+                                    });
                             }
                         }, new OnFailureListener() {
                             @Override
@@ -411,22 +437,23 @@ public class CollectionViewActivity extends AppCompatActivity {
                             }
                         });
 
-                        String newImageResourceID = updatedCollection.getImageResourceID();
                         String oldImageResourceID = collection.getImageResourceID();
-
-                        if (newImageResourceID != null && !newImageResourceID.equals(oldImageResourceID)) {
-                            Log.d(TAG, "newImageResourceID: " + newImageResourceID);
+                        if
+                        (
+                            imageResourceID != null && !imageResourceID.equals(oldImageResourceID)
+                        )
+                        {
+                            Log.d(TAG, "newImageResourceID: " + imageResourceID);
                             Log.d(TAG, "oldImageResourceID: " + oldImageResourceID);
 
                             StorageReference resourceSR =
-                                    FirebaseStorage.getInstance().getReference().child(newImageResourceID);
+                                    FirebaseStorage.getInstance().getReference().child(imageResourceID);
 
                             Log.d(TAG, "ResourceSR: " + resourceSR);
 
                             GlideApp.with(CollectionViewActivity.this)
                                     .load(resourceSR)
                                     .into(mCollectionImage);
-
                         }
                     }
                 }, new OnFailureListener() {
@@ -438,9 +465,10 @@ public class CollectionViewActivity extends AppCompatActivity {
                 });
             }
         }
-
         else
+        {
             Log.d(TAG, "No result from ScanQR Intent");
+        }
     }
 
     /**
