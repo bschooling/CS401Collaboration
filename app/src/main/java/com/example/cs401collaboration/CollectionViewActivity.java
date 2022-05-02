@@ -413,21 +413,24 @@ public class CollectionViewActivity extends AppCompatActivity {
                                 Toast.makeText (CollectionViewActivity.this,
                                         "Update Collection Successful", Toast.LENGTH_SHORT).show();
                                 // Delete old image
-                                mStorage.deleteResource(collection.getImageResourceID(),
-                                    new OnSuccessListener<Void>() {
-                                        @Override
-                                        public void onSuccess(Void unused) {
+                                if (!collection.getImageResourceID().equals("placeholder.png"))
+                                {
+                                    mStorage.deleteResource(collection.getImageResourceID(),
+                                        new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void unused) {
 
-                                        }
-                                    }, new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-                                            Log.d (TAG,
-                                                    "Unable to delete orphaned image id="
-                                                            + collection.getImageResourceID()
-                                            );
-                                        }
-                                    });
+                                            }
+                                        }, new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Log.d (TAG,
+                                                        "Unable to delete orphaned image id="
+                                                                + collection.getImageResourceID()
+                                                );
+                                            }
+                                        });
+                                }
                             }
                         }, new OnFailureListener() {
                             @Override

@@ -239,21 +239,24 @@ public class ItemViewActivity extends AppCompatActivity
                                 Toast.makeText (ItemViewActivity.this,
                                         "Update Item Successful", Toast.LENGTH_SHORT).show();
                                 // Delete old image
-                                mStorage.deleteResource(item.getImageResourceID(),
-                                    new OnSuccessListener<Void>() {
-                                        @Override
-                                        public void onSuccess(Void unused) {
+                                if (!item.getImageResourceID().equals("placeholder.png"))
+                                {
+                                    mStorage.deleteResource(item.getImageResourceID(),
+                                        new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void unused) {
 
-                                        }
-                                    }, new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-                                            Log.d (TAG,
-                                                    "Unable to delete orphaned image id="
-                                                            + item.getImageResourceID()
-                                            );
-                                        }
-                                    });
+                                            }
+                                        }, new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Log.d (TAG,
+                                                        "Unable to delete orphaned image id="
+                                                                + item.getImageResourceID()
+                                                );
+                                            }
+                                        });
+                                }
                             }
                         }, new OnFailureListener() {
                             @Override
