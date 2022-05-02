@@ -6,12 +6,15 @@
     <!-- Collaboration Screen Button -->
     <item
         android:id="@+id/miChangeImage"
-        android:title="Change Image" />
+        android:title="@string/change_image_string" />
+    <item
+        android:id="@+id/miGenQR"
+        android:title="@string/gen_qr_code_string" />
     <item
         android:id="@+id/miScanQR"
         android:title="@string/scan_qr_button" />
     <item android:id="@+id/miCollectionCollabScreen"
-        android:title="Collaboration"
+        android:title="@string/collaboration_string"
         app:showAsAction="never"/>
 
 </menu>

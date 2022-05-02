@@ -275,7 +275,6 @@ public class CollectionViewActivity extends AppCompatActivity {
         {
             Log.d(TAG, "onOptionsItemSelected: scanQR option selected");
 
-            // TODO ScanQR things here
             Intent scanIntent = new Intent(CollectionViewActivity.this, QRScanActivity.class);
             scanIntent.putExtra("RequestCode", QRScanActivity.QR_REQUEST);
 
@@ -287,10 +286,29 @@ public class CollectionViewActivity extends AppCompatActivity {
         {
             Log.d(TAG, "onOptionsItemSelected: changeImage option selected");
 
+            String resID = getIntent().getStringExtra("getImageResourceID");
+            if (resID == null) resID = "placeholder.png";
+
             Intent imageIntent = new Intent(CollectionViewActivity.this, QRScanActivity.class);
             imageIntent.putExtra("RequestCode", QRScanActivity.CAMERA_REQUEST);
+            imageIntent.putExtra("ResourceID", resID);
 
             startActivityForResult(imageIntent, QRScanActivity.CAMERA_REQUEST);
+
+            return true;
+        }
+
+        else if (item.getItemId() == R.id.miGenQR)
+        {
+            Log.d(TAG, "onOptionsItemSelected: genQR option selected");
+
+            Intent qrViewIntent = new Intent(CollectionViewActivity.this, QRViewActivity.class);
+            String inputTitle = mCollectionBar.getTitle().toString() + " Collection";
+
+            qrViewIntent.putExtra("qrTitle", inputTitle);
+            qrViewIntent.putExtra("encodeString", entityID);
+
+            startActivity(qrViewIntent);
 
             return true;
         }
@@ -397,6 +415,9 @@ public class CollectionViewActivity extends AppCompatActivity {
                         String oldImageResourceID = collection.getImageResourceID();
 
                         if (newImageResourceID != null && !newImageResourceID.equals(oldImageResourceID)) {
+                            Log.d(TAG, "newImageResourceID: " + newImageResourceID);
+                            Log.d(TAG, "oldImageResourceID: " + oldImageResourceID);
+
                             StorageReference resourceSR =
                                     FirebaseStorage.getInstance().getReference().child(newImageResourceID);
 
