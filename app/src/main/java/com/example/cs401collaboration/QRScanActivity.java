@@ -308,17 +308,20 @@ public class QRScanActivity extends AppCompatActivity {
         }
 
         // Load preview of current image
-        String imageResourceID = intent.getStringExtra("imageResourceID");
-        Log.d (
-                LOG_TAG,
-                "onStart: CAMERA_REQUEST: loading existing image for preview id=" +
-                        imageResourceID
-        );
-        StorageReference resourceSR =
-                FirebaseStorage.getInstance().getReference().child(imageResourceID);
-        GlideApp.with(QRScanActivity.this)
-                .load(resourceSR)
-                .into(image);
+        if (activityRequest == CAMERA_REQUEST)
+        {
+            String imageResourceID = intent.getStringExtra("imageResourceID");
+            Log.d (
+                    LOG_TAG,
+                    "onStart: CAMERA_REQUEST: loading existing image for preview id=" +
+                            imageResourceID
+            );
+            StorageReference resourceSR =
+                    FirebaseStorage.getInstance().getReference().child(imageResourceID);
+            GlideApp.with(QRScanActivity.this)
+                    .load(resourceSR)
+                    .into(image);
+        }
     }
 
     /**

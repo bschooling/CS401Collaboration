@@ -546,6 +546,7 @@ public class DatabaseService
                             else
                             {
                                 Log.d(TAG, "getItem: No such document");
+                                failureCB.onFailure(new Exception("ItemDoesNotExist"));
                             }
                         }
                         else

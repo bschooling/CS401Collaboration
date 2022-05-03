@@ -331,6 +331,7 @@ public class CollectionViewActivity extends AppCompatActivity {
 
             qrViewIntent.putExtra("qrTitle", inputTitle);
             qrViewIntent.putExtra("encodeString", entityID);
+            qrViewIntent.putExtra("entityType", "collection");
 
             startActivity(qrViewIntent);
 

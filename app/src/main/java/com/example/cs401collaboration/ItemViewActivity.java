@@ -114,6 +114,7 @@ public class ItemViewActivity extends AppCompatActivity
 
                 qrViewIntent.putExtra("qrTitle", inputTitle);
                 qrViewIntent.putExtra("encodeString", itemID);
+                qrViewIntent.putExtra("entityType", "item");
 
                 startActivity(qrViewIntent);
             }
