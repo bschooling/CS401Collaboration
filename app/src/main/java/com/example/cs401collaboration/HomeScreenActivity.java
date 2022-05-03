@@ -175,6 +175,7 @@ public class HomeScreenActivity extends AppCompatActivity
         if (item.getItemId() == R.id.miLogout)
         {
             Log.d(LOG_TAG_MAIN, "onOptionsItemSelected: logout option selected");
+            this.user = null;
             this.mAuth.signOut();
             startActivity(new Intent(this, LoginActivity.class));
             Log.d (
