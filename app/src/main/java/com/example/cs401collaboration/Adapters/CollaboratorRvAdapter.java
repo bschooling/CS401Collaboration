@@ -75,14 +75,6 @@ public class CollaboratorRvAdapter extends RecyclerView.Adapter<CollaboratorRvAd
         holder.tvCollaboratorName.setText(user.getName());
         holder.tvCollaboratorEmail.setText(user.getEmail());
 
-        // Check if user is the owner
-        if (!isOwner) {
-            if (!user.getUid().equals(currentUserID)){
-                // hide the delete button so non-owner cannot remove other users
-                holder.btDelete.setVisibility(View.GONE);
-            }
-        }
-
         holder.btDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
