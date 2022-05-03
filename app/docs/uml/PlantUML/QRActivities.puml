@@ -23,13 +23,14 @@ class com.example.cs401collaboration.QRScanActivity {
 - int activityRequest
 - int returnCode
 - String resultFilePath
-- String fileName
 - ByteArrayOutputStream outputStream
 - Intent returnIntent
 - TextView resultLabel
 - TextView resultText
 - ImageView image
 - Button saveImageButton
+- Button deleteImageButton
+- Button clearImageButton
 - BarcodeScanner barcodeScanner
 - Toolbar qrToolbar
 # void onCreate(Bundle)
@@ -37,6 +38,8 @@ class com.example.cs401collaboration.QRScanActivity {
 + void takeImage(View)
 + void selectImage(View)
 + void saveImage(View)
++ void deleteImage(View)
++ void clearImage(View)
 + boolean checkPermission(String)
 + void onRequestPermissionsResult(int,String[],int[])
 + void onActivityResult(int,int,Intent)
