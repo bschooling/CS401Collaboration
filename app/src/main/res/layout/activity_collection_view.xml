@@ -10,7 +10,8 @@
         android:id="@+id/appbar"
 
         android:layout_width="match_parent"
-        android:layout_height="192dp" >
+        android:layout_height="192dp"
+        android:background="#FEFEFE">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:layout_width="match_parent"
@@ -39,7 +40,6 @@
             </androidx.appcompat.widget.Toolbar>
 
 
-
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -47,7 +47,7 @@
         android:id="@+id/textToolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/purple_500"
+        android:background="@color/white"
         app:layout_anchor="@+id/appbar"
         app:layout_anchorGravity="bottom"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
@@ -56,19 +56,19 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
+
             <TextView
                 android:id="@+id/collection_view_location"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAlignment="center"
-                android:textSize="24sp"
-                />
+                android:textSize="24sp" />
 
             <TextView
                 android:id="@+id/collection_view_description"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/purple_500"
+                android:background="@color/white"
                 android:textAlignment="center"
                 android:textSize="16sp" />
         </LinearLayout>
