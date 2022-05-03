@@ -458,9 +458,10 @@ public class QRScanActivity extends AppCompatActivity {
     public void clearImage(View view) {
         deleteImage(view);
 
+        returnIntent = new Intent();
         returnIntent.putExtra("imageResourceID", "placeholder.png");
-        setResult(RESULT_OK, returnIntent);
 
+        setResult(RESULT_OK, returnIntent);
         finish();
     }
 

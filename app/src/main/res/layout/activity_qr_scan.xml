@@ -85,11 +85,11 @@
         android:id="@+id/save_image_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
         android:text="@string/save_image_string"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/space" />
+        app:layout_constraintTop_toBottomOf="@+id/clear_image_button" />
 
     <Button
         android:id="@+id/clear_image_button"
