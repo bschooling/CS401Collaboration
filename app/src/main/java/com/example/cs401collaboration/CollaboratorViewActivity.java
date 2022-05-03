@@ -158,16 +158,11 @@ public class CollaboratorViewActivity extends AppCompatActivity {
                                     Toast.LENGTH_LONG
                             ).show();
                         } else {
-                            // add the user found as a new collaborator to the collection
+                            // add the user found as a new collaborator to the collection in the database
                             mDB.addCollab(currCollection, user.getUid(), new OnSuccessListener<Boolean>() {
                                 @Override
                                 public void onSuccess(Boolean aBoolean) {
-                                    collaboratorRvAdapter.addUserToAdapter(user);
-                                    Toast.makeText (
-                                            CollaboratorViewActivity.this,
-                                            "User Added",
-                                            Toast.LENGTH_LONG
-                                    ).show();
+
                                 }
                             }, new OnFailureListener() {
                                 @Override
@@ -175,6 +170,14 @@ public class CollaboratorViewActivity extends AppCompatActivity {
 
                                 }
                             });
+
+                            // update local client of changes to collaborator RV
+                            collaboratorRvAdapter.addUserToAdapter(user);
+                            Toast.makeText (
+                                    CollaboratorViewActivity.this,
+                                    "User Added",
+                                    Toast.LENGTH_LONG
+                            ).show();
                         }
                     }
                 }, new OnFailureListener() {
