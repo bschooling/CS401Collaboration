@@ -4,10 +4,14 @@ import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.intent.Intents.intending;
 import static androidx.test.espresso.intent.matcher.IntentMatchers.hasAction;
+import static androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent;
 import static androidx.test.espresso.intent.matcher.IntentMatchers.hasExtra;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
+import static org.junit.Assert.assertEquals;
 
 import android.Manifest;
+import android.app.Activity;
+import android.app.Instrumentation;
 import android.content.Context;
 import android.content.Intent;
 import android.provider.MediaStore;
@@ -120,13 +124,28 @@ public class QRScanActivityTest {
 
     @Test
     public void clearImageTest() {
-        Intent testIntent = new Intent(testContext, QRScanActivity.class);
-        testIntent.putExtra("RequestCode", QRScanActivity.CAMERA_REQUEST);
-        testIntent.putExtra("imageResourceID", "placeholder.png");
+        Intent testResultIntent = new Intent();
+        testResultIntent.putExtra("imageResourceID", "placeholder.png");
+        Instrumentation.ActivityResult result = new Instrumentation.ActivityResult(Activity.RESULT_OK, testResultIntent);
 
-        try (final ActivityScenario<QRScanActivity> activityScenario = ActivityScenario.launch(testIntent)) {
+        Intent inputIntent = new Intent(testContext, QRScanActivity.class);
+        inputIntent.putExtra("RequestCode", QRScanActivity.CAMERA_REQUEST);
+        inputIntent.putExtra("imageResourceID", "placeholder.png");
+
+        try (final ActivityScenario<QRScanActivity> activityScenario = ActivityScenario.launch(inputIntent)) {
+            intending(hasComponent(QRScanActivity.class.getName())).respondWith(
+                    new Instrumentation.ActivityResult(Activity.RESULT_OK, testResultIntent) );
+            
             onView(withId(R.id.clear_image_button)).perform(click());
-            intending(hasAction(""));
+            onView(withId(android.R.id.button1)).perform(click());
+
+            int resultCode = activityScenario.getResult().getResultCode();
+            Intent resultIntent = activityScenario.getResult().getResultData();
+
+            assertEquals(Activity.RESULT_OK, resultCode);
+
+            // assertEquals(testResultIntent, resultIntent);
+
         }
     }
 }
