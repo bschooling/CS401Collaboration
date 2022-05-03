@@ -3,6 +3,7 @@ package com.example.cs401collaboration.model;
 import static org.junit.Assert.*;
 
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
