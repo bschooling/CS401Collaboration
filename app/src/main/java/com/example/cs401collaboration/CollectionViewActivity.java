@@ -344,66 +344,70 @@ public class CollectionViewActivity extends AppCompatActivity {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        String resultString;
-
         super.onActivityResult(requestCode, resultCode, data);
 
         Log.d(TAG, "ResultCode from QRScan: " + resultCode);
 
         if (resultCode == RESULT_OK) {
             if (requestCode == QRScanActivity.QR_REQUEST) {
+                String resultString;
+                String readEntityID;
+                String type;
+
                 Log.d(TAG, "ResultString available: " + data.hasExtra("ResultString"));
                 Log.d(TAG, "Result of ScanQR Intent: " + data.getStringExtra("ResultString"));
 
                 resultString = data.getStringExtra("ResultString");
-                Log.d(TAG, "Processing resultString");
+                type = resultString.substring(0, 1);
+                readEntityID = resultString.substring(2);
 
-                mDB.getCollection(resultString, new OnSuccessListener<Collection>() {
-                    @Override
-                    public void onSuccess(Collection collection) {
-                        Intent entityIntent = new Intent(CollectionViewActivity.this, CollectionViewActivity.class);
-                        entityIntent.putExtra("entity_clicked_id", resultString);
-
-                        startActivity(entityIntent);
-                    }
-                }, new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        if (Objects.equals(e.getMessage(), "UserInvalidPermissions"))
-                        {
-                            Toast.makeText(
-                                    CollectionViewActivity.this,
-                                    "Not Authorized to Access Collection",
-                                    Toast.LENGTH_LONG
-                            ).show();
-                        }
-                        else if (Objects.equals(e.getMessage(), "NoCollectionFound"))
-                        {
-                            Log.d(TAG, "resultString is not a Collection");
-
-                            mDB.getItem(resultString, new OnSuccessListener<Item>() {
+                if (type.equals("c"))
+                {
+                    Intent entityIntent = new Intent(CollectionViewActivity.this, CollectionViewActivity.class);
+                    entityIntent.putExtra("entity_clicked_id", readEntityID);
+                    startActivity(entityIntent);
+                }
+                else if (type.equals("i"))
+                {
+                    Toast errorToast = Toast.makeText (CollectionViewActivity.this,
+                            "An error occurred.",
+                            Toast.LENGTH_LONG);
+                    mDB.getItem(readEntityID, new OnSuccessListener<Item>() {
+                        @Override
+                        public void onSuccess(Item item) {
+                            mDB.getCollection(item.getParentCollection().getId(), new OnSuccessListener<Collection>() {
                                 @Override
-                                public void onSuccess(Item item) {
-                                    Log.d(TAG, "resultString is an Item");
-
+                                public void onSuccess(Collection collection) {
                                     Intent entityIntent = new Intent(CollectionViewActivity.this, ItemViewActivity.class);
-                                    entityIntent.putExtra("entity_clicked_id", resultString);
-
+                                    entityIntent.putExtra("entity_clicked_id", readEntityID);
                                     startActivity(entityIntent);
                                 }
                             }, new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
-                                    Toast.makeText (
-                                            CollectionViewActivity.this,
-                                            "Unable to retrieve ScanQR result",
-                                            Toast.LENGTH_LONG
-                                    ).show();
+                                    if (e.getMessage().equals("UserInvalidPermissions"))
+                                        errorToast.setText("Invalid Code");
+                                    errorToast.show();
                                 }
                             });
                         }
-                    }
-                });
+                    }, new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            if (e.getMessage().equals("ItemDoesNotExist"))
+                                errorToast.setText("Invalid Code");
+                            errorToast.show();
+                        }
+                    });
+                }
+                else
+                {
+                    Log.d(TAG, "Scanned QR Label has invalid tag");
+                    Toast.makeText (CollectionViewActivity.this,
+                            "Invalid QR Code",
+                            Toast.LENGTH_LONG
+                    ).show();
+                }
             }
 
             if (requestCode == QRScanActivity.CAMERA_REQUEST) {
