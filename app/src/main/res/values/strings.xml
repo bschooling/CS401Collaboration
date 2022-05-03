@@ -143,5 +143,6 @@
     <string name="change_image_string">Change Image</string>
     <string name="gen_qr_code_string">Generate QR Code</string>
     <string name="collaboration_string">Collaboration</string>
+    <string name="confirm_clear">Are you sure you want to reset the image to the default?</string>
 
 </resources>

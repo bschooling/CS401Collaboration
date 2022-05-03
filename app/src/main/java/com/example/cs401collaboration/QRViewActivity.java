@@ -91,7 +91,10 @@ public class QRViewActivity extends AppCompatActivity {
 
         qrViewIntent = getIntent();
         inputTitle = qrViewIntent.getStringExtra("qrTitle");
+
+        String tag = qrViewIntent.getStringExtra("entityType").toLowerCase();
         encodeString = qrViewIntent.getStringExtra("encodeString");
+        encodeString = tag.charAt(0) + "-" + encodeString;
 
         qrTitle.setText(inputTitle);
         image.setImageBitmap(genQR(encodeString, QR_SIZE)); // Change inputTitle to Collection or Item ID

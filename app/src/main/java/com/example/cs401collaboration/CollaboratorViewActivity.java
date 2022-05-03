@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 /**
+ * Class for the Collaborator view Activity
+ * Displays all collaborators assigned to current collection
  *
  * @author Bryce Schooling
  */
@@ -88,6 +90,7 @@ public class CollaboratorViewActivity extends AppCompatActivity {
         // Get current logged in user
         currentFbUser = Objects.requireNonNull(mAuth.getCurrentUser(), "User cant be null");
 
+        // retrieve the collection the user is currently in
         String currentCollection = intent.getStringExtra("collection_id");
         if (currentCollection != null){
             mDB.getCollection(currentCollection, new OnSuccessListener<Collection>() {
@@ -113,6 +116,7 @@ public class CollaboratorViewActivity extends AppCompatActivity {
                         }
                     });
 
+                    // get list of collaborators for the current collection
                     mDB.getCollabs(collection, new OnSuccessListener<ArrayList<User>>() {
                         @Override
                         public void onSuccess(ArrayList<User> users) {
@@ -139,9 +143,11 @@ public class CollaboratorViewActivity extends AppCompatActivity {
                 public void onFailure(@NonNull Exception e) {}
             });
         }
+        // onclick listener for the new collaborator button
         btNewCollab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                // checks for a user based on the email entered into text box
                 mDB.getUserByEmail(etNewCollab.getText().toString(), new OnSuccessListener<User>() {
                     @Override
                     public void onSuccess(User user) {
@@ -152,15 +158,11 @@ public class CollaboratorViewActivity extends AppCompatActivity {
                                     Toast.LENGTH_LONG
                             ).show();
                         } else {
+                            // add the user found as a new collaborator to the collection in the database
                             mDB.addCollab(currCollection, user.getUid(), new OnSuccessListener<Boolean>() {
                                 @Override
                                 public void onSuccess(Boolean aBoolean) {
-                                    collaboratorRvAdapter.addUserToAdapter(user);
-                                    Toast.makeText (
-                                            CollaboratorViewActivity.this,
-                                            "User Added",
-                                            Toast.LENGTH_LONG
-                                    ).show();
+
                                 }
                             }, new OnFailureListener() {
                                 @Override
@@ -168,6 +170,14 @@ public class CollaboratorViewActivity extends AppCompatActivity {
 
                                 }
                             });
+
+                            // update local client of changes to collaborator RV
+                            collaboratorRvAdapter.addUserToAdapter(user);
+                            Toast.makeText (
+                                    CollaboratorViewActivity.this,
+                                    "User Added",
+                                    Toast.LENGTH_LONG
+                            ).show();
                         }
                     }
                 }, new OnFailureListener() {

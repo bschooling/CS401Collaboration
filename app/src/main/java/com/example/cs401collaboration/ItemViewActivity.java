@@ -26,6 +26,8 @@ import com.google.firebase.storage.StorageReference;
 import java.util.Objects;
 
 /**
+ * Displays Item View Activity
+ *
  * @author Bryce Schooling
  */
 public class ItemViewActivity extends AppCompatActivity
@@ -70,8 +72,10 @@ public class ItemViewActivity extends AppCompatActivity
         btDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                // Create the Warning Dialog
                 AlertDialog.Builder deleteWarning = new AlertDialog.Builder(ItemViewActivity.this);
 
+                // Set Messages for the Warning Dialog
                 deleteWarning.setMessage(R.string.confirm_delete);
                 deleteWarning.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
@@ -110,6 +114,7 @@ public class ItemViewActivity extends AppCompatActivity
 
                 qrViewIntent.putExtra("qrTitle", inputTitle);
                 qrViewIntent.putExtra("encodeString", itemID);
+                qrViewIntent.putExtra("entityType", "item");
 
                 startActivity(qrViewIntent);
             }
@@ -137,11 +142,13 @@ public class ItemViewActivity extends AppCompatActivity
         super.onStart();
         Intent intent = getIntent();
 
+        // get the id of the item clicked
         itemID = intent.getStringExtra("entity_clicked_id");
 
         mDB.getItem(itemID, new OnSuccessListener<Item>() {
             @Override
             public void onSuccess(Item item) {
+                // populate the ui with fields from current item
                 itemDescription.setText(item.getDescription());
                 itemLocation.setText(item.getLocation());
                 itemTitle.setTitle(item.getName());

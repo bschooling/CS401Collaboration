@@ -35,6 +35,9 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 /**
+ * Class for the Collection View Activity
+ * Displays collections and Items the user has access to inside a recycler view
+ *
  * @author Bryce Schooling
  */
 public class CollectionViewActivity extends AppCompatActivity {
@@ -130,6 +133,7 @@ public class CollectionViewActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         Intent intent = getIntent();
+        // get the collection or item clicked when coming to this activity
         entityID = intent.getStringExtra("entity_clicked_id");
 
         // Fab and Label starting visibility.  Set to hidden
@@ -155,6 +159,7 @@ public class CollectionViewActivity extends AppCompatActivity {
                 mCollectionDescription.setText(collection.getDescription());
                 mCollectionBar.setTitle(collection.getName());
 
+                // retrieve a list of all sub collections or items tied to the current collection
                 mDB.getAllEntitiesForCollection(entityID, new OnSuccessListener<ArrayList<Entity>>() {
                     @Override
                     public void onSuccess(ArrayList<Entity> entities) {
@@ -216,6 +221,7 @@ public class CollectionViewActivity extends AppCompatActivity {
 
     }
 
+    // Listener for the add Fab.  Toggles the visibility of the popup menu
     private View.OnClickListener addFabListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
@@ -237,10 +243,13 @@ public class CollectionViewActivity extends AppCompatActivity {
         }
     };
 
+    // Add Collection FAB onClick listener
     private View.OnClickListener addCollectionFabListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
+            // create activity for adding new collection
             Intent createCollectionIntent = new Intent(CollectionViewActivity.this, NewEntityActivity.class);
+            // sets the intent for collection, the id of current collection, and the owner of current collection
             createCollectionIntent.putExtra("entity_type", Entity.TYPE_COLLECTION);
             createCollectionIntent.putExtra("collectionID", entityID);
             createCollectionIntent.putExtra("entity_owner", entityOwner);
@@ -249,11 +258,14 @@ public class CollectionViewActivity extends AppCompatActivity {
         }
     };
 
+    // Add Item FAB onClick listener
     private View.OnClickListener addItemFabListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
             if (entityID != null){
+                // create activity for adding new item
                 Intent createItemIntent = new Intent(CollectionViewActivity.this, NewEntityActivity.class);
+                // sets the intent for item, and the id of the current collection
                 createItemIntent.putExtra("entity_type", Entity.TYPE_ITEM);
                 createItemIntent.putExtra("collectionID", entityID);
 
@@ -319,6 +331,7 @@ public class CollectionViewActivity extends AppCompatActivity {
 
             qrViewIntent.putExtra("qrTitle", inputTitle);
             qrViewIntent.putExtra("encodeString", entityID);
+            qrViewIntent.putExtra("entityType", "collection");
 
             startActivity(qrViewIntent);
 
@@ -331,66 +344,70 @@ public class CollectionViewActivity extends AppCompatActivity {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        String resultString;
-
         super.onActivityResult(requestCode, resultCode, data);
 
         Log.d(TAG, "ResultCode from QRScan: " + resultCode);
 
         if (resultCode == RESULT_OK) {
             if (requestCode == QRScanActivity.QR_REQUEST) {
+                String resultString;
+                String readEntityID;
+                String type;
+
                 Log.d(TAG, "ResultString available: " + data.hasExtra("ResultString"));
                 Log.d(TAG, "Result of ScanQR Intent: " + data.getStringExtra("ResultString"));
 
                 resultString = data.getStringExtra("ResultString");
-                Log.d(TAG, "Processing resultString");
+                type = resultString.substring(0, 1);
+                readEntityID = resultString.substring(2);
 
-                mDB.getCollection(resultString, new OnSuccessListener<Collection>() {
-                    @Override
-                    public void onSuccess(Collection collection) {
-                        Intent entityIntent = new Intent(CollectionViewActivity.this, CollectionViewActivity.class);
-                        entityIntent.putExtra("entity_clicked_id", resultString);
-
-                        startActivity(entityIntent);
-                    }
-                }, new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        if (Objects.equals(e.getMessage(), "UserInvalidPermissions"))
-                        {
-                            Toast.makeText(
-                                    CollectionViewActivity.this,
-                                    "Not Authorized to Access Collection",
-                                    Toast.LENGTH_LONG
-                            ).show();
-                        }
-                        else if (Objects.equals(e.getMessage(), "NoCollectionFound"))
-                        {
-                            Log.d(TAG, "resultString is not a Collection");
-
-                            mDB.getItem(resultString, new OnSuccessListener<Item>() {
+                if (type.equals("c"))
+                {
+                    Intent entityIntent = new Intent(CollectionViewActivity.this, CollectionViewActivity.class);
+                    entityIntent.putExtra("entity_clicked_id", readEntityID);
+                    startActivity(entityIntent);
+                }
+                else if (type.equals("i"))
+                {
+                    Toast errorToast = Toast.makeText (CollectionViewActivity.this,
+                            "An error occurred.",
+                            Toast.LENGTH_LONG);
+                    mDB.getItem(readEntityID, new OnSuccessListener<Item>() {
+                        @Override
+                        public void onSuccess(Item item) {
+                            mDB.getCollection(item.getParentCollection().getId(), new OnSuccessListener<Collection>() {
                                 @Override
-                                public void onSuccess(Item item) {
-                                    Log.d(TAG, "resultString is an Item");
-
+                                public void onSuccess(Collection collection) {
                                     Intent entityIntent = new Intent(CollectionViewActivity.this, ItemViewActivity.class);
-                                    entityIntent.putExtra("entity_clicked_id", resultString);
-
+                                    entityIntent.putExtra("entity_clicked_id", readEntityID);
                                     startActivity(entityIntent);
                                 }
                             }, new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
-                                    Toast.makeText (
-                                            CollectionViewActivity.this,
-                                            "Unable to retrieve ScanQR result",
-                                            Toast.LENGTH_LONG
-                                    ).show();
+                                    if (e.getMessage().equals("UserInvalidPermissions"))
+                                        errorToast.setText("Invalid Code");
+                                    errorToast.show();
                                 }
                             });
                         }
-                    }
-                });
+                    }, new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            if (e.getMessage().equals("ItemDoesNotExist"))
+                                errorToast.setText("Invalid Code");
+                            errorToast.show();
+                        }
+                    });
+                }
+                else
+                {
+                    Log.d(TAG, "Scanned QR Label has invalid tag");
+                    Toast.makeText (CollectionViewActivity.this,
+                            "Invalid QR Code",
+                            Toast.LENGTH_LONG
+                    ).show();
+                }
             }
 
             if (requestCode == QRScanActivity.CAMERA_REQUEST) {

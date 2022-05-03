@@ -146,6 +146,7 @@ public class EntityRvAdapter extends RecyclerView.Adapter<EntityRvAdapter.Viewho
                 EditText editLocation = (EditText) dialogView.findViewById(R.id.editLocation);
                 EditText editDescription = (EditText) dialogView.findViewById((R.id.editDescription));
 
+                // Variables for holding the updated Collection or updated Item
                 Collection updatedCollection = new Collection();
                 Item updatedItem = new Item();
 
@@ -269,9 +270,10 @@ public class EntityRvAdapter extends RecyclerView.Adapter<EntityRvAdapter.Viewho
                 btDelete.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-
+                        // Create the Warning Dialog
                         AlertDialog.Builder deleteWarning = new AlertDialog.Builder(context);
 
+                        // Set Messages for the Warning Dialog
                         deleteWarning.setMessage(R.string.confirm_delete);
                         deleteWarning.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                             @Override

@@ -75,17 +75,13 @@ public class CollaboratorRvAdapter extends RecyclerView.Adapter<CollaboratorRvAd
         holder.tvCollaboratorName.setText(user.getName());
         holder.tvCollaboratorEmail.setText(user.getEmail());
 
-        if (!isOwner) {
-            if (!user.getUid().equals(currentUserID)){
-                holder.btDelete.setVisibility(View.GONE);
-            }
-        }
-
         holder.btDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                // Create the Warning Dialog
                 AlertDialog.Builder deleteWarning = new AlertDialog.Builder(context);
 
+                // Set Messages for the Warning Dialog
                 deleteWarning.setMessage(R.string.confirm_delete);
                 deleteWarning.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     @Override

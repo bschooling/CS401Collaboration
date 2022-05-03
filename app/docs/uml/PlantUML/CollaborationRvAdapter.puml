@@ -1,0 +1,23 @@
+@startuml
+class com.example.cs401collaboration.Adapters.CollaboratorRvAdapter {
+- Context context
+- Collection currCollection
+- ArrayList<User> CollaboratorArrayList
+- DatabaseService mDB
+- String currentUserID
+- Boolean isOwner
++ void addUserToAdapter(User)
++ CollaboratorRvAdapter.Viewholder onCreateViewHolder(ViewGroup,int)
++ void onBindViewHolder(CollaboratorRvAdapter.Viewholder,int)
++ int getItemCount()
+}
+class com.example.cs401collaboration.Adapters.CollaboratorRvAdapter.Viewholder {
+- TextView tvCollaboratorName
+- Button btDelete
+}
+
+
+com.example.cs401collaboration.Adapters.Adapter <|-- com.example.cs401collaboration.Adapters.CollaboratorRvAdapter
+com.example.cs401collaboration.Adapters.CollaboratorRvAdapter +.. com.example.cs401collaboration.Adapters.CollaboratorRvAdapter.Viewholder
+com.example.cs401collaboration.Adapters.ViewHolder <|-- com.example.cs401collaboration.Adapters.CollaboratorRvAdapter.Viewholder
+@enduml

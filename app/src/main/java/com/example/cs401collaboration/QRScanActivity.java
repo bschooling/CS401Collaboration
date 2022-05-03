@@ -1,6 +1,8 @@
 package com.example.cs401collaboration;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -44,7 +46,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * QRScanActivity class manages things relating to scanning a QR code
+ * QRScanActivity class manages things relating to scanning a QR code and taking images
  * @author Nguyen Nam Pham
  */
 public class QRScanActivity extends AppCompatActivity {
@@ -62,7 +64,7 @@ public class QRScanActivity extends AppCompatActivity {
     public static final int CAMERA_REQUEST = 200;
 
     /**
-     * QR_REQUEST is a request code to the onActivityResult method to use the Camera for processing the QR image
+     * QR_REQUEST is a request code from another activity to use the Camera for processing the QR image
      */
     public static final int QR_REQUEST = 300;
 
@@ -79,7 +81,7 @@ public class QRScanActivity extends AppCompatActivity {
     // Instance constants
 
     /**
-     * LOG_TAG is a Tag String with the app name and activity name
+     * LOG_TAG is a Tag String with the activity name
      */
     private final String LOG_TAG = "QRScanActivity";
 
@@ -90,7 +92,7 @@ public class QRScanActivity extends AppCompatActivity {
 
     /* Storage */
     /**
-     *
+     * mStorage is a StorageService instance that handles things with Firebase Storage
      */
     private StorageService mStorage = StorageService.getInstance();
 
@@ -102,27 +104,22 @@ public class QRScanActivity extends AppCompatActivity {
     private int activityRequest;
 
     /**
-     *
+     * returnCode holds the return code before saving the image and return back to the calling activity
      */
     private int returnCode;
 
     /**
-     *
+     * resultFilePath holds the resulting file path as a String
      */
     private String resultFilePath;
 
     /**
-     *
-     */
-    private String fileName;
-
-    /**
-     *
+     * outputStream holds the image data in a ByteArrayOutputStream
      */
     private ByteArrayOutputStream outputStream;
 
     /**
-     *
+     * returnIntent is an Intent for returning the results to the calling activity
      */
     private Intent returnIntent;
 
@@ -147,6 +144,16 @@ public class QRScanActivity extends AppCompatActivity {
     private Button saveImageButton;
 
     /**
+     * deleteImageButton is a Button that saves the image when its onClick is triggered
+     */
+    private Button deleteImageButton;
+
+    /**
+     * clearImageButton is a Button that saves the image when its onClick is triggered
+     */
+    private Button clearImageButton;
+
+    /**
      * barcodeScanner is a BarcodeScanner object that handles scanning the QR code and displaying the result
      */
     private BarcodeScanner barcodeScanner;
@@ -168,26 +175,31 @@ public class QRScanActivity extends AppCompatActivity {
         Button cameraButton;
         Button selectButton;
 
+        // Calling its super class and set content view
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_qr_scan);
 
+        // Initializing variables
         BarcodeScannerOptions options = new BarcodeScannerOptions.Builder().setBarcodeFormats(
                 Barcode.FORMAT_QR_CODE
         ).build();
 
         barcodeScanner = BarcodeScanning.getClient(options);
 
-        resultText = (TextView) findViewById(R.id.result_text);
-        resultLabel = (TextView) findViewById(R.id.result_label);
-        image = (ImageView) findViewById(R.id.qr_scan_image);
-        qrToolbar = (Toolbar) findViewById(R.id.qrScanToolbar);
-        cameraButton = (Button) findViewById(R.id.camera_button);
-        selectButton = (Button) findViewById(R.id.select_image_button);
-        saveImageButton = (Button) findViewById(R.id.save_image_button);
+        resultText = findViewById(R.id.result_text);
+        resultLabel = findViewById(R.id.result_label);
+        image = findViewById(R.id.qr_scan_image);
+        qrToolbar = findViewById(R.id.qrScanToolbar);
+        cameraButton = findViewById(R.id.camera_button);
+        selectButton = findViewById(R.id.select_image_button);
+        saveImageButton = findViewById(R.id.save_image_button);
+        deleteImageButton = findViewById(R.id.delete_image_button);
+        clearImageButton = findViewById(R.id.clear_image_button);
 
         returnIntent = null;
         returnCode = 0;
 
+        // Set some onClickListeners to buttons
         cameraButton.setOnClickListener(new View.OnClickListener() {
             /**
              * onClick takes the image from the camera activity
@@ -217,6 +229,58 @@ public class QRScanActivity extends AppCompatActivity {
            }
         });
 
+        deleteImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AlertDialog.Builder deleteWarning = new AlertDialog.Builder(QRScanActivity.this);
+
+                deleteWarning.setMessage(R.string.confirm_delete);
+                deleteWarning.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        deleteImage(view);
+                    }
+                });
+
+                deleteWarning.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                });
+
+                AlertDialog warning = deleteWarning.create();
+                warning.show();
+            }
+        });
+
+        clearImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AlertDialog.Builder clearWarning = new AlertDialog.Builder(QRScanActivity.this);
+
+                clearWarning.setMessage(R.string.confirm_clear);
+                clearWarning.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        clearImage(view);
+                    }
+                });
+
+                clearWarning.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                });
+
+                AlertDialog warning = clearWarning.create();
+                warning.show();
+            }
+        });
+
+        // Start with this image in onCreate just in case the app
+        // cannot get the image from the database
         image.setImageResource(R.drawable.ic_launcher_background);
     }
 
@@ -224,11 +288,13 @@ public class QRScanActivity extends AppCompatActivity {
      * onStart starts the activity
      */
     public void onStart() {
+        // Calls its super class
         super.onStart();
 
         Intent intent = getIntent();
         activityRequest = intent.getIntExtra("RequestCode", 0);
 
+        // If it receives the CAMERA_REQUEST from the calling activity
         if (activityRequest == CAMERA_REQUEST) {
             Log.d(LOG_TAG, "CAMERA_REQUEST code");
 
@@ -238,24 +304,30 @@ public class QRScanActivity extends AppCompatActivity {
             resultText.setVisibility(View.GONE);
         }
 
+        // Else if it receives the QR_REQUEST from the calling activity
         else if (activityRequest == QR_REQUEST) {
             Log.d(LOG_TAG, "QR_REQUEST code");
 
             saveImageButton.setVisibility(View.GONE);
+            deleteImageButton.setVisibility(View.GONE);
+            clearImageButton.setVisibility(View.GONE);
         }
 
-        // Load preview of current image
-        String imageResourceID = intent.getStringExtra("imageResourceID");
-        Log.d (
-                LOG_TAG,
-                "onStart: CAMERA_REQUEST: loading existing image for preview id=" +
-                        imageResourceID
-        );
-        StorageReference resourceSR =
-                FirebaseStorage.getInstance().getReference().child(imageResourceID);
-        GlideApp.with(QRScanActivity.this)
-                .load(resourceSR)
-                .into(image);
+        // Load preview of current image on each start of this activity
+        if (activityRequest == CAMERA_REQUEST)
+        {
+            String imageResourceID = intent.getStringExtra("imageResourceID");
+            Log.d (
+                    LOG_TAG,
+                    "onStart: CAMERA_REQUEST: loading existing image for preview id=" +
+                            imageResourceID
+            );
+            StorageReference resourceSR =
+                    FirebaseStorage.getInstance().getReference().child(imageResourceID);
+            GlideApp.with(QRScanActivity.this)
+                    .load(resourceSR)
+                    .into(image);
+        }
     }
 
     /**
@@ -305,6 +377,7 @@ public class QRScanActivity extends AppCompatActivity {
     public void selectImage(View view) {
         Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
 
+        // Set the Gallery type before starting the Gallery
         galleryIntent.setType("image/*");
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
@@ -326,7 +399,11 @@ public class QRScanActivity extends AppCompatActivity {
     public void saveImage(View view) {
         Toast failToast = Toast.makeText(this, "Failed to upload image", Toast.LENGTH_LONG);
 
-        if (returnCode == RESULT_OK && activityRequest == CAMERA_REQUEST) {
+        Log.d(LOG_TAG, "ReturnCode: " + returnCode);
+        Log.d(LOG_TAG, "activityRequest: " + activityRequest);
+        Log.d(LOG_TAG, "outputStream: " + outputStream);
+
+        if (returnCode == RESULT_OK && activityRequest == CAMERA_REQUEST && outputStream != null) {
             byte[] uploadBytes = outputStream.toByteArray();
 
             Log.d(LOG_TAG, "uploadBytes: " + uploadBytes.length);
@@ -354,6 +431,49 @@ public class QRScanActivity extends AppCompatActivity {
                 }
             });
         }
+
+        else if (returnCode == RESULT_OK && activityRequest == CAMERA_REQUEST) {
+            if (returnIntent == null) {
+                returnIntent = new Intent();
+                returnIntent.putExtra("imageResourceID", "placeholder.png");
+            }
+
+            setResult(RESULT_OK, returnIntent);
+            finish();
+        }
+    }
+
+    /**
+     * deleteImage deletes the image when the warning dialog is confirmed
+     * @param view is a View object
+     */
+    public void deleteImage(View view) {
+        String imageResourceID = getIntent().getStringExtra("imageResourceID");
+
+        if (!imageResourceID.equals("placeholder.png")) {
+            // Log.d(LOG_TAG, "Delete Image Confirmed");
+
+            if (returnIntent == null)
+                returnIntent = new Intent();
+
+            returnIntent.putExtra("imageResourceID", "placeholder.png");
+
+            returnCode = RESULT_OK;
+        }
+    }
+
+    /**
+     * clearImage deletes the image, resets the imageResourceID to the default, and exits the activity
+     * @param view is a View object
+     */
+    public void clearImage(View view) {
+        if (returnIntent == null)
+            returnIntent = new Intent();
+
+        returnIntent.putExtra("imageResourceID", "placeholder.png");
+
+        setResult(RESULT_OK, returnIntent);
+        finish();
     }
 
     /**
@@ -450,7 +570,7 @@ public class QRScanActivity extends AppCompatActivity {
         resultStringList = new ArrayList<String>();
 
         if (resultCode == RESULT_OK) {
-            if (requestCode == CAMERA_REQUEST) {
+            if (requestCode == CAMERA_REQUEST) { // If the requestCode by this activity is CAMERA_REQUEST
                 Log.d(LOG_TAG, " Using Camera ResultIntent: " + data);
 
                 try {
@@ -467,7 +587,6 @@ public class QRScanActivity extends AppCompatActivity {
                         int jpgQuality = 80;
                         File photoFile = new File(resultFilePath);
                         Uri photoUri = Uri.fromFile(photoFile);
-                        fileName = photoFile.getName();
                         outputStream = new ByteArrayOutputStream();
                         photo = MediaStore.Images.Media.getBitmap(getContentResolver(), photoUri);
 
@@ -492,7 +611,7 @@ public class QRScanActivity extends AppCompatActivity {
                 }
             }
 
-            else if (requestCode == GALLERY_REQUEST) {
+            else if (requestCode == GALLERY_REQUEST) { // Else if the requestCode by this activity is GALLERY_REQUEST
                 imageUri = data.getData();
 
                 if (imageUri != null) {
@@ -591,8 +710,6 @@ public class QRScanActivity extends AppCompatActivity {
                     else {
                         resultText.setText(R.string.no_qr_text);
                         Log.d(LOG_TAG, "No QR code found in the image");
-
-                        // onFail.onFailure(new Exception("No QR Found"));
                     }
                 }
             }).addOnFailureListener(new OnFailureListener() {
@@ -604,6 +721,7 @@ public class QRScanActivity extends AppCompatActivity {
                 public void onFailure(@NonNull Exception except) {
                     //resultText.setText(R.string.no_qr_text);
                     Log.e(LOG_TAG, "Failed to generate QR Code: " + except.getMessage());
+                    onFail.onFailure(new Exception("GenQRFailed"));
                 }
             });
         }
