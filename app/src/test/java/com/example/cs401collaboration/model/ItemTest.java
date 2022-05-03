@@ -2,38 +2,61 @@ package com.example.cs401collaboration.model;
 
 import static org.junit.Assert.*;
 
+import com.google.firebase.firestore.DocumentReference;
+
+import org.junit.BeforeClass;
 import org.junit.Test;
 
+/**
+ * @author Jason Lim
+ */
 public class ItemTest {
+    //Each portion (ParentCollection, Name, Location, etc) will be individually portioned, thus not requiring a @before method.
     Item mockItem = new Item();
+
+    /**
+     * Test method for {@link Item#setParentCollection(DocumentReference)}.
+     */
     @Test
-    public void setParentCollection() {
+    public void testSetParentCollection() {
         mockItem.setParentCollection(null);
-        assertEquals("mockItem's parent collection should be null", null, mockItem.getParentCollection());
+        assertNull(mockItem.getParentCollection());
     }
 
+    /**
+     * Test method for {@link Item#setName(String)}.
+     */
     @Test
-    public void setName() {
+    public void testSetName() {
         mockItem.setName("Abyssal Whip");
-        assertEquals("mockItem's name should be Abyssal Whip", "Abyssal Whip", mockItem.getName());
+        assertEquals("Abyssal Whip", mockItem.getName());
     }
 
+    /**
+     * Test method for {@link Item#setLocation(String)}
+     */
     @Test
-    public void setLocation() {
+    public void testSetLocation() {
         mockItem.setLocation("Ver Shinhaza");
-        assertEquals("mockItem's location should be Ver Shinhaza", "Ver Shinhaza", mockItem.getLocation());
+        assertEquals("Ver Shinhaza", mockItem.getLocation());
     }
 
+    /**
+     * Test method for {@link Item#setDescription(String)}
+     */
     @Test
-    public void setDescription() {
+    public void testSetDescription() {
         String mockDesc = "An iconic and powerful one-handed melee weapon requiring an Attack level of 70 to wield.";
         mockItem.setDescription(mockDesc);
-        assertEquals("Desc should match", mockDesc,mockItem.getDescription());
+        assertEquals(mockDesc,mockItem.getDescription());
     }
 
+    /**
+     * Test method for {@link Item#setImageResourceID(String)}
+     */
     @Test
-    public void setImageResourceID() {
+    public void testSetImageResourceID() {
         mockItem.setImageResourceID("0pSAWfU");
-        assertEquals("Image Resource ID should match", "0pSAWfU",mockItem.getImageResourceID());
+        assertEquals("0pSAWfU",mockItem.getImageResourceID());
     }
 }
