@@ -585,9 +585,11 @@ public class DatabaseService
                         ArrayList<Entity> ents = new ArrayList<>();
                         for (Collection collection : collections)
                         {
+                            String childCollectionCount =
+                                    String.valueOf(collection.getChildrenCollections().size());
                             Entity entity = new Entity (
                                     collection.getName(),
-                                    collection.getLocation(),
+                                    collection.getLocation() + " (" + childCollectionCount + " cols)",
                                     collection.getImageResourceID(),
                                     collection.getDocID(),
                                     Entity.TYPE_COLLECTION
@@ -1036,6 +1038,7 @@ public class DatabaseService
             DocumentReference collectionDR =
                     db.collection("collections").document(collection.getDocID());
             collectionDR.update("authUsers", FieldValue.arrayUnion(userDR));
+            successCB.onSuccess(true);
             // Climb upstream
             if (collection.getParentCollection() == null) return;
             collection.getParentCollection().get()
