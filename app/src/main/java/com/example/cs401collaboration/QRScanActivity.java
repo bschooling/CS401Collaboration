@@ -399,6 +399,10 @@ public class QRScanActivity extends AppCompatActivity {
     public void saveImage(View view) {
         Toast failToast = Toast.makeText(this, "Failed to upload image", Toast.LENGTH_LONG);
 
+        Log.d(LOG_TAG, "ReturnCode: " + returnCode);
+        Log.d(LOG_TAG, "activityRequest: " + activityRequest);
+        Log.d(LOG_TAG, "outputStream: " + outputStream);
+
         if (returnCode == RESULT_OK && activityRequest == CAMERA_REQUEST && outputStream != null) {
             byte[] uploadBytes = outputStream.toByteArray();
 
@@ -429,10 +433,10 @@ public class QRScanActivity extends AppCompatActivity {
         }
 
         else if (returnCode == RESULT_OK && activityRequest == CAMERA_REQUEST) {
-            if (returnIntent == null)
+            if (returnIntent == null) {
                 returnIntent = new Intent();
-
-            returnIntent.putExtra("imageResourceID", "placeholder.png");
+                returnIntent.putExtra("imageResourceID", "placeholder.png");
+            }
 
             setResult(RESULT_OK, returnIntent);
             finish();
@@ -445,36 +449,16 @@ public class QRScanActivity extends AppCompatActivity {
      */
     public void deleteImage(View view) {
         String imageResourceID = getIntent().getStringExtra("imageResourceID");
-        Toast deletedToast = Toast.makeText(QRScanActivity.this, "Image deleted", Toast.LENGTH_SHORT);
-        Toast failToast = Toast.makeText(QRScanActivity.this, "Failed to delete image", Toast.LENGTH_LONG);
 
         if (!imageResourceID.equals("placeholder.png")) {
             // Log.d(LOG_TAG, "Delete Image Confirmed");
 
-            deleteImageButton.setEnabled(false);
+            if (returnIntent == null)
+                returnIntent = new Intent();
 
-            mStorage.deleteResource(imageResourceID, new OnSuccessListener<Void>() {
-                @Override
-                public void onSuccess(Void unused) {
-                    deletedToast.show();
-                    deleteImageButton.setEnabled(true);
+            returnIntent.putExtra("imageResourceID", "placeholder.png");
 
-                    if (returnIntent == null)
-                        returnIntent = new Intent();
-
-                    returnIntent.putExtra("imageResourceID", "placeholder.png");
-                    returnCode = RESULT_OK;
-
-                    StorageReference resourceSR = FirebaseStorage.getInstance().getReference().child("placeholder.png");
-                    GlideApp.with(QRScanActivity.this).load(resourceSR).into(image);
-                }
-            }, new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    deleteImageButton.setEnabled(true);
-                    failToast.show();
-                }
-            });
+            returnCode = RESULT_OK;
         }
     }
 
@@ -483,9 +467,9 @@ public class QRScanActivity extends AppCompatActivity {
      * @param view is a View object
      */
     public void clearImage(View view) {
-        deleteImage(view);
+        if (returnIntent == null)
+            returnIntent = new Intent();
 
-        returnIntent = new Intent();
         returnIntent.putExtra("imageResourceID", "placeholder.png");
 
         setResult(RESULT_OK, returnIntent);
