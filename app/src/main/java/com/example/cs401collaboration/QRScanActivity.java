@@ -1,6 +1,8 @@
 package com.example.cs401collaboration;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -90,7 +92,7 @@ public class QRScanActivity extends AppCompatActivity {
 
     /* Storage */
     /**
-     *
+     * mStorage is a StorageService instance that handles things with Firebase Storage
      */
     private StorageService mStorage = StorageService.getInstance();
 
@@ -102,27 +104,22 @@ public class QRScanActivity extends AppCompatActivity {
     private int activityRequest;
 
     /**
-     *
+     * returnCode holds the return code before saving the image and return back to the calling activity
      */
     private int returnCode;
 
     /**
-     *
+     * resultFilePath holds the resulting file path as a String
      */
     private String resultFilePath;
 
     /**
-     *
-     */
-    private String fileName;
-
-    /**
-     *
+     * outputStream holds the image data in a ByteArrayOutputStream
      */
     private ByteArrayOutputStream outputStream;
 
     /**
-     *
+     * returnIntent is an Intent for returning the results to the calling activity
      */
     private Intent returnIntent;
 
@@ -145,6 +142,16 @@ public class QRScanActivity extends AppCompatActivity {
      * saveImageButton is a Button that saves the image when its onClick is triggered
      */
     private Button saveImageButton;
+
+    /**
+     * deleteImageButton is a Button that saves the image when its onClick is triggered
+     */
+    private Button deleteImageButton;
+
+    /**
+     * clearImageButton is a Button that saves the image when its onClick is triggered
+     */
+    private Button clearImageButton;
 
     /**
      * barcodeScanner is a BarcodeScanner object that handles scanning the QR code and displaying the result
@@ -177,13 +184,15 @@ public class QRScanActivity extends AppCompatActivity {
 
         barcodeScanner = BarcodeScanning.getClient(options);
 
-        resultText = (TextView) findViewById(R.id.result_text);
-        resultLabel = (TextView) findViewById(R.id.result_label);
-        image = (ImageView) findViewById(R.id.qr_scan_image);
-        qrToolbar = (Toolbar) findViewById(R.id.qrScanToolbar);
-        cameraButton = (Button) findViewById(R.id.camera_button);
-        selectButton = (Button) findViewById(R.id.select_image_button);
-        saveImageButton = (Button) findViewById(R.id.save_image_button);
+        resultText = findViewById(R.id.result_text);
+        resultLabel = findViewById(R.id.result_label);
+        image = findViewById(R.id.qr_scan_image);
+        qrToolbar = findViewById(R.id.qrScanToolbar);
+        cameraButton = findViewById(R.id.camera_button);
+        selectButton = findViewById(R.id.select_image_button);
+        saveImageButton = findViewById(R.id.save_image_button);
+        deleteImageButton = findViewById(R.id.delete_image_button);
+        clearImageButton = findViewById(R.id.clear_image_button);
 
         returnIntent = null;
         returnCode = 0;
@@ -217,6 +226,58 @@ public class QRScanActivity extends AppCompatActivity {
            }
         });
 
+        deleteImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AlertDialog.Builder deleteWarning = new AlertDialog.Builder(QRScanActivity.this);
+
+                deleteWarning.setMessage(R.string.confirm_delete);
+                deleteWarning.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        deleteImage(view);
+                    }
+                });
+
+                deleteWarning.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                });
+
+                AlertDialog warning = deleteWarning.create();
+                warning.show();
+            }
+        });
+
+        clearImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AlertDialog.Builder clearWarning = new AlertDialog.Builder(QRScanActivity.this);
+
+                clearWarning.setMessage(R.string.confirm_clear);
+                clearWarning.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        clearImage(view);
+                    }
+                });
+
+                clearWarning.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                });
+
+                AlertDialog warning = clearWarning.create();
+                warning.show();
+            }
+        });
+
+        // Start with this image in onCreate just in case the app
+        // cannot get the image from the database
         image.setImageResource(R.drawable.ic_launcher_background);
     }
 
@@ -242,6 +303,8 @@ public class QRScanActivity extends AppCompatActivity {
             Log.d(LOG_TAG, "QR_REQUEST code");
 
             saveImageButton.setVisibility(View.GONE);
+            deleteImageButton.setVisibility(View.GONE);
+            clearImageButton.setVisibility(View.GONE);
         }
 
         // Load preview of current image
@@ -357,6 +420,51 @@ public class QRScanActivity extends AppCompatActivity {
     }
 
     /**
+     * deleteImage deletes the image when the warning dialog is confirmed
+     * @param view is a View object
+     */
+    public void deleteImage(View view) {
+        String imageResourceID = getIntent().getStringExtra("imageResourceID");
+        Toast deletedToast = Toast.makeText(QRScanActivity.this, "Image deleted", Toast.LENGTH_SHORT);
+        Toast failToast = Toast.makeText(QRScanActivity.this, "Failed to delete image", Toast.LENGTH_LONG);
+
+        if (!imageResourceID.equals("placeholder.png")) {
+            // Log.d(LOG_TAG, "Delete Image Confirmed");
+
+            deleteImageButton.setEnabled(false);
+
+            mStorage.deleteResource(imageResourceID, new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void unused) {
+                    deletedToast.show();
+                    deleteImageButton.setEnabled(true);
+
+                    StorageReference resourceSR = FirebaseStorage.getInstance().getReference().child("placeholder.png");
+                    GlideApp.with(QRScanActivity.this).load(resourceSR).into(image);
+                }
+            }, new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    failToast.show();
+                }
+            });
+        }
+    }
+
+    /**
+     * clearImage deletes the image, resets the imageResourceID to the default, and exits the activity
+     * @param view is a View object
+     */
+    public void clearImage(View view) {
+        deleteImage(view);
+
+        returnIntent.putExtra("imageResourceID", "placeholder.png");
+        setResult(RESULT_OK, returnIntent);
+
+        finish();
+    }
+
+    /**
      * checkPermission checks the permission to use a restricted activity
      * @param permission is the permission String typically in Manifest.permission
      * @return a boolean whether the checked permission is granted
@@ -467,7 +575,6 @@ public class QRScanActivity extends AppCompatActivity {
                         int jpgQuality = 80;
                         File photoFile = new File(resultFilePath);
                         Uri photoUri = Uri.fromFile(photoFile);
-                        fileName = photoFile.getName();
                         outputStream = new ByteArrayOutputStream();
                         photo = MediaStore.Images.Media.getBitmap(getContentResolver(), photoUri);
 
