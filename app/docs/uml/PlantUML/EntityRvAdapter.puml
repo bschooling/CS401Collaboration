@@ -1,0 +1,20 @@
+@startuml
+class com.example.cs401collaboration.Adapters.EntityRvAdapter {
+- Context context
+- ArrayList<Entity> entityArrayList
+- DatabaseService mDB
+- StorageService mStorage
++ EntityRvAdapter.Viewholder onCreateViewHolder(ViewGroup,int)
++ void onBindViewHolder(EntityRvAdapter.Viewholder,int)
++ int getItemCount()
+}
+class com.example.cs401collaboration.Adapters.EntityRvAdapter.Viewholder {
+- TextView entityFirstLine
+- ImageView entityImage
+}
+
+
+com.example.cs401collaboration.Adapters.Adapter <|-- com.example.cs401collaboration.Adapters.EntityRvAdapter
+com.example.cs401collaboration.Adapters.EntityRvAdapter +.. com.example.cs401collaboration.Adapters.EntityRvAdapter.Viewholder
+com.example.cs401collaboration.Adapters.ViewHolder <|-- com.example.cs401collaboration.Adapters.EntityRvAdapter.Viewholder
+@enduml

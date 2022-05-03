@@ -1,0 +1,15 @@
+@startuml
+class com.example.cs401collaboration.StorageService {
+- FirebaseStorage firebaseStorage
+- StorageReference storageReference
+- long maxDownloadSize
+- String TAG
+- {static} StorageService INSTANCE
++ {static} StorageService getInstance()
++ void downloadResource(String,OnSuccessListener<byte[]>,OnFailureListener)
++ void uploadResource(String,byte[],OnSuccessListener<String>,OnFailureListener)
++ void deleteResource(String,OnSuccessListener<Void>,OnFailureListener)
++ Bitmap toBitmap(byte[])
++ byte[] toBytes(ImageView)
+}
+@enduml
