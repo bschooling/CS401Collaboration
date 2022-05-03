@@ -4,11 +4,22 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FFFFFF"
     tools:context=".ItemViewActivity">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar2"
-        android:layout_width="409dp"
+    <Button
+        android:id="@+id/bt_change_image"
+        android:layout_width="160dp"
+        android:layout_height="70dp"
+        android:layout_marginStart="124dp"
+        android:layout_marginBottom="132dp"
+        android:text="@string/change_image_string"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <android.widget.Toolbar
+        android:id="@+id/item_title"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimary"
         android:minHeight="?attr/actionBarSize"
@@ -19,39 +30,48 @@
         app:title="ITEM NAME" />
 
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/item_image"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar2"
-        app:srcCompat="@android:drawable/sym_def_app_icon" />
+        app:layout_constraintTop_toBottomOf="@+id/item_title"
+        android:layout_centerHorizontal="true"
+        android:text=""
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"/>
 
     <TextView
-        android:id="@+id/textView3"
+        android:id="@+id/item_description"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="TextView"
         android:textAlignment="center"
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView"
-        tools:text="ITEM DESCRIPTION" />
+        app:layout_constraintTop_toBottomOf="@+id/item_image"
+        android:layout_centerHorizontal="true"
+        android:text=""
+        android:textColor="@color/black"
+        android:textStyle="bold"/>
 
     <TextView
-        android:id="@+id/textView4"
+        android:id="@+id/item_location"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="ITEM LOCATION"
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView3" />
+        app:layout_constraintTop_toBottomOf="@+id/item_description"
+        android:layout_centerHorizontal="true"
+        android:text=""
+        android:textColor="@color/black"
+        android:textStyle="bold"/>
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/bt_delete_item"
         android:layout_width="160dp"
         android:layout_height="70dp"
         android:layout_marginStart="24dp"
@@ -61,7 +81,7 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/button3"
+        android:id="@+id/bt_item_qr"
         android:layout_width="160dp"
         android:layout_height="70dp"
         android:layout_marginEnd="24dp"

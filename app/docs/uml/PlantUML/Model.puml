@@ -1,0 +1,86 @@
+@startuml
+class com.example.cs401collaboration.model.Item {
+- String docID
+- String name
+- String description
+- String location
+- String imageResourceID
+- DocumentReference parentCollection
++ void copyOther(Item)
++ void setParentCollection(DocumentReference)
++ String getDocID()
++ String getName()
++ void setName(String)
++ void setLocation(String)
++ void setDescription(String)
++ String getDescription()
++ String getLocation()
++ String getImageResourceID()
++ void setImageResourceID(String)
++ DocumentReference getParentCollection()
+}
+class com.example.cs401collaboration.model.User {
+- String docID
+- String uid
+- String name
+- String email
+- ArrayList<DocumentReference> collections
+- ArrayList<DocumentReference> collabs
++ String getDocID()
++ String getUid()
++ String getName()
++ String getEmail()
++ ArrayList<DocumentReference> getCollections()
++ ArrayList<DocumentReference> getCollabs()
+}
+class com.example.cs401collaboration.model.Collection {
+- String docID
+- String name
+- String description
+- String location
+- String imageResourceID
+- DocumentReference owner
+- ArrayList<DocumentReference> authUsers
+- DocumentReference parentCollection
+- ArrayList<DocumentReference> childrenCollections
+- ArrayList<DocumentReference> items
++ void setOwner(DocumentReference)
++ void setParentCollection(DocumentReference)
++ void setArrayFieldsEmpty()
++ void copyOther(Collection)
++ String getDocID()
++ String getName()
++ void setName(String)
++ void setLocation(String)
++ void setDescription(String)
++ String getDescription()
++ String getLocation()
++ String getImageResourceID()
++ void setImageResourceID(String)
++ ArrayList<DocumentReference> getItems()
++ DocumentReference getOwner()
++ ArrayList<DocumentReference> getAuthUsers()
++ DocumentReference getParentCollection()
++ ArrayList<DocumentReference> getChildrenCollections()
+}
+class com.example.cs401collaboration.model.Entity {
+- String firstLine
+- String secondLine
+- String imageResourceID
+- Integer type
++ {static} Integer TYPE_COLLECTION
++ {static} Integer TYPE_ITEM
+- String docID
++ Map<String,String> extras
++ String getFirstLine()
++ void setFirstLine(String)
++ String getSecondLine()
++ void setSecondLine(String)
++ String getImageResourceID()
++ void setImageResourceID(String)
++ String getDocID()
++ void setDocID(String)
++ Integer getType()
++ void setType(Integer)
+}
+@enduml

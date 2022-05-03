@@ -1,0 +1,42 @@
+@startuml
+class com.example.cs401collaboration.CollaboratorViewActivity {
+- DatabaseService mDB
+- FirebaseAuth mAuth
+- TextView displayOwnerName
+- EditText etNewCollab
+- Button btNewCollab
+- FirebaseUser currentFbUser
+- Boolean isOwner
+~ Collection currCollection
+- RecyclerView collaboratorRvView
+- CollaboratorRvAdapter collaboratorRvAdapter
+# void onCreate(Bundle)
+# void onStart()
+}
+class com.example.cs401collaboration.LoginActivity {
+- FirebaseAuth mAuth
+- DatabaseService mDB
+~ Button btLogin
+~ Button btSignup
+~ EditText etEmail
+~ EditText etPassword
+~ EditText etName
+~ boolean signupBtClicked
+- String LOG_TAG_MAIN
+# void onCreate(Bundle)
+}
+class com.example.cs401collaboration.LoginActivity.btLoginOnClickListener {
++ void onClick(View)
+}
+class com.example.cs401collaboration.LoginActivity.btSignupOnClickListener {
++ void onClick(View)
+}
+
+
+androidx.appcompat.app.AppCompatActivity <|-- com.example.cs401collaboration.CollaboratorViewActivity
+androidx.appcompat.app.AppCompatActivity <|-- com.example.cs401collaboration.LoginActivity
+com.example.cs401collaboration.LoginActivity +.. com.example.cs401collaboration.LoginActivity.btLoginOnClickListener
+com.example.cs401collaboration.OnClickListener <|.. com.example.cs401collaboration.LoginActivity.btLoginOnClickListener
+com.example.cs401collaboration.LoginActivity +.. com.example.cs401collaboration.LoginActivity.btSignupOnClickListener
+com.example.cs401collaboration.OnClickListener <|.. com.example.cs401collaboration.LoginActivity.btSignupOnClickListener
+@enduml

@@ -1,0 +1,70 @@
+@startuml
+class com.example.cs401collaboration.CollectionViewActivity {
+- DatabaseService mDB
+- StorageService mStorage
+- TextView mCollectionLocation
+- TextView mCollectionDescription
+- Toolbar mCollectionBar
+- ImageView mCollectionImage
+- FloatingActionButton mAddFab
+- TextView addCollectionsFabLabel
+- boolean isFabVisible
+~ Boolean suppressGetCollectionInvalidPermission
+~ ActivityResultLauncher<Intent> collabScreenLauncher
+- Collection mCollection
+~ String entityID
+~ String entityOwner
+- RecyclerView entityRvView
+- String TAG
+- View.OnClickListener addFabListener
+- View.OnClickListener addCollectionFabListener
+- View.OnClickListener addItemFabListener
+# void onCreate(Bundle)
+# void onStart()
++ boolean onCreateOptionsMenu(Menu)
++ boolean onOptionsItemSelected(MenuItem)
++ void onActivityResult(int,int,Intent)
+}
+class com.example.cs401collaboration.CollectionViewActivity.collabScreenLauncherActivityResultCallback {
++ void onActivityResult(ActivityResult)
+}
+class com.example.cs401collaboration.ItemViewActivity {
+- DatabaseService mDB
+~ StorageService mStorage
+- TextView itemDescription
+- ImageView itemImage
+- Toolbar itemTitle
+- Button btDelete
+~ String itemID
+- {static} String TAG
+# void onCreate(Bundle)
++ void onStart()
++ void onActivityResult(int,int,Intent)
+}
+class com.example.cs401collaboration.HomeScreenActivity {
+- FirebaseAuth mAuth
+- DatabaseService mDB
+- RecyclerView collectionRView
+- FloatingActionButton fab
+- String LOG_TAG_MAIN
+- User user
+# void onCreate(Bundle)
+# void onStart()
++ boolean onCreateOptionsMenu(Menu)
++ boolean onPrepareOptionsMenu(Menu)
++ boolean onOptionsItemSelected(MenuItem)
++ void onActivityResult(int,int,Intent)
+}
+class com.example.cs401collaboration.HomeScreenActivity.fabOnClickListener {
++ void onClick(View)
+}
+
+
+androidx.appcompat.app.AppCompatActivity <|-- com.example.cs401collaboration.CollectionViewActivity
+com.example.cs401collaboration.CollectionViewActivity +.. com.example.cs401collaboration.CollectionViewActivity.collabScreenLauncherActivityResultCallback
+com.example.cs401collaboration.ActivityResultCallback <|.. com.example.cs401collaboration.CollectionViewActivity.collabScreenLauncherActivityResultCallback
+androidx.appcompat.app.AppCompatActivity <|-- com.example.cs401collaboration.ItemViewActivity
+androidx.appcompat.app.AppCompatActivity <|-- com.example.cs401collaboration.HomeScreenActivity
+com.example.cs401collaboration.HomeScreenActivity +.. com.example.cs401collaboration.HomeScreenActivity.fabOnClickListener
+com.example.cs401collaboration.OnClickListener <|.. com.example.cs401collaboration.HomeScreenActivity.fabOnClickListener
+@enduml

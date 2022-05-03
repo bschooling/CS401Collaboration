@@ -1,0 +1,31 @@
+@startuml
+class com.example.cs401collaboration.DatabaseService {
+- {static} DatabaseService INSTANCE
+~ FirebaseAuth auth
+~ FirebaseFirestore db
+- String TAG
++ {static} DatabaseService getInstance()
++ void createUser(String,String,OnFailureListener)
++ void getUser(String,OnSuccessListener<User>,OnFailureListener)
++ void getUserByEmail(String,OnSuccessListener<User>,OnFailureListener)
+- void getCollectionsOwned(DocumentReference,OnSuccessListener<ArrayList<Collection>>,OnFailureListener,OnSuccessListener<ArrayList<Collection>>)
+- void getCollectionsAuthorized(DocumentReference,OnSuccessListener<ArrayList<Collection>>,OnFailureListener,ArrayList<Collection>)
++ void getCollections(String,OnSuccessListener<ArrayList<Collection>>,OnFailureListener)
++ void updateCollection(Collection,OnSuccessListener<Boolean>,OnFailureListener)
++ void getItemsForCollection(String,OnSuccessListener<ArrayList<Item>>,OnFailureListener)
++ void createItem(Item,String,OnSuccessListener<String>,OnFailureListener)
++ void getItem(String,OnSuccessListener<Item>,OnFailureListener)
++ void getAllEntitiesForCollection(String,OnSuccessListener<ArrayList<Entity>>,OnFailureListener)
++ void getCollection(String,OnSuccessListener<Collection>,OnFailureListener)
++ void updateItem(Item,OnSuccessListener<Boolean>,OnFailureListener)
++ void deleteItem(String,OnSuccessListener<Boolean>,OnFailureListener)
++ void createRootCollection(Collection,OnSuccessListener<String>,OnFailureListener)
++ void createCollection(Collection,String,String,OnSuccessListener<String>,OnFailureListener)
+- void deleteAllItemsForCollection(String,OnSuccessListener<Boolean>,OnFailureListener)
+- void deleteCollectionHelper(Collection,OnSuccessListener<Boolean>,OnFailureListener)
++ void deleteCollection(String,OnSuccessListener<Boolean>,OnFailureListener)
++ void getCollabs(Collection,OnSuccessListener<ArrayList<User>>,OnFailureListener)
++ void addCollab(Collection,String,OnSuccessListener<Boolean>,OnFailureListener)
++ void removeCollab(Collection,String,OnSuccessListener<Boolean>,OnFailureListener)
+}
+@enduml
