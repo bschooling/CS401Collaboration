@@ -1,53 +1,57 @@
 package com.example.cs401collaboration.model;
 
-import static org.junit.Assert.*;
 
+import static org.junit.Assert.*;
 import org.junit.Test;
 
+/**
+ * @author Jason Lim
+ */
 public class EntityTest {
-    Entity testEntity = new Entity(     "1stLineA",
-                                        "2ndLineB",
-                                        "imgStringC",
-                                        "docidD",
+    Entity testEntity = new Entity(     "firstLine",
+                                        "secondLine",
+                                        "image",
+                                        "documentID",
                                         0);
+
+    /**
+     * Test method for {@link Entity#setFirstLine(String)}
+     */
     @Test
-    public void setFirstLine() {
-        assertEquals(   "testEntity's First Line should be 1stLineA",
-                        "1stLineA",
-                        testEntity.getFirstLine());
-
-
+    public void testSetFirstLine() {
+        assertEquals("firstLine",testEntity.getFirstLine());
     }
 
+    /**
+     * Test method for {@link Entity#setSecondLine(String)}
+     */
     @Test
-    public void setSecondLine() {
-        assertEquals(   "testEntity's Second Line should be 2ndLineB",
-                "2ndLineB",
-                testEntity.getSecondLine());
+    public void testSetSecondLine() {
+        assertEquals("secondLine", testEntity.getSecondLine());
     }
 
+    /**
+     * Test method for {@link Entity#setImageResourceID(String)}
+     */
     @Test
-    public void setImageResourceID() {
-        assertEquals(   "testEntity's ImageResourceID should be imgStringC",
-                "imgStringC",
-                testEntity.getImageResourceID());
+    public void testSetImageResourceID() {
+        assertEquals("image", testEntity.getImageResourceID());
     }
 
+    /**
+     * Test method for {@link Entity#setDocID(String)}
+     */
     @Test
-    public void setDocID() {
-        assertEquals(   "testEntity's DocID should be docidD",
-                "docidD",
-                testEntity.getDocID());
+    public void testSetDocID() {
+        assertEquals("documentID", testEntity.getDocID());
     }
 
+    /**
+     * Test method for {@link Entity#setType(Integer)}
+     */
     @Test
-    public void setType() {
-        fail();
-        /*
-        assertEquals("testEntity's type should be 0",
-                0,
-                testEntity.getType());
+    public void testSetType() {
 
-         */
+        assertEquals((Integer)0,testEntity.getType());
     }
 }
