@@ -1,0 +1,14 @@
+@startuml
+class com.example.cs401collaboration.glide.MyAppGlideModule {
++ void registerComponents(Context,Glide,Registry)
+}
+class com.example.cs401collaboration.glide.ClearGlideCache {
+~ Activity activity
+# Void doInBackground(Void)
+# void onPostExecute(Void)
+}
+
+
+com.bumptech.glide.module.AppGlideModule <|-- com.example.cs401collaboration.glide.MyAppGlideModule
+android.os.AsyncTask <|-- com.example.cs401collaboration.glide.ClearGlideCache
+@enduml

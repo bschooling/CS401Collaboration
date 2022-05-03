@@ -1,0 +1,41 @@
+@startuml
+class com.example.cs401collaboration.NewEntityActivity {
+~ DatabaseService mDB
+- String TAG
+- TextView header
+- Button btCreate
+~ EditText etName
+~ EditText etLocation
+~ EditText etDescription
+- Integer type
+- String ParentEntityID
+- String ParentEntityOwner
+# void onCreate(Bundle)
+# void onStart()
++ boolean onOptionsItemSelected(MenuItem)
+}
+class com.example.cs401collaboration.NewEntityActivity.btCreateOnClickListener {
++ void onClick(View)
+}
+class com.example.cs401collaboration.NewHomeCollectionActivity {
+~ DatabaseService mDB
+- String TAG
+- Button btCreate
+~ EditText etName
+~ EditText etLocation
+~ EditText etDescription
+# void onCreate(Bundle)
++ boolean onOptionsItemSelected(MenuItem)
+}
+class com.example.cs401collaboration.NewHomeCollectionActivity.btCreateOnClickListener {
++ void onClick(View)
+}
+
+
+androidx.appcompat.app.AppCompatActivity <|-- com.example.cs401collaboration.NewEntityActivity
+com.example.cs401collaboration.NewEntityActivity +.. com.example.cs401collaboration.NewEntityActivity.btCreateOnClickListener
+com.example.cs401collaboration.OnClickListener <|.. com.example.cs401collaboration.NewEntityActivity.btCreateOnClickListener
+androidx.appcompat.app.AppCompatActivity <|-- com.example.cs401collaboration.NewHomeCollectionActivity
+com.example.cs401collaboration.NewHomeCollectionActivity +.. com.example.cs401collaboration.NewHomeCollectionActivity.btCreateOnClickListener
+com.example.cs401collaboration.OnClickListener <|.. com.example.cs401collaboration.NewHomeCollectionActivity.btCreateOnClickListener
+@enduml

@@ -1,0 +1,52 @@
+@startuml
+class com.example.cs401collaboration.QRViewActivity {
+~ {static} int QR_SIZE
+- String LOG_TAG
+- ImageView image
+- ConstraintLayout qrImageLayout
+- String inputTitle
+# void onCreate(Bundle)
++ void onActivityResult(int,int,Intent)
++ Bitmap genQR(String,int)
++ void saveQR(View)
++ void scanQRCode(View)
+}
+class com.example.cs401collaboration.QRScanActivity {
++ {static} int GALLERY_REQUEST
++ {static} int CAMERA_REQUEST
++ {static} int QR_REQUEST
++ {static} int RESULT_DENIED
++ {static} int RESULT_FAILED
+- String LOG_TAG
+- String WRITE_PERMISSION
+- StorageService mStorage
+- int activityRequest
+- int returnCode
+- String resultFilePath
+- ByteArrayOutputStream outputStream
+- Intent returnIntent
+- TextView resultLabel
+- TextView resultText
+- ImageView image
+- Button saveImageButton
+- Button deleteImageButton
+- Button clearImageButton
+- BarcodeScanner barcodeScanner
+- Toolbar qrToolbar
+# void onCreate(Bundle)
++ void onStart()
++ void takeImage(View)
++ void selectImage(View)
++ void saveImage(View)
++ void deleteImage(View)
++ void clearImage(View)
++ boolean checkPermission(String)
++ void onRequestPermissionsResult(int,String[],int[])
++ void onActivityResult(int,int,Intent)
++ void processImage(InputImage,ArrayList<String>,OnSuccessListener<ArrayList<String>>,OnFailureListener)
+}
+
+
+androidx.appcompat.app.AppCompatActivity <|-- com.example.cs401collaboration.QRViewActivity
+androidx.appcompat.app.AppCompatActivity <|-- com.example.cs401collaboration.QRScanActivity
+@enduml

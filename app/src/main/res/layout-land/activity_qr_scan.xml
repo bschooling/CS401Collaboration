@@ -24,8 +24,6 @@
         android:layout_width="250dp"
         android:layout_height="250dp"
         android:contentDescription="@string/qr_code_image"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.496"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/qrScanToolbar"
         tools:srcCompat="@tools:sample/avatars" />
@@ -37,8 +35,8 @@
         android:layout_marginTop="8dp"
         android:text="@string/resultString"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/qr_scan_image" />
+        app:layout_constraintStart_toEndOf="@+id/qr_scan_image"
+        app:layout_constraintTop_toBottomOf="@+id/qrScanToolbar" />
 
     <TextView
         android:id="@+id/result_text"
@@ -46,8 +44,7 @@
         android:layout_height="wrap_content"
         android:text="@string/defaultResult"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/qr_scan_image"
         app:layout_constraintTop_toBottomOf="@+id/result_label" />
 
     <Button
@@ -68,7 +65,7 @@
         android:text="@string/select_image_string"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/space"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/qr_scan_image"
         app:layout_constraintTop_toBottomOf="@+id/result_text"
         app:layout_constraintVertical_bias="0.25" />
 
@@ -78,7 +75,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/qr_scan_image"
         app:layout_constraintTop_toBottomOf="@+id/result_text" />
 
     <Button
@@ -88,7 +85,7 @@
         android:layout_marginTop="32dp"
         android:text="@string/save_image_string"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/qr_scan_image"
         app:layout_constraintTop_toBottomOf="@+id/clear_image_button" />
 
     <Button
@@ -100,7 +97,7 @@
         android:text="Reset Image"
         android:textColor="#FF0000"
         app:layout_constraintEnd_toStartOf="@+id/space"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/qr_scan_image"
         app:layout_constraintTop_toBottomOf="@+id/select_image_button" />
 
     <Button

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Collaboration Screen Button -->
+    <item
+        android:id="@+id/miChangeImage"
+        android:title="@string/change_image_string" />
+    <item
+        android:id="@+id/miGenQR"
+        android:title="@string/gen_qr_code_string" />
+    <item
+        android:id="@+id/miScanQR"
+        android:title="@string/scan_qr_button" />
+    <item android:id="@+id/miCollectionCollabScreen"
+        android:title="@string/collaboration_string"
+        app:showAsAction="never"/>
+
+</menu>
