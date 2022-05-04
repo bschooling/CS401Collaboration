@@ -30,24 +30,31 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class QRScanActivityTest {
     private final Context testContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-    //private final Intent testIntent = new Intent(testContext, QRScanActivity.class);
 
     private final String cameraPermission = Manifest.permission.CAMERA;
     private final String galleryPermission = Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
-    // @Rule
-    // public ActivityScenarioRule<QRScanActivity> activityRule = new ActivityScenarioRule<QRScanActivity>(QRScanActivity.class);
-
+    /**
+     * beforeTests is run before each test is conducted
+     */
     @Before
     public void beforeTests() {
         Intents.init();
     }
 
+    /**
+     * afterTest is run after each test has finished
+     */
     @After
     public void afterTests() {
         Intents.release();
     }
 
+
+    // Tests
+    /**
+     * selectQRImageTest tests the selection of a QR image
+     */
     @Test
     public void selectQRImageTest() {
         GrantPermissionRule permissionRule = GrantPermissionRule.grant(cameraPermission, galleryPermission);
@@ -60,6 +67,9 @@ public class QRScanActivityTest {
         }
     }
 
+    /**
+     * takeQRImageTest tests the taking an image for QR
+     */
     @Test
     public void takeQRImageTest() {
         GrantPermissionRule permissionRule = GrantPermissionRule.grant(cameraPermission, galleryPermission);
@@ -72,6 +82,9 @@ public class QRScanActivityTest {
         }
     }
 
+    /**
+     * processQRImageTest tests the processing of a QR Image
+     */
     @Test
     public void processQRImageTest() {
         GrantPermissionRule permissionRule = GrantPermissionRule.grant(cameraPermission, galleryPermission);
@@ -84,6 +97,9 @@ public class QRScanActivityTest {
         }
     }
 
+    /**
+     * selectImageTest tests the selection of an image for CollectionView or ItemView
+     */
     @Test
     public void selectImageTest() {
         GrantPermissionRule permissionRule = GrantPermissionRule.grant(cameraPermission, galleryPermission);
@@ -97,6 +113,9 @@ public class QRScanActivityTest {
         }
     }
 
+    /**
+     * takeImageTest tests the taking an image for CollectionView or ItemView
+     */
     @Test
     public void takeImageTest() {
         GrantPermissionRule permissionRule = GrantPermissionRule.grant(cameraPermission, galleryPermission);
@@ -110,6 +129,9 @@ public class QRScanActivityTest {
         }
     }
 
+    /**
+     * deleteImageTest tests the deletion of an image
+     */
     @Test
     public void deleteImageTest() {
         Intent testIntent = new Intent(testContext, QRScanActivity.class);
@@ -122,6 +144,9 @@ public class QRScanActivityTest {
         }
     }
 
+    /**
+     * clearImageTest tests the clearing of an image and resetting its imageResourceID to the default
+     */
     @Test
     public void clearImageTest() {
         Intent testResultIntent = new Intent();
