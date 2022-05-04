@@ -46,8 +46,8 @@
             android:layout_marginBottom="8dp"
             android:text=""
             android:textColor="@color/black"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textSize="16sp"
+            android:textStyle="normal" />
 
         <TextView
             android:id="@+id/typeLabel"
@@ -62,7 +62,9 @@
             android:textAlignment="center"
             android:textColor="#FFFFFF"
             android:textSize="12sp"
-            android:textStyle="italic" />
+            android:textStyle="italic"
+            android:layout_alignParentBottom="true" />
+
     </RelativeLayout>
 
 </androidx.cardview.widget.CardView>
