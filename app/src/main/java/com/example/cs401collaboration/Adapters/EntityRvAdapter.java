@@ -81,7 +81,7 @@ public class EntityRvAdapter extends RecyclerView.Adapter<EntityRvAdapter.Viewho
 
         GlideApp.with(context)
                 .load(resourceSR)
-                .override(400, 400)
+                .override(600, 600)
                 .into(holder.entityImage);
 
         // Setting Label
