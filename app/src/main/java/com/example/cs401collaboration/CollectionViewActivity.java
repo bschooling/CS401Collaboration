@@ -51,6 +51,7 @@ public class CollectionViewActivity extends AppCompatActivity {
     /* UI Element Handlers */
     private TextView mCollectionLocation;
     private TextView mCollectionDescription;
+    private TextView mNoEntitiesMessage;
     private Toolbar mCollectionBar;
     private ImageView mCollectionImage;
     private FloatingActionButton mAddFab, mAddCollectionFab, mAddItemFab;
@@ -105,6 +106,7 @@ public class CollectionViewActivity extends AppCompatActivity {
         // Location and Description text
         mCollectionLocation = findViewById(R.id.collection_view_location);
         mCollectionDescription = findViewById(R.id.collection_view_description);
+        mNoEntitiesMessage = findViewById(R.id.collection_view_noentitiesmsg);
 
         // Bar and Image fields
         mCollectionBar = findViewById(R.id.collectionToolbar);
@@ -127,6 +129,14 @@ public class CollectionViewActivity extends AppCompatActivity {
 
         // Add Item onClick
         mAddItemFab.setOnClickListener(addItemFabListener);
+
+        // Inflate Menu
+        mCollectionBar.inflateMenu(R.menu.collectionview_menu);
+        mCollectionBar.setOnMenuItemClickListener(new MenuItemListener());
+
+        // Handle RV
+        entityRvView = findViewById(R.id.collectionViewActivity_rv);
+        entityRvView.setNestedScrollingEnabled(false);
     }
 
     @Override
@@ -155,17 +165,28 @@ public class CollectionViewActivity extends AppCompatActivity {
                 entityOwner = collection.getOwner().getId();
 
                 // Sets UI fields with Collection Data
-                mCollectionLocation.setText(collection.getLocation());
-                mCollectionDescription.setText(collection.getDescription());
+                mCollectionDescription.setText (
+                        (collection.getDescription() != null && !collection.getDescription().isEmpty()) ?
+                                collection.getDescription() :
+                                "No Description Information"
+                );
+                mCollectionLocation.setText (
+                        (collection.getLocation() != null && !collection.getLocation().isEmpty()) ?
+                                collection.getLocation() :
+                                "No Location Information"
+                );
                 mCollectionBar.setTitle(collection.getName());
 
                 // retrieve a list of all sub collections or items tied to the current collection
                 mDB.getAllEntitiesForCollection(entityID, new OnSuccessListener<ArrayList<Entity>>() {
                     @Override
                     public void onSuccess(ArrayList<Entity> entities) {
+                        // Hide or show the "No Entities" Message
+                        mNoEntitiesMessage.setVisibility (
+                                (entities.isEmpty()) ? View.VISIBLE : View.GONE
+                        );
 
                         // Populate retrieved collections on home screen rv
-                        entityRvView = findViewById(R.id.collectionViewActivity_rv);
                         EntityRvAdapter entityRvAdapter = new EntityRvAdapter(CollectionViewActivity.this, entities);
                         GridLayoutManager gridLayoutManager = new GridLayoutManager(CollectionViewActivity.this, 2);
                         entityRvView.setLayoutManager(gridLayoutManager);
@@ -274,72 +295,66 @@ public class CollectionViewActivity extends AppCompatActivity {
         }
     };
 
-    /* Setup Menu */
-    @Override
-    public boolean onCreateOptionsMenu (Menu menu)
-    {
-        getMenuInflater().inflate(R.menu.collectionview_menu, menu);
-        return true;
-    }
-
     /* Handle Menu Item Clicks */
-    @Override
-    public boolean onOptionsItemSelected (MenuItem item)
+    private class MenuItemListener implements Toolbar.OnMenuItemClickListener
     {
-        if (item.getItemId() == R.id.miCollectionCollabScreen)
-        {
-            Log.d(TAG, "onOptionsItemSelected: to collab screen option selected");
-            Intent collaboratorIntent = new Intent(this, CollaboratorViewActivity.class);
-            collaboratorIntent.putExtra("collection_id", entityID);
-            collabScreenLauncher.launch(collaboratorIntent);
-            return true;
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            if (item.getItemId() == R.id.miCollectionCollabScreen)
+            {
+                Log.d(TAG, "onOptionsItemSelected: to collab screen option selected");
+                Intent collaboratorIntent = new Intent(CollectionViewActivity.this, CollaboratorViewActivity.class);
+                collaboratorIntent.putExtra("collection_id", entityID);
+                collabScreenLauncher.launch(collaboratorIntent);
+                return true;
+            }
+
+            else if (item.getItemId() == R.id.miScanQR)
+            {
+                Log.d(TAG, "onOptionsItemSelected: scanQR option selected");
+
+                Intent scanIntent = new Intent(CollectionViewActivity.this, QRScanActivity.class);
+                scanIntent.putExtra("RequestCode", QRScanActivity.QR_REQUEST);
+
+                startActivityForResult(scanIntent, QRScanActivity.QR_REQUEST);
+                return true;
+            }
+
+            else if (item.getItemId() == R.id.miChangeImage)
+            {
+                Log.d(TAG, "onOptionsItemSelected: changeImage option selected");
+
+                String imageResourceID = mCollection.getImageResourceID();
+                if (imageResourceID == null) imageResourceID = "placeholder.png";
+
+                Intent imageIntent = new Intent(CollectionViewActivity.this, QRScanActivity.class);
+                imageIntent.putExtra("RequestCode", QRScanActivity.CAMERA_REQUEST);
+                imageIntent.putExtra("imageResourceID", imageResourceID);
+
+                startActivityForResult(imageIntent, QRScanActivity.CAMERA_REQUEST);
+
+                return true;
+            }
+
+            else if (item.getItemId() == R.id.miGenQR)
+            {
+                Log.d(TAG, "onOptionsItemSelected: genQR option selected");
+
+                Intent qrViewIntent = new Intent(CollectionViewActivity.this, QRViewActivity.class);
+                String inputTitle = mCollectionBar.getTitle().toString() + " Collection";
+
+                qrViewIntent.putExtra("qrTitle", inputTitle);
+                qrViewIntent.putExtra("encodeString", entityID);
+                qrViewIntent.putExtra("entityType", "collection");
+
+                startActivity(qrViewIntent);
+
+                return true;
+            }
+
+            Log.d(TAG, "onOptionsItemSelected: default triggered");
+            return false;
         }
-
-        else if (item.getItemId() == R.id.miScanQR)
-        {
-            Log.d(TAG, "onOptionsItemSelected: scanQR option selected");
-
-            Intent scanIntent = new Intent(CollectionViewActivity.this, QRScanActivity.class);
-            scanIntent.putExtra("RequestCode", QRScanActivity.QR_REQUEST);
-
-            startActivityForResult(scanIntent, QRScanActivity.QR_REQUEST);
-            return true;
-        }
-
-        else if (item.getItemId() == R.id.miChangeImage)
-        {
-            Log.d(TAG, "onOptionsItemSelected: changeImage option selected");
-
-            String imageResourceID = mCollection.getImageResourceID();
-            if (imageResourceID == null) imageResourceID = "placeholder.png";
-
-            Intent imageIntent = new Intent(CollectionViewActivity.this, QRScanActivity.class);
-            imageIntent.putExtra("RequestCode", QRScanActivity.CAMERA_REQUEST);
-            imageIntent.putExtra("imageResourceID", imageResourceID);
-
-            startActivityForResult(imageIntent, QRScanActivity.CAMERA_REQUEST);
-
-            return true;
-        }
-
-        else if (item.getItemId() == R.id.miGenQR)
-        {
-            Log.d(TAG, "onOptionsItemSelected: genQR option selected");
-
-            Intent qrViewIntent = new Intent(CollectionViewActivity.this, QRViewActivity.class);
-            String inputTitle = mCollectionBar.getTitle().toString() + " Collection";
-
-            qrViewIntent.putExtra("qrTitle", inputTitle);
-            qrViewIntent.putExtra("encodeString", entityID);
-            qrViewIntent.putExtra("entityType", "collection");
-
-            startActivity(qrViewIntent);
-
-            return true;
-        }
-
-        Log.d(TAG, "onOptionsItemSelected: default triggered");
-        return super.onOptionsItemSelected(item);
     }
 
     @Override

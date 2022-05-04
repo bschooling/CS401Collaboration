@@ -42,7 +42,8 @@
             android:exported="false" />
         <activity
             android:name=".CollectionViewActivity"
-            android:exported="true" />
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity
             android:name=".QRViewActivity"
             android:exported="true" />
