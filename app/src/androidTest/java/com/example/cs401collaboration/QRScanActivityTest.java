@@ -32,9 +32,19 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public class QRScanActivityTest {
+    /**
+     * testContext is the Context of the testing class
+     */
     private final Context testContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
 
+    /**
+     * cameraPermission holds the String to request camera permission
+     */
     private final String cameraPermission = Manifest.permission.CAMERA;
+
+    /**
+     * galleryPermission holds the String to request write and read permission for the Gallery
+     */
     private final String galleryPermission = Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
     /**
