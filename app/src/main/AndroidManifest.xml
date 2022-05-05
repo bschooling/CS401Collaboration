@@ -39,7 +39,8 @@
             android:exported="false" />
         <activity
             android:name=".ItemViewActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity
             android:name=".CollectionViewActivity"
             android:exported="true"
