@@ -148,9 +148,16 @@ public class ItemViewActivity extends AppCompatActivity
         mDB.getItem(itemID, new OnSuccessListener<Item>() {
             @Override
             public void onSuccess(Item item) {
-                // populate the ui with fields from current item
-                itemDescription.setText(item.getDescription());
-                itemLocation.setText(item.getLocation());
+                // Populate name, description, location fields from current item retrieved
+                itemDescription.setText (
+                        (item.getDescription() != null && !item.getDescription().isEmpty()) ?
+                                item.getDescription() : "No Description"
+                );
+
+                itemLocation.setText (
+                        (item.getLocation() != null && !item.getLocation().isEmpty()) ?
+                                item.getLocation() : "No Location"
+                );
                 itemTitle.setTitle(item.getName());
             }
         }, new OnFailureListener() {
