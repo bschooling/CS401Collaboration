@@ -63,7 +63,10 @@ public class HomeScreenActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
 
+        /* Handle providers, ui elements */
         mDB = DatabaseService.getInstance();
+        mAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
         fab = findViewById(R.id.floatingActionButton);
 
         // Check First Launch
@@ -83,9 +86,6 @@ public class HomeScreenActivity extends AppCompatActivity
         }
 
         // Check if user is logged in. Direct to login screen if not.
-        mAuth = FirebaseAuth.getInstance();
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-
         if (currentUser == null)
         {
             Log.d(LOG_TAG_MAIN, "onCreate: User not logged in");
@@ -100,7 +100,6 @@ public class HomeScreenActivity extends AppCompatActivity
     {
         super.onStart();
 
-        if (this.isFirstLaunch) return;
         if (mAuth.getCurrentUser() == null) return;
 
         // Get User From DB and Assign to this.user

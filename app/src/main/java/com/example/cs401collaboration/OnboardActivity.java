@@ -25,11 +25,8 @@ public class OnboardActivity extends AppCompatActivity
             @Override
             public void onClick (View view)
             {
-                Intent intent = new Intent(OnboardActivity.this, LoginActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_TASK_ON_HOME);
-                getApplicationContext().startActivity(intent);
-                Activity activity = (Activity) getApplicationContext();
-                activity.finishAffinity();
+                startActivity(new Intent(OnboardActivity.this, LoginActivity.class));
+                finish();
             }
         });
     }
