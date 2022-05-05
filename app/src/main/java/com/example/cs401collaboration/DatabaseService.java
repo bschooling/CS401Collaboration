@@ -595,7 +595,6 @@ public class DatabaseService
                                     Entity.TYPE_COLLECTION
                             );
                             String isOwned = String.valueOf((collection.getOwner().getId()).equals(auth.getUid()));
-                            Log.d(TAG, "samplexxxxx=" + isOwned + " " + collection.getOwner().getId() + " " + auth.getUid());
                             entity.extras.put("isOwned", isOwned);
                             ents.add(entity);
                         }
