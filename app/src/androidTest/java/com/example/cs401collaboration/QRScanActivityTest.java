@@ -2,12 +2,14 @@ package com.example.cs401collaboration;
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.contrib.ActivityResultMatchers.hasResultCode;
+import static androidx.test.espresso.contrib.ActivityResultMatchers.hasResultData;
 import static androidx.test.espresso.intent.Intents.intending;
 import static androidx.test.espresso.intent.matcher.IntentMatchers.hasAction;
 import static androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent;
 import static androidx.test.espresso.intent.matcher.IntentMatchers.hasExtra;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import android.Manifest;
 import android.app.Activity;
@@ -18,6 +20,7 @@ import android.provider.MediaStore;
 
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.espresso.intent.Intents;
+import androidx.test.espresso.intent.matcher.IntentMatchers;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.GrantPermissionRule;
@@ -93,7 +96,6 @@ public class QRScanActivityTest {
 
         try (final ActivityScenario<QRScanActivity> activityScenario = ActivityScenario.launch(testIntent)) {
             onView(withId(R.id.select_image_button)).perform(click());
-            intending(hasAction(Intent.ACTION_GET_CONTENT));
         }
     }
 
@@ -130,10 +132,34 @@ public class QRScanActivityTest {
     }
 
     /**
-     * deleteImageTest tests the deletion of an image
+     * deleteImageTest tests the deletion of an image and having its imageResourceID back to the default
      */
     @Test
     public void deleteImageTest() {
+        Intent testResultIntent = new Intent();
+        testResultIntent.putExtra("imageResourceID", "placeholder.png");
+        Instrumentation.ActivityResult testResult = new Instrumentation.ActivityResult(Activity.RESULT_OK, testResultIntent);
+
+        Intent inputIntent = new Intent(testContext, QRScanActivity.class);
+        inputIntent.putExtra("RequestCode", QRScanActivity.CAMERA_REQUEST);
+        inputIntent.putExtra("imageResourceID", "placeholder.png");
+
+        try (final ActivityScenario<QRScanActivity> activityScenario = ActivityScenario.launch(inputIntent)) {
+            intending(hasComponent(QRScanActivity.class.getName())).respondWith(testResult);
+
+            onView(withId(R.id.delete_image_button)).perform(click());
+            onView(withId(android.R.id.button1)).perform(click());
+
+            assertThat(activityScenario.getResult(), hasResultCode(Activity.RESULT_OK));
+            assertThat(activityScenario.getResult(), hasResultData(IntentMatchers.hasExtra("imageResourceID", "placeholder.png")));
+        }
+    }
+
+    /**
+     * clearImageTest tests the clearing of an image back to the old image from the entity
+     */
+    @Test
+    public void clearImageTest() {
         Intent testIntent = new Intent(testContext, QRScanActivity.class);
         testIntent.putExtra("RequestCode", QRScanActivity.CAMERA_REQUEST);
         testIntent.putExtra("imageResourceID", "placeholder.png");
@@ -141,36 +167,6 @@ public class QRScanActivityTest {
         try (final ActivityScenario<QRScanActivity> activityScenario = ActivityScenario.launch(testIntent)) {
             onView(withId(R.id.delete_image_button)).perform(click());
             intending(hasExtra("imageResourceID", "placeholder.png"));
-        }
-    }
-
-    /**
-     * clearImageTest tests the clearing of an image and resetting its imageResourceID to the default
-     */
-    @Test
-    public void clearImageTest() {
-        Intent testResultIntent = new Intent();
-        testResultIntent.putExtra("imageResourceID", "placeholder.png");
-        Instrumentation.ActivityResult result = new Instrumentation.ActivityResult(Activity.RESULT_OK, testResultIntent);
-
-        Intent inputIntent = new Intent(testContext, QRScanActivity.class);
-        inputIntent.putExtra("RequestCode", QRScanActivity.CAMERA_REQUEST);
-        inputIntent.putExtra("imageResourceID", "placeholder.png");
-
-        try (final ActivityScenario<QRScanActivity> activityScenario = ActivityScenario.launch(inputIntent)) {
-            intending(hasComponent(QRScanActivity.class.getName())).respondWith(
-                    new Instrumentation.ActivityResult(Activity.RESULT_OK, testResultIntent) );
-            
-            onView(withId(R.id.clear_image_button)).perform(click());
-            onView(withId(android.R.id.button1)).perform(click());
-
-            int resultCode = activityScenario.getResult().getResultCode();
-            Intent resultIntent = activityScenario.getResult().getResultData();
-
-            assertEquals(Activity.RESULT_OK, resultCode);
-
-            // assertEquals(testResultIntent, resultIntent);
-
         }
     }
 }
