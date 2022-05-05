@@ -144,12 +144,12 @@ public class QRScanActivity extends AppCompatActivity {
     private Button saveImageButton;
 
     /**
-     * deleteImageButton is a Button that saves the image when its onClick is triggered
+     * deleteImageButton is a Button that resets the entity image to placeholder default
      */
     private Button deleteImageButton;
 
     /**
-     * clearImageButton is a Button that saves the image when its onClick is triggered
+     * clearImageButton is a Button that clears the preview image to the present image of entity
      */
     private Button clearImageButton;
 
@@ -445,28 +445,12 @@ public class QRScanActivity extends AppCompatActivity {
 
     /**
      * deleteImage deletes the image when the warning dialog is confirmed
+     *
+     * Sets return imageResourceID to placeholder default and finishes.
+     *
      * @param view is a View object
      */
     public void deleteImage(View view) {
-        String imageResourceID = getIntent().getStringExtra("imageResourceID");
-
-        if (!imageResourceID.equals("placeholder.png")) {
-            // Log.d(LOG_TAG, "Delete Image Confirmed");
-
-            if (returnIntent == null)
-                returnIntent = new Intent();
-
-            returnIntent.putExtra("imageResourceID", "placeholder.png");
-
-            returnCode = RESULT_OK;
-        }
-    }
-
-    /**
-     * clearImage deletes the image, resets the imageResourceID to the default, and exits the activity
-     * @param view is a View object
-     */
-    public void clearImage(View view) {
         if (returnIntent == null)
             returnIntent = new Intent();
 
@@ -474,6 +458,25 @@ public class QRScanActivity extends AppCompatActivity {
 
         setResult(RESULT_OK, returnIntent);
         finish();
+    }
+
+    /**
+     * clearImage clears ImageView to present entity image when the warning dialog is confirmed
+     *
+     * That is, any loaded image from user is cleared.
+     *
+     * @param view is a View object
+     */
+    public void clearImage(View view) {
+        String imageResourceID = getIntent().getStringExtra("imageResourceID");
+        StorageReference resourceSR =
+                FirebaseStorage.getInstance().getReference().child(imageResourceID);
+        GlideApp.with(QRScanActivity.this)
+                .load(resourceSR)
+                .into(image);
+        outputStream = new ByteArrayOutputStream();
+        Bitmap photo = ((BitmapDrawable) image.getDrawable()).getBitmap();
+        photo.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
     }
 
     /**
