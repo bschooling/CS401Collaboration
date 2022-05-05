@@ -63,6 +63,12 @@ public class LoginActivity extends AppCompatActivity
         btSignup.setOnClickListener(new btSignupOnClickListener());
     }
 
+    @Override
+    public void onBackPressed()
+    {
+        moveTaskToBack(true);
+    }
+
     /**
      * Handles onClick of Login button.
      *
