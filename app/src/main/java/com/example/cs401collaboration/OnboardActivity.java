@@ -1,0 +1,37 @@
+package com.example.cs401collaboration;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+
+public class OnboardActivity extends AppCompatActivity
+{
+
+    Button mContinueBtn;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_onboard);
+
+        mContinueBtn = findViewById(R.id.onboard_continue);
+
+        mContinueBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick (View view)
+            {
+                Intent intent = new Intent(OnboardActivity.this, LoginActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_TASK_ON_HOME);
+                getApplicationContext().startActivity(intent);
+                Activity activity = (Activity) getApplicationContext();
+                activity.finishAffinity();
+            }
+        });
+    }
+
+}

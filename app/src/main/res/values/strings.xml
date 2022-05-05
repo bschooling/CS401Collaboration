@@ -54,5 +54,9 @@
     <string name="gen_qr_code_string">Generate QR Code</string>
     <string name="collaboration_string">Collaboration</string>
     <string name="confirm_clear">Clear loaded image?</string>
+    <string name="onboard_sCollection_info">Invii organizes items into collections. Collections can contain other collections or items. They can also have images.</string>
+    <string name="onboard_sItem_info">Items contain information such as name, location, and description. They can also contain images of the item.</string>
+    <string name="onboard_sCollab_info">You can share collections with other application members. They can view all the items of that collection.</string>
+    <string name="onboard_sQR_info">Want to know something cool? You can generate and print labels for each collection and item you have. Scanning that code takes you straight to that collection or item! This is perfect for labeling moving boxes or storage containers.</string>
 
 </resources>

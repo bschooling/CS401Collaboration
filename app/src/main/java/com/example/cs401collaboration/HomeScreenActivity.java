@@ -1,6 +1,8 @@
 package com.example.cs401collaboration;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -45,6 +47,9 @@ public class HomeScreenActivity extends AppCompatActivity
     private RecyclerView collectionRView;
     private FloatingActionButton fab;
 
+    /** Flag: isFirstLaunch of application */
+    Boolean isFirstLaunch = true;
+
     private final String LOG_TAG_MAIN = "HomeScreenActivity";
 
     /**
@@ -58,21 +63,36 @@ public class HomeScreenActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
 
+        mDB = DatabaseService.getInstance();
+        fab = findViewById(R.id.floatingActionButton);
+
+        // Check First Launch
+        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        this.isFirstLaunch = sharedPref.getBoolean("isFirstLaunch", true);
+        if (isFirstLaunch)
+        {
+            Log.d(LOG_TAG_MAIN, "IS_FIRST_LAUNCH");
+
+            startActivity(new Intent(this, OnboardActivity.class));
+
+            // Set flag -- first launch reached
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putBoolean("isFirstLaunch", false);
+            editor.apply();
+            return;
+        }
+
         // Check if user is logged in. Direct to login screen if not.
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
 
-        if(currentUser == null)
+        if (currentUser == null)
         {
             Log.d(LOG_TAG_MAIN, "onCreate: User not logged in");
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
         }
         else Log.d(LOG_TAG_MAIN, "onCreate: User logged in");
-
-        mDB = DatabaseService.getInstance();
-
-        fab = findViewById(R.id.floatingActionButton);
     }
 
     @Override
@@ -80,6 +100,7 @@ public class HomeScreenActivity extends AppCompatActivity
     {
         super.onStart();
 
+        if (this.isFirstLaunch) return;
         if (mAuth.getCurrentUser() == null) return;
 
         // Get User From DB and Assign to this.user
